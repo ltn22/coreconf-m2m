@@ -2,6 +2,7 @@
 title: "CORECONF for Machine-to-Machine Communication"
 abbrev: "coreconf-m2m"
 category: info
+ipr: trust200902
 
 docname: draft-ietf-t2trg-coreconf-m2m-00
 submissiontype: IRTF
@@ -28,9 +29,7 @@ venue:
   group: T2TRG
   type: Research Group
   mail: t2trg@irtf.org
-  arch: https://mailarchive.ietf.org/arch/browse/t2trg/
   github: "ltn22/coreconf-m2m"
-  latest: "https://ltn22.github.io/coreconf-m2m/draft-ietf-t2trg-coreconf-m2m.html"
 
 author:
   -
@@ -47,63 +46,66 @@ normative:
   I-D.ietf-core-comi:
 
 informative:
+  RFC8376:   # LPWAN overview
   RFC8724:   # SCHC
   RFC9179:   # SCHC Generic Rule Set
   RFC8949:   # CBOR
   RFC7396:   # JSON Merge Patch
+  RFC8428:   # SenML
   I-D.ietf-core-sid:
   I-D.ietf-core-yang-cbor:
+  I-D.gudi-t2trg-senml-as-coreconf:
+  I-D.birkholz-yang-core-telemetry:
+  OMA-LwM2M:
+    title: "Lightweight Machine to Machine Technical Specification: Core"
+    target: https://www.openmobilealliance.org/release/LightweightM2M/V1_2-20201110-A/OMA-TS-LightweightM2M_Core-V1_2-20201110-A.pdf
+    org: Open Mobile Alliance (OMA)
+    date: 2020
 
 --- abstract
+
+The document addresses the specific challenges of M2M interactions where
+both endpoints may be constrained nodes, and explores the use of CORECONF
+primitives.
 
 This document describes the use of CORECONF (CoAP Management Interface) for
 Machine-to-Machine (M2M) communication in constrained IoT environments.
 It defines a YANG data model enabling remote management and configuration
-of constrained devices using CoAP, CBOR, and YANG SID identifiers.
-The document addresses the specific challenges of M2M interactions where
-both endpoints may be constrained nodes, and explores the use of CORECONF
-primitives (GET, PUT, POST/action, DELETE) in an M2M context, including
-geo-location, RPC/action semantics, and augmentation patterns.
+of constrained devices using CoAP, CBOR, and YANG SID identifiers. The
+serialization in CBOR of this data model limits the payload size.
+
 
 --- middle
 
 # Introduction
 
-The CORECONF protocol stack — combining CoAP {{RFC7252}}, YANG {{RFC7950}},
-CBOR {{RFC8949}}, and YANG SID identifiers {{I-D.ietf-core-sid}} — provides
-a compact and efficient management interface for constrained devices.
+SenML {{RFC8428}} has become a widely adopted format for Machine-to-Machine (M2M) data exchange in IoT environments, enabling constrained devices to report sensor measurements and time series in JSON or CBOR. However, SenML is primarily a data serialization format: it structures payloads but does not enforce strong type checking, schema validation, or support for configuration and remote operations. 
 
-While CORECONF has been primarily designed for device management (operator
-to device), its application to Machine-to-Machine (M2M) scenarios raises
-specific challenges:
+SenML is also part of the LwM2M framework {{OMA-LwM2M}}, which defines a broader device management protocol built on CoAP and SenML for operator-to-device interactions. However, LwM2M relies on periodic reporting and registration messages that impose a non-trivial overhead, particularly on Low-Power Wide-Area Networks (LPWANs) {{RFC8376}} where bandwidth and energy budgets are severely constrained.
 
-- Both endpoints may be constrained (e.g., Class 1 or Class 2 devices)
-- Communication may occur over Low-Power Wide-Area Networks (LPWAN)
-- Data models must be compact and efficiently encoded
-- Action/RPC semantics are needed for peer-to-peer interactions
+In some ways, SenML  may be described by a YANG Data Model {{I-D.gudi-t2trg-senml-as-coreconf}}, but the limits
+in term of integration in the YANG ecosystem is limited.
 
-This document explores how CORECONF primitives can be adapted and used
-in M2M contexts, and proposes a YANG module (`coreconf-m2m`) addressing
-these requirements.
+The CORECONF protocol stack  using YANG {{RFC7950}} for Data Modeling,  CoAP {{RFC7252}} for data transport, and CBOR {{RFC8949}} and YANG SID identifiers {{I-D.ietf-core-sid}} for the compact data serialization provides the richer foundation that SenML lacks: a strongly typed data model, schema validation, and support for full CRUD operations and actions. However, CORECONF has so far been designed for operator-to-device management, leaving peer-to-peer M2M communication — where both endpoints may themselves be constrained nodes — largely unaddressed.
+
+Some YANG Data Model has been defined for telemetry. RFC 9232 introduces Network Telemetry used to collect vast amount of data to supervise a network. RFC 8639 allows to subscribe to a datastore filtered through XPath and receives notifications. {{I-D.birkholz-yang-core-telemetry}} proposes to extend telemetry to CORECONF, but using traditional approach.
+
+This document adopts a different approach. The goal is to define a YANG Data Model that will benefits of CBOR serialization to optimize the bandwidth to extends CORECONF for M2M use cases over low-power links, covering geo-location reporting, action/RPC semantics, and YANG augmentation patterns.
 
 ## Motivation
 
-{::comment}
-TODO: Elaborate on the motivation for M2M CORECONF usage.
-Describe use cases from LPWAN, LoRaWAN, SCHC context.
-{:/comment}
+CBOR is designed to be concise to represent numerical information since they are directly coded in binary and not represented in ASCII. CBOR uses also binary representation to encode the structures such as Maps and Arrays.
+The length of a numerical value depends of its value, for instance numbers between -24 and 23 are coded on a single byte, values between -255 and 255 on two bytes,...
 
-[TODO: Add motivation section]
+Nevertheless, some representations may be less efficient numerically or less precise. CBOR defines 3 IEEE 754 encoding on 3, 5 or 9 bytes. The smallest representation introduce a close to 1% error. 
+
+The assumption leading to this YANG module is to avoid floating numbers for their size or precision and rely on integer with a precision parameter indication if positive, the number of digits after the dot or the power of 10 if negative. The module also introduces the notion of time series to record several measurement during a period of time and send them in a single message using a notification.
+
+
 
 ## Use Cases
 
-{::comment}
-TODO: List concrete M2M use cases.
-Examples: sensor-to-actuator, peer configuration exchange,
-distributed SCHC rule negotiation, geo-aware routing.
-{:/comment}
 
-[TODO: Add use cases]
 
 ## Requirements Language
 
@@ -162,7 +164,7 @@ CORECONF maps YANG operations to CoAP methods as follows:
 
 [TODO: Describe YANG-to-CBOR encoding per {{RFC9254}} in M2M context]
 
-# The `coreconf-m2m` YANG Module
+# The coreconf-m2m YANG Module
 
 ## Module Overview
 
