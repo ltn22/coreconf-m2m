@@ -1,0 +1,504 @@
+
+
+
+
+Thing-to-Thing Research Group (T2TRG)                         L. Toutain
+Internet-Draft                                            IMT Atlantique
+Intended status: Informational                             25 March 2026
+Expires: 26 September 2026
+
+
+             CORECONF for Machine-to-Machine Communication
+                    draft-ietf-t2trg-coreconf-m2m-00
+
+Abstract
+
+   This document describes the use of CORECONF (CoAP Management
+   Interface) for Machine-to-Machine (M2M) communication in constrained
+   IoT environments.  It defines a YANG data model enabling remote
+   management and configuration of constrained devices using CoAP, CBOR,
+   and YANG SID identifiers.  The document addresses the specific
+   challenges of M2M interactions where both endpoints may be
+   constrained nodes, and explores the use of CORECONF primitives (GET,
+   PUT, POST/action, DELETE) in an M2M context, including geo-location,
+   RPC/action semantics, and augmentation patterns.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 26 September 2026.
+
+Copyright Notice
+
+   Copyright (c) 2026 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.
+
+
+
+Toutain                 Expires 26 September 2026               [Page 1]
+
+Internet-Draft                coreconf-m2m                    March 2026
+
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
+     1.1.  Motivation  . . . . . . . . . . . . . . . . . . . . . . .   3
+     1.2.  Use Cases . . . . . . . . . . . . . . . . . . . . . . . .   3
+     1.3.  Requirements Language . . . . . . . . . . . . . . . . . .   3
+   2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   3
+   3.  CORECONF Overview in the M2M Context  . . . . . . . . . . . .   3
+     3.1.  CoAP Methods Mapping  . . . . . . . . . . . . . . . . . .   3
+     3.2.  SID-Based Addressing  . . . . . . . . . . . . . . . . . .   4
+     3.3.  CBOR Encoding . . . . . . . . . . . . . . . . . . . . . .   4
+   4.  The coreconf-m2m YANG Module  . . . . . . . . . . . . . . . .   4
+     4.1.  Module Overview . . . . . . . . . . . . . . . . . . . . .   4
+     4.2.  Module Structure  . . . . . . . . . . . . . . . . . . . .   4
+     4.3.  Geo-location Support  . . . . . . . . . . . . . . . . . .   5
+     4.4.  Action and RPC Semantics  . . . . . . . . . . . . . . . .   6
+     4.5.  Augment Patterns  . . . . . . . . . . . . . . . . . . . .   6
+   5.  SID Allocation  . . . . . . . . . . . . . . . . . . . . . . .   6
+   6.  CORECONF Operations for M2M . . . . . . . . . . . . . . . . .   6
+     6.1.  Peer State Retrieval (GET)  . . . . . . . . . . . . . . .   6
+     6.2.  Peer Configuration (PUT / iPATCH) . . . . . . . . . . . .   6
+     6.3.  Triggering an Action (POST) . . . . . . . . . . . . . . .   6
+     6.4.  Instance Identifier Handling  . . . . . . . . . . . . . .   6
+   7.  Security Considerations . . . . . . . . . . . . . . . . . . .   7
+   8.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   7
+     8.1.  YANG Module Registration  . . . . . . . . . . . . . . . .   7
+     8.2.  SID Range Allocation  . . . . . . . . . . . . . . . . . .   7
+   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   7
+     9.1.  Normative References  . . . . . . . . . . . . . . . . . .   7
+     9.2.  Informative References  . . . . . . . . . . . . . . . . .   8
+   Appendix A.  Complete YANG Module . . . . . . . . . . . . . . . .   9
+   Appendix B.  Example CBOR Encodings . . . . . . . . . . . . . . .   9
+   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .   9
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .   9
+
+1.  Introduction
+
+   The CORECONF protocol stack — combining CoAP [RFC7252], YANG
+   [RFC7950], CBOR [RFC8949], and YANG SID identifiers
+   [I-D.ietf-core-sid] — provides a compact and efficient management
+   interface for constrained devices.
+
+   While CORECONF has been primarily designed for device management
+   (operator to device), its application to Machine-to-Machine (M2M)
+   scenarios raises specific challenges:
+
+   *  Both endpoints may be constrained (e.g., Class 1 or Class 2
+      devices)
+
+
+
+Toutain                 Expires 26 September 2026               [Page 2]
+
+Internet-Draft                coreconf-m2m                    March 2026
+
+
+   *  Communication may occur over Low-Power Wide-Area Networks (LPWAN)
+
+   *  Data models must be compact and efficiently encoded
+
+   *  Action/RPC semantics are needed for peer-to-peer interactions
+
+   This document explores how CORECONF primitives can be adapted and
+   used in M2M contexts, and proposes a YANG module (coreconf-m2m)
+   addressing these requirements.
+
+1.1.  Motivation
+
+   [TODO: Add motivation section]
+
+1.2.  Use Cases
+
+   [TODO: Add use cases]
+
+1.3.  Requirements Language
+
+   The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”,
+   “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “NOT RECOMMENDED”, “MAY”, and
+   “OPTIONAL” in this document are to be interpreted as described in BCP
+   14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+2.  Terminology
+
+   The following terminology is used in this document:
+
+   CORECONF:  CoAP Management Interface, as defined in
+      [I-D.ietf-core-comi].
+
+   M2M:  Machine-to-Machine communication, referring to direct data
+      exchanges between devices without human intervention.
+
+   SID:  YANG Schema Item iDentifier, a compact numeric identifier for
+      YANG data nodes, as defined in [I-D.ietf-core-sid].
+
+   Constrained Device:  A device with limited processing, memory, and
+      energy resources, as characterized in [RFC7228].
+
+3.  CORECONF Overview in the M2M Context
+
+3.1.  CoAP Methods Mapping
+
+   CORECONF maps YANG operations to CoAP methods as follows:
+
+
+
+
+Toutain                 Expires 26 September 2026               [Page 3]
+
+Internet-Draft                coreconf-m2m                    March 2026
+
+
+      +=============+==================+===========================+
+      | CoAP Method |  YANG Operation  |        M2M Semantic       |
+      +=============+==================+===========================+
+      |     GET     |  data retrieval  |      Read peer state      |
+      +-------------+------------------+---------------------------+
+      |     PUT     | data replacement |   Set peer configuration  |
+      +-------------+------------------+---------------------------+
+      |     POST    |   action / RPC   |   Trigger peer operation  |
+      +-------------+------------------+---------------------------+
+      |    DELETE   |  data deletion   |  Reset / clear peer state |
+      +-------------+------------------+---------------------------+
+      |    iPATCH   |  partial update  | Incremental config update |
+      +-------------+------------------+---------------------------+
+
+                                 Table 1
+
+3.2.  SID-Based Addressing
+
+   [TODO: Describe how SIDs are used to address YANG data nodes over
+   CoAP URIs]
+
+3.3.  CBOR Encoding
+
+   [TODO: Describe YANG-to-CBOR encoding per [RFC9254] in M2M context]
+
+4.  The coreconf-m2m YANG Module
+
+4.1.  Module Overview
+
+   The coreconf-m2m YANG module defines data structures enabling:
+
+   1.  *Geo-location* — incorporation of RFC 9179-style geographic
+       coordinates for location-aware M2M interactions
+
+   2.  *Action/RPC semantics* — peer-triggered operations with input/
+       output parameter encoding in CBOR
+
+   3.  *Augment patterns* — extension of base device models for M2M-
+       specific attributes
+
+4.2.  Module Structure
+
+
+
+
+
+
+
+
+
+
+Toutain                 Expires 26 September 2026               [Page 4]
+
+Internet-Draft                coreconf-m2m                    March 2026
+
+
+   module coreconf-m2m {
+     yang-version 1.1;
+     namespace "urn:ietf:params:xml:ns:yang:coreconf-m2m";
+     prefix "cm2m";
+
+     // TODO: Add imports
+     // import ietf-geo-location { ... }
+     // import ietf-schc { ... }
+
+     organization
+       "IETF T2TRG Research Group";
+
+     contact
+       "WG Web:   <https://datatracker.ietf.org/rg/t2trg/>
+        WG List:  <mailto:t2trg@irtf.org>
+
+        Author:   Laurent Toutain
+                  <mailto:laurent.toutain@imt-atlantique.fr>";
+
+     description
+       "YANG module for CORECONF Machine-to-Machine communication.
+
+        Copyright (c) 2026 IETF Trust and the persons identified as
+        authors of the code. All rights reserved.";
+
+     revision 2026-03-25 {
+       description "Initial version.";
+       reference "draft-ietf-t2trg-coreconf-m2m-00";
+     }
+
+     // ===== Geo-location grouping =====
+     // TODO: Define or import geo-location grouping (cf. RFC 9179)
+
+     // ===== M2M peer description =====
+     // TODO: Define peer identity and capabilities container
+
+     // ===== Actions / RPCs =====
+     // TODO: Define action nodes for M2M operations
+
+     // ===== Augmentations =====
+     // TODO: Augment base SCHC or device models if needed
+
+   }
+
+4.3.  Geo-location Support
+
+   [TODO: Add geo-location section]
+
+
+
+
+Toutain                 Expires 26 September 2026               [Page 5]
+
+Internet-Draft                coreconf-m2m                    March 2026
+
+
+4.4.  Action and RPC Semantics
+
+   [TODO: Add action/RPC section]
+
+4.5.  Augment Patterns
+
+   [TODO: Add augment section]
+
+5.  SID Allocation
+
+   [TODO: Request SID range allocation and provide .sid file]
+
+   The following SID file is associated with this module:
+
+   {
+     "ietf-sid-file:sid-file": {
+       "module-name": "coreconf-m2m",
+       "module-revision": "2026-03-25",
+       "sid-range": [
+         {
+           "entry-point": "TBD1",
+           "size": 100
+         }
+       ],
+       "item": []
+     }
+   }
+
+6.  CORECONF Operations for M2M
+
+6.1.  Peer State Retrieval (GET)
+
+   [TODO: Example of GET request/response in M2M context with CBOR
+   encoding]
+
+6.2.  Peer Configuration (PUT / iPATCH)
+
+   [TODO: Example of PUT or iPATCH for partial configuration update]
+
+6.3.  Triggering an Action (POST)
+
+   [TODO: Example of CoAP POST to trigger a YANG action on a peer
+   device]
+
+6.4.  Instance Identifier Handling
+
+   [TODO: Describe instance-identifier parsing and encoding]
+
+
+
+
+Toutain                 Expires 26 September 2026               [Page 6]
+
+Internet-Draft                coreconf-m2m                    March 2026
+
+
+7.  Security Considerations
+
+   [TODO: Security considerations]
+
+   CORECONF operations over CoAP MUST be secured using either DTLS
+   [RFC6347] or OSCORE [RFC8613].  In M2M scenarios where a central
+   manager is absent, the trust model requires particular attention.
+
+8.  IANA Considerations
+
+8.1.  YANG Module Registration
+
+   This document registers the following YANG module in the “YANG Module
+   Names” registry [RFC7950]:
+
+   +=========+=======================================+======+=========+
+   |   Name  |               Namespace               |Prefix|Reference|
+   +=========+=======================================+======+=========+
+   |coreconf-| urn:ietf:params:xml:ns:yang:coreconf- | cm2m |   This  |
+   |   m2m   |                  m2m                  |      | document|
+   +---------+---------------------------------------+------+---------+
+
+                                 Table 2
+
+8.2.  SID Range Allocation
+
+   [TODO: Request SID range from IANA per the process defined in
+   [I-D.ietf-core-sid]]
+
+9.  References
+
+9.1.  Normative References
+
+   [RFC7252]  Shelby, Z., Hartke, K., and C. Bormann, "The Constrained
+              Application Protocol (CoAP)", RFC 7252,
+              DOI 10.17487/RFC7252, June 2014,
+              <https://www.rfc-editor.org/info/rfc7252>.
+
+   [RFC7950]  Bjorklund, M., Ed., "The YANG 1.1 Data Modeling Language",
+              RFC 7950, DOI 10.17487/RFC7950, August 2016,
+              <https://www.rfc-editor.org/info/rfc7950>.
+
+   [RFC8610]  Birkholz, H., Vigano, C., and C. Bormann, "Concise Data
+              Definition Language (CDDL): A Notational Convention to
+              Express Concise Binary Object Representation (CBOR) and
+              JSON Data Structures", RFC 8610, DOI 10.17487/RFC8610,
+              June 2019, <https://www.rfc-editor.org/info/rfc8610>.
+
+
+
+
+Toutain                 Expires 26 September 2026               [Page 7]
+
+Internet-Draft                coreconf-m2m                    March 2026
+
+
+   [RFC9254]  Veillette, M., Ed., Petrov, I., Ed., Pelov, A., Bormann,
+              C., and M. Richardson, "Encoding of Data Modeled with YANG
+              in the Concise Binary Object Representation (CBOR)",
+              RFC 9254, DOI 10.17487/RFC9254, July 2022,
+              <https://www.rfc-editor.org/info/rfc9254>.
+
+   [RFC9363]  Minaburo, A. and L. Toutain, "A YANG Data Model for Static
+              Context Header Compression (SCHC)", RFC 9363,
+              DOI 10.17487/RFC9363, March 2023,
+              <https://www.rfc-editor.org/info/rfc9363>.
+
+   [I-D.ietf-core-comi]
+              Veillette, M., Van der Stok, P., Pelov, A., Bierman, A.,
+              and C. Bormann, "CoAP Management Interface (CORECONF)",
+              Work in Progress, Internet-Draft, draft-ietf-core-comi-21,
+              2 March 2026, <https://datatracker.ietf.org/doc/html/
+              draft-ietf-core-comi-21>.
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/info/rfc2119>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/info/rfc8174>.
+
+9.2.  Informative References
+
+   [RFC8724]  Minaburo, A., Toutain, L., Gomez, C., Barthel, D., and JC.
+              Zuniga, "SCHC: Generic Framework for Static Context Header
+              Compression and Fragmentation", RFC 8724,
+              DOI 10.17487/RFC8724, April 2020,
+              <https://www.rfc-editor.org/info/rfc8724>.
+
+   [RFC9179]  Hopps, C., "A YANG Grouping for Geographic Locations",
+              RFC 9179, DOI 10.17487/RFC9179, February 2022,
+              <https://www.rfc-editor.org/info/rfc9179>.
+
+   [RFC8949]  Bormann, C. and P. Hoffman, "Concise Binary Object
+              Representation (CBOR)", STD 94, RFC 8949,
+              DOI 10.17487/RFC8949, December 2020,
+              <https://www.rfc-editor.org/info/rfc8949>.
+
+   [RFC7396]  Hoffman, P. and J. Snell, "JSON Merge Patch", RFC 7396,
+              DOI 10.17487/RFC7396, October 2014,
+              <https://www.rfc-editor.org/info/rfc7396>.
+
+
+
+
+Toutain                 Expires 26 September 2026               [Page 8]
+
+Internet-Draft                coreconf-m2m                    March 2026
+
+
+   [I-D.ietf-core-sid]
+              Veillette, M., Pelov, A., Petrov, I., Bormann, C., and M.
+              Richardson, "YANG Schema Item iDentifier (YANG SID)", Work
+              in Progress, Internet-Draft, draft-ietf-core-sid-24, 22
+              December 2023, <https://datatracker.ietf.org/doc/html/
+              draft-ietf-core-sid-24>.
+
+   [I-D.ietf-core-yang-cbor]
+              Veillette, M., Petrov, I., Pelov, A., Bormann, C., and M.
+              Richardson, "Encoding of Data Modeled with YANG in the
+              Concise Binary Object Representation (CBOR)", Work in
+              Progress, Internet-Draft, draft-ietf-core-yang-cbor-20, 11
+              April 2022, <https://datatracker.ietf.org/doc/html/draft-
+              ietf-core-yang-cbor-20>.
+
+   [RFC7228]  Bormann, C., Ersue, M., and A. Keranen, "Terminology for
+              Constrained-Node Networks", RFC 7228,
+              DOI 10.17487/RFC7228, May 2014,
+              <https://www.rfc-editor.org/info/rfc7228>.
+
+   [RFC6347]  Rescorla, E. and N. Modadugu, "Datagram Transport Layer
+              Security Version 1.2", RFC 6347, DOI 10.17487/RFC6347,
+              January 2012, <https://www.rfc-editor.org/info/rfc6347>.
+
+   [RFC8613]  Selander, G., Mattsson, J., Palombini, F., and L. Seitz,
+              "Object Security for Constrained RESTful Environments
+              (OSCORE)", RFC 8613, DOI 10.17487/RFC8613, July 2019,
+              <https://www.rfc-editor.org/info/rfc8613>.
+
+Appendix A.  Complete YANG Module
+
+   [TODO: Full YANG module listing]
+
+Appendix B.  Example CBOR Encodings
+
+   [TODO: CBOR examples in diagnostic notation]
+
+Acknowledgments
+
+   The authors would like to thank the members of the T2TRG Research
+   Group and the CORE Working Group for their valuable feedback and
+   discussions.
+
+Author's Address
+
+   Laurent Toutain
+   IMT Atlantique
+   Email: laurent.toutain@imt-atlantique.fr
+
+
+
+Toutain                 Expires 26 September 2026               [Page 9]
