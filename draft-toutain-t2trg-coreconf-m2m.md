@@ -53,6 +53,8 @@ informative:
   RFC8949:   # CBOR
   RFC7396:   # JSON Merge Patch
   RFC8428:   # SenML
+  RFC9232:   # Network Telemetry
+  RFC8639:   # YANG Subscribed Notifications
   I-D.ietf-core-sid:
   I-D.ietf-core-yang-cbor:
   I-D.gudi-t2trg-senml-as-coreconf:
@@ -88,9 +90,9 @@ In some ways, SenML may be described by a YANG Data Model {{I-D.gudi-t2trg-senml
 
 The CORECONF protocol stack  using YANG {{RFC7950}} for Data Modeling,  CoAP {{RFC7252}} for data transport, and CBOR {{RFC8949}} and YANG SID identifiers {{I-D.ietf-core-sid}} for the compact data serialization provides the richer foundation that SenML lacks: a strongly typed data model, schema validation, and support for full CRUD operations and actions. However, CORECONF has so far been designed for operator-to-device management, leaving peer-to-peer M2M communication — where both endpoints may themselves be constrained nodes — largely unaddressed.
 
-Some YANG Data Models have been defined for telemetry. RFC 9232 introduces Network Telemetry used to collect vast amounts of data to supervise a network. RFC 8639 allows to subscribe to a datastore filtered through XPath and receives notifications. {{I-D.birkholz-yang-core-telemetry}} proposes to extend telemetry to CORECONF, but using a traditional approach.
+Some YANG Data Models have been defined for telemetry. {{RFC9232}} introduces Network Telemetry used to collect vast amounts of data to supervise a network. {{RFC8639}} allows subscribing to a datastore filtered through XPath and receiving notifications. {{I-D.birkholz-yang-core-telemetry}} proposes to extend telemetry to CORECONF, but using a traditional approach.
 
-This document adopts a different approach. The goal is to define a YANG Data Model that will benefit from CBOR serialization to optimize the bandwidth to extend CORECONF for M2M use cases over low-power links, covering geo-location reporting, action/RPC semantics, and YANG augmentation patterns.
+This document adopts a different approach. The goal is to define a YANG Data Model that will benefit from CBOR serialization to optimize the bandwidth to extend CORECONF for M2M use cases over low-power links. This document focuses on transducer management: resource discovery, value polling, statistical computation, threshold alerts, and time-series history notifications. This is an early-stage work; future revisions will explore other categories of measurements and interaction patterns.
 
 ## Motivation
 
@@ -185,7 +187,7 @@ The second part defines the data structures:
 
 * an RPC to reset all statistics
 
-* two notifications for each transducer. One to collect time-series and the other to inform when a quantity reaches a minimum or a maximum threshold.
+* two notification types: one to collect time-series history, and one to alert when a quantity reaches a minimum or maximum threshold.
 
 {{fig-cf-m2m-tree}} gives an overview of the module YANG tree:
 
@@ -277,19 +279,16 @@ The use of a string, instead of identityref is intentional. Units are short name
 * "nature" reveals if a transducer is a sensor, from which the quantity can be read, or an actuator where the quantity can be written. 
 * "precision": is the number of digits after the decimal point. Quantity values are integers multiplied by 10^precision. It can be noted that precision can also be negative for very large values.
 
-These five leaves form the first level of the transducers tree. A query with a depth of 0 returns only the list of transducers, their unit and precision, and is used to discover the device resources.
+These five leaves form the first level of the transducers tree. The recommended approach is to query with depth=0, which returns only the transducer list with its identifying leaves (type, id, unit, nature, precision). This lightweight exchange is sufficient for resource discovery and minimizes traffic on constrained networks.
 
-If the depth is set to 1, the system retrieves transducers and their associated values; "notification-parameter" will be empty since there is no leaf at this level, only sub-trees. The risk with a query with depth set to 1 is to get large messages, especially if timestamping is done by the device. 
-
+A query with depth=1 is also possible and returns transducers together with their associated quantity values in a single message. However, the response may be significantly larger, as it includes timestamp and statistics data that the client may not need. On low-power links, it is therefore preferable to perform discovery and value retrieval as two separate queries.
 
 ### quantity
 
-The "quantity" sub-tree pushes the leaves to a deeper level, to avoid being retrieved during the resource discovery phase. This limits the traffic on constrained networks. Quantity contains:
+The "quantity" sub-tree pushes the leaves to a deeper level, to avoid being retrieved during the resource discovery phase. Quantity contains:
 * the value adjusted with the precision to be an integer,
 * the timestamp in seconds and microseconds,
-* the entity in charge of the timestamp which can be the device itself or the receiver.
-
-Getting the transducer tree with a depth of 1 allows to discover all the transducers and their associated values.
+* the entity in charge of the timestamp, which can be the device itself or the receiver.
 
 Under "quantity", the sub-level "statistics" includes major statistic for a specific transducer. Locally computed statistics. Statistics may be erased for each transducer by calling the "reset-stats" action, or globally for all transducers with the "reset-stats" RPC.
 
@@ -316,16 +315,18 @@ The model supports two kinds of notifications:
 ## starting notifications
 
 A client wishing to initiate a notification may first send an iPATCH to set up notification parameters.
-To start the notification, the client does a FETCH on a specific transducer. If several clients are observing the same transducer, they will receive the same notification.
+To start the notification, the client sends a FETCH+Observe on the notification stream resource (/s), with a body containing the SID of the transducer to observe. If several clients observe the same transducer, they each receive a copy of the same notification.
 
 # CORECONF Overview in the M2M Context
 
 ## CoAP Methods Mapping
 
-CORECONF uses mainly two methods:
+CORECONF defines mappings for all CoAP methods, but this document uses only two:
 
-* FETCH used to get any values in the YANG Data Model and to initiate notifications,
-* iPATCH used to modify quantities and notification parameters.
+* FETCH is used instead of GET to retrieve values from the YANG Data Model. Unlike GET, FETCH carries a body specifying the exact SIDs to retrieve, enabling precise and bandwidth-efficient queries. Combined with the CoAP Observe option, FETCH also serves to subscribe to notification streams.
+
+* iPATCH is used instead of PUT or POST to modify quantities and notification parameters. It supports partial updates: only the specified nodes are modified, leaving others unchanged. Setting a node to an empty value with iPATCH is the preferred way to clear a parameter, making DELETE unnecessary for datastore modifications.
+
 
 
 # CORECONF traffic
@@ -390,6 +391,8 @@ CoAP Response:
 ~~~~
 {: #fig-resource-discovery title="Resource discovery: FETCH request and response" artwork-align="left"}
 
+In the request, the payload `1A 000186DF` is the CBOR encoding of the unsigned integer 100063, which is the SID of /transducers/transducer. In the response, the outer key 100063 identifies the list, and each entry is a CBOR map whose keys are delta SIDs relative to the list SID, as defined in {{RFC9254}}. The values encode the transducer type (as an identity SID), instance id, precision, and unit string.
+
 The client may translate the identityref values to the names defined in the YANG module. {{fig-transducer-list}} shows the resulting transducer table:
 
 ~~~~
@@ -434,6 +437,8 @@ CoAP Response:
 ~~~~
 {: #fig-query-value title="FETCH request and response for air-temperature current value" artwork-align="left"}
 
+The FETCH body `[100092, 100001, 0]` is a CORECONF instance-identifier: the first element is the SID of the requested leaf, followed by the list key values identifying the transducer (type=100001 for air-temperature, id=0). The response value 112, combined with precision=1, decodes to 11.2°C.
+
 {{fig-query-stats}} shows the FETCH for the full statistics table of the same transducer:
 
 ~~~~
@@ -456,6 +461,8 @@ CoAP Response:
     {100082: {4: 79, 1: 119, 2: 94, 3: 103, 6: 12, 5: 53}}
 ~~~~
 {: #fig-query-stats title="FETCH request and response for air-temperature statistics" artwork-align="left"}
+
+The FETCH body `[100082, 100001, 0]` requests the quantity sub-tree (SID 100082) for air-temperature (100001), instance 0. In the response, the inner map keys are delta SIDs relative to 100082, each encoding the difference between consecutive SIDs to minimize CBOR size. The six values correspond to the statistics leaves: min, max, mean, median, stdev, and sample-count, all scaled by the transducer precision.
 
 The client decodes the response and displays the statistics as shown in {{fig-stats-display}}:
 
@@ -490,6 +497,8 @@ CoAP Response:
 ~~~~
 {: #fig-notification-config title="iPATCH to configure history notification parameters for solar-radiation" artwork-align="left"}
 
+The iPATCH key `[100066, 100008, 0]` is an instance-identifier targeting the notification-parameters node (SID 100066) for solar-radiation (SID 100008), instance 0. The value `{100066: {6: 5000, 4: 3, 2: 1}}` sets three history parameters using delta SIDs relative to 100066: step=5000 ms (one sample every 5 seconds), max-samples=3, and encoding=delta (value 1).
+
 The client then initiates an Observe subscription with a FETCH on the notification stream resource /s, as shown in {{fig-notification-observe}}.
 
 ~~~~
@@ -523,6 +532,8 @@ CoAP Notification:
     {100042: {2: [{6: 100008, 1: 0, 7: [1043, 82, 82, 362, 316, 318, 226, 94, -147, -16]}]}}
 ~~~~
 {: #fig-notification-observe title="FETCH+Observe subscription on /s and history notification for solar-radiation" artwork-align="left"}
+
+The FETCH body `[100044, 100008, 0]` subscribes to the history time-series stream (SID 100044) for solar-radiation. The server acknowledges with an empty map `{}`. In the notification, the outer key 100042 identifies the history notification; the inner structure uses delta SIDs to encode type, id, and the values list. The values `[1043, 82, 82, ...]` use delta encoding: 1043 is the absolute reference (104.3 W/m²), and each subsequent value is the difference from the previous one, yielding a compact representation of slowly-varying measurements.
 
 The client decodes the delta-encoded time-series values and displays the result as shown in {{fig-notification-decoded}}:
 
@@ -1179,6 +1190,4 @@ SID,Namespace,Identifier
 
 # Acknowledgments
 {:numbered="false"}
-
-The authors would like to thank the members of the T2TRG Research Group
-and the CORE Working Group for their valuable feedback and discussions.
+Waiting to be filled with a lot of gratitude.
