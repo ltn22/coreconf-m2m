@@ -400,23 +400,23 @@ CoAP Response:
 ~~~~
 {: #fig-resource-discovery title="Resource discovery: FETCH request and response" artwork-align="left"}
 
-In the request, the payload `1A 000186DF` is the CBOR encoding of the unsigned integer 100063, which is the SID of /transducers/transducer. In the response, the outer key 100063 identifies the list, and each entry is a CBOR map whose keys are delta SIDs relative to the list SID, as defined in {{RFC9254}}. The values encode the transducer type (as an identity SID), instance id, precision, and unit string.
+In the request, the payload `1A 000186DF` is the CBOR encoding of the unsigned integer 100063, which is the SID of "/transducers/transducer". In the response, the outer key 100063 identifies the list, and each entry is a CBOR map whose keys are delta SIDs relative to the list SID, as defined in {{RFC9254}}. The values encode the transducer type (as an identity SID), instance id, precision, and unit string.
 
 The client may translate the identityref values to the names defined in the YANG module. {{fig-transducer-list}} shows the resulting transducer table:
 
 ~~~~
-    1  solar-radiation              W/m2     [type='solar-radiation'][id='0']
-    2  precipitation                mm       [type='precipitation'][id='0']
-    3  strike-count                          [type='strike-count'][id='0']
-    4  average-distance             km       [type='average-distance'][id='0']
-    5  wind-direction               deg      [type='wind-direction'][id='0']
-    6  wind-speed                   m/s      [type='wind-speed'][id='0']
-    7  wind-gust                    m/s      [type='wind-gust'][id='0']
-    8  tilt                         deg      [type='tilt'][id='0']
-    9  air-temperature              degC     [type='air-temperature'][id='0']
-   10  vapor-pressure               kPa      [type='vapor-pressure'][id='0']
-   11  barometric-pressure          kPa      [type='barometric-pressure'][id='0']
-   12  relative-humidity            %RH      [type='relative-humidity'][id='0']
+  1  solar-radiation      W/m2  [type='solar-radiation'][id='0']
+  2  precipitation        mm    [type='precipitation'][id='0']
+  3  strike-count               [type='strike-count'][id='0']
+  4  average-distance     km    [type='average-distance'][id='0']
+  5  wind-direction       deg   [type='wind-direction'][id='0']
+  6  wind-speed           m/s   [type='wind-speed'][id='0']
+  7  wind-gust            m/s   [type='wind-gust'][id='0']
+  8  tilt                 deg   [type='tilt'][id='0']
+  9  air-temperature      degC  [type='air-temperature'][id='0']
+ 10  vapor-pressure       kPa   [type='vapor-pressure'][id='0']
+ 11  barometric-pressure  kPa   [type='barometric-pressure'][id='0']
+ 12  relative-humidity    %RH   [type='relative-humidity'][id='0']
 ~~~~
 {: #fig-transducer-list title="Decoded transducer list from resource discovery response" artwork-align="left"}
 
