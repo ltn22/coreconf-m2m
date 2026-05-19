@@ -84,7 +84,7 @@ serialization in CBOR of this data model limits the payload size.
 
 This document proposes a YANG data model designed for constrained devices and low-power networks. By combining YANG's strong typing with CBOR's compact binary serialization and CoAP's lightweight transport, the model enables efficient Machine-to-Machine (M2M) data exchange while remaining within the bandwidth and energy budgets of constrained environments. SCHC header compression {{RFC8724}} may further be used to reduce the overhead of IPv6, UDP, and CoAP headers on the most constrained links.
 
-Some data models and protocols already exist for M2M communication in IoT environments, but none is fully adapted to the constraints of low-power networks in terms of message size, energy consumption, and interaction patterns. This document reviews the main existing approaches and explains why a new model is needed.
+Some data models and protocols already exist for M2M communication in IoT environments, but none is fully adapted to the constraints of low-power networks in terms of message size, energy consumption, and interaction patterns. This section reviews the main existing approaches and explains why a new model is needed.
 
 SenML {{RFC8428}} has become a widely adopted format for Machine-to-Machine (M2M) data exchange in IoT environments, enabling constrained devices to report sensor measurements and time series in JSON or CBOR. However, SenML is primarily a data serialization format: it structures payloads but does not enforce strong type checking, schema validation, or support for configuration and remote operations. 
 
@@ -97,17 +97,6 @@ The CORECONF protocol stack  using YANG {{RFC7950}} for Data Modeling,  CoAP {{R
 Some YANG Data Models have been defined for telemetry. {{RFC9232}} introduces Network Telemetry used to collect vast amounts of data to supervise a network. {{RFC8639}} allows subscribing to a datastore filtered through XPath and receiving notifications. {{I-D.birkholz-yang-core-telemetry}} proposes to extend telemetry to CORECONF, but using a traditional approach.
 
 This document adopts a different approach. The goal is to define a YANG Data Model that will benefit from CBOR serialization to optimize the bandwidth to extend CORECONF for M2M use cases over low-power links. This document focuses on transducer management: resource discovery, value polling, statistical computation, threshold alerts, and time-series history notifications. This is an early-stage work; future revisions will explore other categories of measurements and interaction patterns.
-
-## Motivation
-
-CBOR is designed to be concise to represent numerical information since it is directly coded in binary and not represented in ASCII. CBOR also uses binary representation to encode structures such as Maps and Arrays.
-The length of a numerical value depends on its value; for instance, numbers between -24 and 23 are coded on a single byte, values between -255 and 255 on two bytes,...
-
-Nevertheless, some representations may be less efficient numerically or less precise. CBOR defines 3 IEEE 754 encodings on 3, 5, or 9 bytes. The smallest representation introduces a close to 1% error. 
-
-The assumption leading to this YANG module is to avoid floating-point numbers for their size or precision and rely on integers with a precision parameter indicating, if positive, the number of digits after the decimal point, or the power of 10 if negative. The module also introduces the notion of time series to record several measurements during a period of time and send them in a single message using a notification.
-
-
 
 ## Use Cases
 
@@ -124,6 +113,16 @@ The model covers the following use cases:
 * alert notification: when a value reaches a threshold (minimum and maximum) a notification message is sent
 
 * time series: values are collected by the device and sent when a limit is reached (number of samples, duration, message size)
+
+
+## Data Representation
+
+CBOR is designed to be concise to represent numerical information since it is directly coded in binary and not represented in ASCII. CBOR also uses binary representation to encode structures such as Maps and Arrays.
+The length of a numerical value depends on its value; for instance, numbers between -24 and 23 are coded on a single byte, values between -255 and 255 on two bytes,...
+
+Nevertheless, some representations may be less efficient numerically or less precise. CBOR defines 3 IEEE 754 encodings on 3, 5, or 9 bytes. The smallest representation introduces a close to 1% error. 
+
+The assumption leading to this YANG module is to avoid floating-point numbers for their size or precision and rely on integers with a precision parameter indicating, if positive, the number of digits after the decimal point, or the power of 10 if negative. The module also introduces the notion of time series to record several measurements during a period of time and send them in a single message using a notification.
 
 
 ## Requirements Language
