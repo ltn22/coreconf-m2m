@@ -334,7 +334,7 @@ The recommended CoAP Content-Formats for all exchanges are:
 * Content-Format 141 (`application/yang-fetch+cbor`) for FETCH request bodies, which carry the list of SIDs to retrieve.
 * Content-Format 142 (`application/yang-data+cbor;id=sid`) for all response bodies and iPATCH payloads, where data nodes are identified by their SID.
 
-Using these two content formats ensures maximum interoperability with CORECONF implementations and keeps the payloads as compact as possible.
+Using these two content formats ensures maximum interoperability with CORECONF implementations and keeps the payloads as compact as possible. Limiting exchanges to a small number of well-known packet formats also benefits SCHC compression {{RFC8724}}: the fewer distinct header patterns in use, the more efficiently SCHC rules can compress the CoAP headers, reducing overhead on the most constrained links.
 
 
 
