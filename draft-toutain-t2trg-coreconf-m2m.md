@@ -82,7 +82,9 @@ serialization in CBOR of this data model limits the payload size.
 
 # Introduction
 
-This document proposes a YANG data model designed for constrained devices and low-power networks. By combining YANG's strong typing with CBOR's compact binary serialization and CoAP's lightweight transport, the model enables efficient Machine-to-Machine (M2M) data exchange while remaining within the bandwidth and energy budgets of constrained environments.
+This document proposes a YANG data model designed for constrained devices and low-power networks. By combining YANG's strong typing with CBOR's compact binary serialization and CoAP's lightweight transport, the model enables efficient Machine-to-Machine (M2M) data exchange while remaining within the bandwidth and energy budgets of constrained environments. SCHC header compression {{RFC8724}} may further be used to reduce the overhead of IPv6, UDP, and CoAP headers on the most constrained links.
+
+Some data models and protocols already exist for M2M communication in IoT environments, but none is fully adapted to the constraints of low-power networks in terms of message size, energy consumption, and interaction patterns. This document reviews the main existing approaches and explains why a new model is needed.
 
 SenML {{RFC8428}} has become a widely adopted format for Machine-to-Machine (M2M) data exchange in IoT environments, enabling constrained devices to report sensor measurements and time series in JSON or CBOR. However, SenML is primarily a data serialization format: it structures payloads but does not enforce strong type checking, schema validation, or support for configuration and remote operations. 
 
