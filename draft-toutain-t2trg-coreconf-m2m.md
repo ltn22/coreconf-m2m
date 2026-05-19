@@ -122,7 +122,7 @@ The length of a numerical value depends on its value; for instance, numbers betw
 
 Nevertheless, some representations may be less efficient numerically or less precise. CBOR defines 3 IEEE 754 encodings on 3, 5, or 9 bytes. The smallest representation introduces a close to 1% error. 
 
-The assumption leading to this YANG module is to avoid floating-point numbers for their size or precision and rely on integers with a precision parameter indicating, if positive, the number of digits after the decimal point, or the power of 10 if negative. The module also introduces the notion of time series to record several measurements during a period of time and send them in a single message using a notification.
+The assumption leading to this YANG module is to avoid floating-point numbers for their size or precision and rely on integers with a precision parameter indicating, if positive, the number of digits after the decimal point, or the power of 10 if negative. The module also introduces the notion of time series to record several measurements during a period of time and send them in a single message using a notification. Time series values may further be compressed depending on the nature of the data. This version proposes a compression based on delta encoding: instead of transmitting absolute values, each sample is encoded as the difference from the previous one, which significantly reduces the CBOR payload size for slowly-varying measurements.
 
 
 ## Requirements Language
