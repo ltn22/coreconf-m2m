@@ -296,7 +296,7 @@ The "quantity" sub-tree pushes the leaves to a deeper level, to avoid being retr
 Under "quantity", the sub-level "statistics" includes major statistic for a specific transducer. Locally computed statistics. Statistics may be erased for each transducer by calling the "reset-stats" action, or globally for all transducers with the "reset-stats" RPC.
 
 
-### notification parameters
+### Notification Parameters
 
 The model supports two kinds of notifications:
 
