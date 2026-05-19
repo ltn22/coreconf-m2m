@@ -90,6 +90,29 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
 BCP 14 {{!RFC2119}} {{!RFC8174}} when, and only when, they appear in
 all capitals, as shown here.
 
+# Case Studies
+
+## SCHC Management
+
+SCHC {{RFC8724}} compresses IPv6, UDP, and CoAP headers by applying rules stored
+in a Rule Book shared between two entities: a device and its network gateway (or
+SCHC instance). When the Rule Book needs to be updated — for example to add,
+modify, or delete compression rules — management messages must be exchanged
+between these two entities.
+
+In this deployment, the only YANG Data Model in use is the SCHC Rule Book model
+{{RFC9363}}. Both endpoints are pre-configured with the same private SID
+translation table covering exactly that model, and no other YANG module is
+expected to be exchanged over the link. There is therefore no risk of SID
+collision with another data model, and full CORECONF interoperability with
+third-party implementations is not required.
+
+This makes SCHC management an ideal candidate for private SID translation:
+the set of nodes is fixed and known at deployment time, the two endpoints
+share an implicit translation context, and the reduction in SID encoding size
+directly lowers the overhead of management messages on the constrained link
+that SCHC itself is compressing.
+
 # Security Considerations
 
 TODO
