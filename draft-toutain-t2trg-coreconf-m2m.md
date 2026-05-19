@@ -315,7 +315,7 @@ The model supports two kinds of notifications:
       * "max-payload" is based on the size of the time series. Since small numbers take less space than large numbers in CBOR, a time series may contain a different number of samples.
       * the "time-period" after which the collection should be sent.
 
-## starting notifications
+## Starting Notifications
 
 A client wishing to initiate a notification may first send an iPATCH to set up notification parameters.
 To start the notification, the client sends a FETCH+Observe on the notification stream resource (/s), with a body containing the SID of the transducer to observe. If several clients observe the same transducer, they each receive a copy of the same notification.
@@ -332,7 +332,7 @@ CORECONF defines mappings for all CoAP methods, but this document uses only two:
 
 
 
-# CORECONF traffic
+# CORECONF Traffic
 
 The following examples show some CoAP messages between a client and a device (the CoAP server).
 In the example, the device is an ATMOS41 weather station, able to measure 12 parameters. An identity is associated with each parameter and a unique SID, as illustrated in {{fig-identity-excerpt}}:
@@ -356,7 +356,7 @@ In the example, the device is an ATMOS41 weather station, able to measure 12 par
 {: #fig-identity-excerpt title="Excerpt of YANG identity definitions for the ATMOS41 transducers" artwork-align="left"}
 
 
-## resource discovery
+## Resource Discovery
 
 The client does not know the transducers managed by the device. It sends a FETCH on "/transducers/transducer" with a depth of 0, as shown in {{fig-resource-discovery}}.
 
@@ -480,7 +480,7 @@ The client decodes the response and displays the statistics as shown in {{fig-st
 ~~~~
 {: #fig-stats-display title="Decoded statistics for air-temperature" artwork-align="left"}
 
-##  Notification
+## Notification
 
 The client first sends an iPATCH to configure the history notification parameters for the solar-radiation transducer, as shown in {{fig-notification-config}}.
 
