@@ -54,7 +54,29 @@ implementations.
 
 # Introduction
 
-TODO
+YANG SID identifiers {{I-D.ietf-core-sid}} are designed to be globally unique,
+ensuring that any node from any YANG Data Model can be unambiguously identified
+without conflict across implementations and deployments. SIDs are compact
+integers, far smaller than their ASCII path equivalents, and their delta
+encoding in CBOR maps {{RFC9254}} further reduces the on-wire size.
+
+However, on very constrained networks — such as LPWANs operating under strict
+duty cycles or satellite links with tight bandwidth budgets — even a few extra
+bytes per message can have a significant impact on energy consumption and
+transmission cost. In these environments, the globally allocated SID values,
+which may require two or more bytes in CBOR encoding, can still be considered
+too large.
+
+This document defines a mechanism for using small negative integers as private
+SID aliases. Negative SIDs have no meaning in the global allocation scheme and
+encode in a single byte in CBOR for values in the range -1 to -24. A device
+can therefore maintain a local translation table mapping each official SID to a
+private negative alias, use the compact alias in all on-air exchanges, and
+perform the substitution to the canonical SID when interoperability with
+standard CORECONF implementations is required.
+
+This approach is intended for closed deployments where both endpoints share the
+same translation table and full CORECONF interoperability is not a requirement.
 
 ## Requirements Language
 
