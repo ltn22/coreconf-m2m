@@ -359,7 +359,7 @@ In the example, the device is an ATMOS41 weather station, able to measure 12 par
     description "Air temperature measurement (°C).";
   }
 ~~~~
-{: #fig-identity-excerpt title="Excerpt of YANG identity definitions for the ATMOS41 transducers" artwork-align="left"}
+{: #fig-identity-excerpt title="Excerpt of YANG identity definitions for the ATMOS41 transducers (see {{annex-yang}} for the complete module)" artwork-align="left"}
 
 
 ## Resource Discovery
@@ -591,7 +591,7 @@ as defined in {{I-D.ietf-core-sid}}.
 
 --- back
 
-# Complete YANG Module
+# Complete YANG Module {#annex-yang}
 
 ~~~~
 module coreconf-m2m {
