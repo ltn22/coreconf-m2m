@@ -261,13 +261,10 @@ module: coreconf-m2m
 {: #fig-cf-m2m-tree title="coreconf-m2m module tree" artwork-align="center"}
 
 
-## state and characteristics sub-tree
+## State and Characteristics Sub-Tree
 
 These two sub-trees contain global parameters generic to the device, such as uptime.
-They are still under definition.
-
-It can be noted, that some parameters such as battery level may be stored in the transducer
-tree, this way notification may be applied.
+They are still under development and their content is not yet fully defined.
 
 ## transducer sub-tree
 
