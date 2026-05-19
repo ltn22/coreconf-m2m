@@ -122,7 +122,9 @@ The length of a numerical value depends on its value; for instance, numbers betw
 
 Nevertheless, some representations may be less efficient numerically or less precise. CBOR defines 3 IEEE 754 encodings on 3, 5, or 9 bytes. The smallest representation introduces a close to 1% error. 
 
-The assumption leading to this YANG module is to avoid floating-point numbers for their size or precision and rely on integers with a precision parameter indicating, if positive, the number of digits after the decimal point, or the power of 10 if negative. The module also introduces the notion of time series to record several measurements during a period of time and send them in a single message using a notification. Time series values may further be compressed depending on the nature of the data. This version proposes a compression based on delta encoding: instead of transmitting absolute values, each sample is encoded as the difference from the previous one, which significantly reduces the CBOR payload size for slowly-varying measurements.
+The assumption leading to this YANG module is to avoid floating-point numbers for their size or precision and rely on integers with a precision parameter indicating, if positive, the number of digits after the decimal point, or the power of 10 if negative. 
+
+The module also introduces the notion of time series to record several measurements during a period of time and send them in a single message using a notification. Time series values may further be compressed depending on the nature of the data. This version proposes a compression based on delta encoding: instead of transmitting absolute values, each sample is encoded as the difference from the previous one, which significantly reduces the CBOR payload size for slowly-varying measurements.
 
 
 ## Requirements Language
@@ -268,7 +270,7 @@ They are still under development and their content is not yet fully defined.
 
 ## transducer sub-tree
 
-Transducer sub-tree contains the list of transducers (i.e. sensors, actuators) maintained by the device.
+Transducers sub-tree contains the list of transducers (i.e. sensors, actuators) maintained by the device.
 A transducer is identified by two elements:
 * a "type" identityref giving the nature of the transducer,
 * an "id" giving the instance number allowing several transducers of the same type.
@@ -299,8 +301,8 @@ The model supports two kinds of notifications:
 
 * "sensor-alert" will send a notification when the measured quantity reaches one or two limits, minimal and maximal, or goes back to a value between these two bounds. To avoid fluctuations, two mechanisms are in place:
     * "hysteresis" defines a percentage, by default 5% around the limit, so if a maximum limit is set to 100, an alert message will be triggered when the quantity is higher than 105 and another alert will be sent when the quantity becomes lower than 95%. The value is sent in the notification message, so the client is able to know the state of the alert.
-    * "dampening" limits the number of messages sent. 
-    
+    * "dampening" limits the number of messages sent.
+
 * "history" builds time series:
     * "step" parameter defines at which interval samples are taken.
     * "precision" allows overriding the quantity precision defined in the transducer. By default the precision is the one associated with the transducer.
@@ -326,6 +328,13 @@ CORECONF defines mappings for all CoAP methods, but this document uses only two:
 * FETCH is used instead of GET to retrieve values from the YANG Data Model. Unlike GET, FETCH carries a body specifying the exact SIDs to retrieve, enabling precise and bandwidth-efficient queries. Combined with the CoAP Observe option, FETCH also serves to subscribe to notification streams.
 
 * iPATCH is used instead of PUT or POST to modify quantities and notification parameters. It supports partial updates: only the specified nodes are modified, leaving others unchanged. Setting a node to an empty value with iPATCH is the preferred way to clear a parameter, making DELETE unnecessary for datastore modifications.
+
+The recommended CoAP Content-Formats for all exchanges are:
+
+* Content-Format 141 (`application/yang-fetch+cbor`) for FETCH request bodies, which carry the list of SIDs to retrieve.
+* Content-Format 142 (`application/yang-data+cbor;id=sid`) for all response bodies and iPATCH payloads, where data nodes are identified by their SID.
+
+Using these two content formats ensures maximum interoperability with CORECONF implementations and keeps the payloads as compact as possible.
 
 
 
