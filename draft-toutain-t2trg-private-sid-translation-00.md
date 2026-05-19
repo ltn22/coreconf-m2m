@@ -90,17 +90,49 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
 BCP 14 {{!RFC2119}} {{!RFC8174}} when, and only when, they appear in
 all capitals, as shown here.
 
+# Private SID Computation
+
+Each YANG Data Model is assigned a contiguous range of globally allocated SIDs.
+The private SID translator uses that allocation to derive a compact negative
+alias for every node in the model according to the following formula:
+
+~~~
+privateSID = offset - (officialSID - firstSID)
+~~~
+
+where:
+
+* `firstSID` is the lowest SID in the official range allocated to the model.
+* `officialSID` is the globally allocated SID of the node to be translated.
+* `offset` is a small negative integer chosen as the starting point of the
+  private range (e.g., -1).
+
+With `offset = -1`, the node whose `officialSID` equals `firstSID` maps to -1,
+the next node maps to -2, and so on. The resulting private SIDs form a dense
+sequence of negative integers starting from `offset`, each encoding in a single
+byte in CBOR for values in the range -1 to -24 {{RFC8949}}.
+
+The inverse translation is:
+
+~~~
+officialSID = firstSID - (privateSID - offset)
+~~~
+
+Both endpoints MUST be configured with identical values of `firstSID` and
+`offset` for the translation to be consistent. The translation table is
+therefore fully determined by these two parameters together with the official
+SID range of the model.
+
 # Case Studies
 
 ## SCHC Management
 
 SCHC {{RFC8724}} compresses IPv6, UDP, and CoAP headers by applying rules stored
-in a Rule Book shared between two entities: a device and its network gateway (or
-SCHC instance). When the Rule Book needs to be updated — for example to add,
-modify, or delete compression rules — management messages must be exchanged
+in Static Context shared between two entities. When the Static Context needs to be updated 
+management messages must be exchanged
 between these two entities.
 
-In this deployment, the only YANG Data Model in use is the SCHC Rule Book model
+In this deployment, the only YANG Data Model in use is the SCHC Rule  Data Model
 {{RFC9363}}. Both endpoints are pre-configured with the same private SID
 translation table covering exactly that model, and no other YANG module is
 expected to be exchanged over the link. There is therefore no risk of SID
@@ -112,6 +144,9 @@ the set of nodes is fixed and known at deployment time, the two endpoints
 share an implicit translation context, and the reduction in SID encoding size
 directly lowers the overhead of management messages on the constrained link
 that SCHC itself is compressing.
+
+Note that the Data Model may be augmented, in that case, either these models
+are also translated in another zone, or use the official SIDs.
 
 # Security Considerations
 
