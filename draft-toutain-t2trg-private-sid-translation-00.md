@@ -222,48 +222,7 @@ descriptor whereas MO, CDA, and FL appear in every entry.
 2591      -41  fid-udp-app-port
 2592      -42  fid-udp-length
 2593      -43  fid-udp-checksum
-2595      -45  fid-unused
-2596      -46  fid-payload
-2600      -50  fid-coap-version
-2601      -51  fid-coap-type
-2602      -52  fid-coap-tkl
-2603      -53  fid-coap-code
-2604      -54  fid-coap-code-class
-2605      -55  fid-coap-code-detail
-2606      -56  fid-coap-mid
-2607      -57  fid-coap-token
-2609      -59  fid-coap-option-oscore-flags
-2610      -60  fid-coap-option-oscore-kid
-2611      -61  fid-coap-option-oscore-kidctx
-2612      -62  fid-coap-option-oscore-piv
-2614      -64  mo-rev-rule-match
-2615      -65  mo-rule-match
-2616      -66  cda-compress-sent
-2617      -67  cda-rev-compress-sent
-2620      -70  fid-icmpv6-type
-2621      -71  fid-icmpv6-code
-2622      -72  fid-icmpv6-checksum
-2623      -73  fid-icmpv6-identifier
-2624      -74  fid-icmpv6-mtu
-2625      -75  fid-icmpv6-pointer
-2626      -76  fid-icmpv6-sequence
-2627      -77  fid-icmpv6-payload
-2630      -80  fragmentation-mode-no-ack
-2631      -81  fragmentation-mode-ack-always
-2632      -82  fragmentation-mode-ack-on-error
-2635      -85  ack-behavior-after-all-0
-2636      -86  ack-behavior-after-all-1
-2637      -87  ack-behavior-by-layer2
-2640      -90  rcs-crc32
-2645      -95  all-1-data-no
-2646      -96  all-1-data-sender-choice
-2647      -97  all-1-data-yes
-2650     -100  bitmap-RFC8724
-2651     -101  bitmap-compound-ack
-2655     -105  nature-compression
-2656     -106  nature-fragmentation
-2657     -107  nature-no-compression
-2658     -108  nature-management
+ ...      ...  ...
 ~~~~
 {: #fig-schc-allocation title="Private SID allocation for the SCHC Rule Data Model" artwork-align="left"}
 
