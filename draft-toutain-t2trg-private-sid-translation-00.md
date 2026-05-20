@@ -148,6 +148,65 @@ that SCHC itself is compressing.
 Note that the Data Model may be augmented, in that case, either these models
 are also translated in another zone, or use the official SIDs.
 
+# SID Allocation Strategy
+
+The ordering of nodes within the official SID range directly determines which
+private SIDs they receive. Since the formula maps the node at `firstSID` to
+`offset` (e.g., -1), `firstSID+1` to `offset-1` (e.g., -2), and so on,
+nodes that appear most frequently in on-wire messages SHOULD be allocated
+the lowest offsets from `firstSID` so that they receive the smallest private
+SIDs and benefit from single-byte CBOR encoding (values -1 to -24).
+
+For a YANG Data Model containing identityref leaves, the values of those
+identities are the elements that appear most often in serialized instances.
+The SID allocation SHOULD therefore place the most-used identity values
+at the beginning of the range, ahead of structural nodes and less-frequent
+identities.
+
+## Example: SCHC Rule Data Model
+
+In the SCHC Rule Data Model {{RFC9363}}, every compression rule entry
+contains at least one Matching Operator (MO), one Compression/Decompression
+Action (CDA), and a Field Length function. These three categories of
+identityref appear in every field descriptor of every rule and are therefore
+the most bandwidth-sensitive values.
+
+The recommended allocation assigns the first 23 entries to MO, CDA, and
+Field Length identities, so that all of them map to private SIDs in the
+range -1 to -23, each encoding in a single CBOR byte:
+
+~~~~
+Rank  Private SID  Category        Identity name
+----  -----------  --------------  -------------------
+   0           -1  MO              equal
+   1           -2  MO              ignore
+   2           -3  MO              MSB
+   3           -4  MO              match-mapping
+   4           -5  CDA             not-sent
+   5           -6  CDA             value-sent
+   6           -7  CDA             mapping-sent
+   7           -8  CDA             LSB
+   8           -9  CDA             compute-length
+   9          -10  CDA             compute-checksum
+  10          -11  CDA             DevIID
+  11          -12  CDA             AppIID
+  12          -13  Length          variable-length
+  13          -14  Length          fixed-length
+  14          -15  (reserved)
+  ...
+  22          -23  (reserved)
+----  -----------  --------------  -------------------
+  23          -24  FID             fid-ipv6-version
+  24          -25  FID             fid-ipv6-trafficclass
+  ...
+~~~~
+{: #fig-schc-allocation title="Example private SID allocation for the SCHC Rule Data Model" artwork-align="left"}
+
+Field Identifiers (FID) are allocated starting at rank 23 (private SID -24).
+The first FID still encodes in a single byte; subsequent ones require two bytes,
+which remains acceptable since FID values appear once per field descriptor
+rather than once per rule entry.
+
 # Security Considerations
 
 TODO
