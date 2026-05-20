@@ -336,7 +336,17 @@ The recommended CoAP Content-Formats for all exchanges are:
 
 Using these two content formats ensures maximum interoperability with CORECONF implementations and keeps the payloads as compact as possible. Limiting exchanges to a small number of well-known packet formats also benefits SCHC compression {{RFC8724}}: the fewer distinct header patterns in use, the more efficiently SCHC rules can compress the CoAP headers, reducing overhead on the most constrained links.
 
+FETCH and iPATCH requests MUST be sent as Non-Confirmable (NON) CoAP messages.
+This leaves the application free to implement its own retransmission strategy
+and timer management, which is essential on constrained networks where the
+default CoAP confirmable retransmission behavior may be inappropriate or
+wasteful.
 
+For notification streams (Observe), Confirmable (CON) messages MAY be used.
+A CON notification allows the server to detect that the observer is no longer
+reachable when no ACK is received, and to cancel the Observe subscription
+accordingly. A RST response from the client is also a valid way to signal that
+the subscription should be terminated.
 
 # CORECONF Traffic
 
