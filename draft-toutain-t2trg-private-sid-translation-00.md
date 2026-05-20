@@ -171,41 +171,101 @@ Action (CDA), and a Field Length function. These three categories of
 identityref appear in every field descriptor of every rule and are therefore
 the most bandwidth-sensitive values.
 
-The recommended allocation assigns the first 23 entries to MO, CDA, and
-Field Length identities, so that all of them map to private SIDs in the
-range -1 to -23, each encoding in a single CBOR byte:
+The allocation for the SCHC Rule Data Model uses `firstSID` = 2551 and
+`offset` = -1. The first 24 entries (private SIDs -1 to -24) cover MO, CDA,
+Direction Indicator, and Field Length identities, all encoding in a single CBOR
+byte. Field Identifiers (FID) start at rank 24 (private SID -25) and require
+two bytes, which remains acceptable since a FID appears once per field
+descriptor whereas MO, CDA, and FL appear in every entry.
 
 ~~~~
-Rank  Private SID  Category        Identity name
-----  -----------  --------------  -------------------
-   0           -1  MO              equal
-   1           -2  MO              ignore
-   2           -3  MO              MSB
-   3           -4  MO              match-mapping
-   4           -5  CDA             not-sent
-   5           -6  CDA             value-sent
-   6           -7  CDA             mapping-sent
-   7           -8  CDA             LSB
-   8           -9  CDA             compute-length
-   9          -10  CDA             compute-checksum
-  10          -11  CDA             DevIID
-  11          -12  CDA             AppIID
-  12          -13  Length          variable-length
-  13          -14  Length          fixed-length
-  14          -15  (reserved)
-  ...
-  22          -23  (reserved)
-----  -----------  --------------  -------------------
-  23          -24  FID             fid-ipv6-version
-  24          -25  FID             fid-ipv6-trafficclass
-  ...
+ SID  Private  Identity
+----  -------  ------------------------------
+2551       -1  mo-equal
+2552       -2  mo-ignore
+2553       -3  mo-match-mapping
+2554       -4  mo-msb
+2555       -5  cda-not-sent
+2556       -6  cda-value-sent
+2557       -7  cda-mapping-sent
+2558       -8  cda-lsb
+2559       -9  cda-compute
+2560      -10  cda-deviid
+2561      -11  cda-appiid
+2562      -12  di-bidirectional
+2563      -13  di-down
+2564      -14  di-up
+2565      -15  fl-length-bits
+2566      -16  fl-length-bytes
+2567      -17  fl-token-length
+2568      -18  fl-variable
+2569      -19  fl-variable-bits
+2570      -20  (reserved)
+2571      -21  space-id-coap
+2572      -22  (reserved)
+2573      -23  (reserved)
+2574      -24  (reserved)        ← last single-byte encoding
+----  -------  ------------------------------
+2575      -25  fid-ipv6-version
+2576      -26  fid-ipv6-trafficclass
+2577      -27  fid-ipv6-trafficclass-ds
+2578      -28  fid-ipv6-trafficclass-ecn
+2579      -29  fid-ipv6-flowlabel
+2580      -30  fid-ipv6-payload-length
+2581      -31  fid-ipv6-nextheader
+2582      -32  fid-ipv6-hoplimit
+2583      -33  fid-ipv6-deviid
+2584      -34  fid-ipv6-devprefix
+2585      -35  fid-ipv6-appiid
+2586      -36  fid-ipv6-appprefix
+2590      -40  fid-udp-dev-port
+2591      -41  fid-udp-app-port
+2592      -42  fid-udp-length
+2593      -43  fid-udp-checksum
+2595      -45  fid-unused
+2596      -46  fid-payload
+2600      -50  fid-coap-version
+2601      -51  fid-coap-type
+2602      -52  fid-coap-tkl
+2603      -53  fid-coap-code
+2604      -54  fid-coap-code-class
+2605      -55  fid-coap-code-detail
+2606      -56  fid-coap-mid
+2607      -57  fid-coap-token
+2609      -59  fid-coap-option-oscore-flags
+2610      -60  fid-coap-option-oscore-kid
+2611      -61  fid-coap-option-oscore-kidctx
+2612      -62  fid-coap-option-oscore-piv
+2614      -64  mo-rev-rule-match
+2615      -65  mo-rule-match
+2616      -66  cda-compress-sent
+2617      -67  cda-rev-compress-sent
+2620      -70  fid-icmpv6-type
+2621      -71  fid-icmpv6-code
+2622      -72  fid-icmpv6-checksum
+2623      -73  fid-icmpv6-identifier
+2624      -74  fid-icmpv6-mtu
+2625      -75  fid-icmpv6-pointer
+2626      -76  fid-icmpv6-sequence
+2627      -77  fid-icmpv6-payload
+2630      -80  fragmentation-mode-no-ack
+2631      -81  fragmentation-mode-ack-always
+2632      -82  fragmentation-mode-ack-on-error
+2635      -85  ack-behavior-after-all-0
+2636      -86  ack-behavior-after-all-1
+2637      -87  ack-behavior-by-layer2
+2640      -90  rcs-crc32
+2645      -95  all-1-data-no
+2646      -96  all-1-data-sender-choice
+2647      -97  all-1-data-yes
+2650     -100  bitmap-RFC8724
+2651     -101  bitmap-compound-ack
+2655     -105  nature-compression
+2656     -106  nature-fragmentation
+2657     -107  nature-no-compression
+2658     -108  nature-management
 ~~~~
-{: #fig-schc-allocation title="Example private SID allocation for the SCHC Rule Data Model" artwork-align="left"}
-
-Field Identifiers (FID) are allocated starting at rank 23 (private SID -24).
-The first FID still encodes in a single byte; subsequent ones require two bytes,
-which remains acceptable since FID values appear once per field descriptor
-rather than once per rule entry.
+{: #fig-schc-allocation title="Private SID allocation for the SCHC Rule Data Model" artwork-align="left"}
 
 # Security Considerations
 
