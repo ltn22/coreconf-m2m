@@ -47,6 +47,7 @@ informative:
   RFC8949:   # CBOR
   RFC8724:   # SCHC
   RFC9363:   # SCHC Rule Data Model
+  RFC9371:   # Private Enterprise Numbers
 
 --- abstract
 
@@ -80,6 +81,8 @@ private negative alias, use the compact alias in all on-air exchanges, and
 perform the substitution to the canonical SID when interoperability with
 standard CORECONF implementations is required.
 
+For reason of simplicity this translation is purely arithmetic and applied to the whole module.
+
 This approach is intended for closed deployments where both endpoints share the
 same translation table and full CORECONF interoperability is not a requirement.
 
@@ -102,17 +105,19 @@ The private SID translator uses that allocation to derive a compact negative
 alias for every node in the model according to the following formula:
 
 ~~~
-privateSID = (offset - 1) - (officialSID - firstSID)
+privateSID = (offset - 1) - (current_sid - entry_point)
 ~~~
 
 where:
 
-* `firstSID` is the lowest SID in the official range allocated to the model.
-* `officialSID` is the globally allocated SID of the node to be translated.
+* `entry_point` is the lowest SID in the official range allocated to the model,
+  found in the `entry-point` field of the `assignment-range` list in the `.sid`
+  file ({{RFC9595}}).
+* `current_sid` is the globally allocated SID of the node to be translated.
 * `offset` is a non-positive integer that shifts the private range to avoid
   overlapping with other translated models (e.g., 0 for the first model).
 
-With `offset = 0`, the node whose `officialSID` equals `firstSID` maps to -1,
+With `offset = 0`, the node whose `current_sid` equals `entry_point` maps to -1,
 the next node maps to -2, and so on. The resulting private SIDs form a dense
 sequence of negative integers starting from -1, each encoding in a single
 byte in CBOR for values in the range -1 to -24 {{RFC8949}}.
@@ -120,10 +125,10 @@ byte in CBOR for values in the range -1 to -24 {{RFC8949}}.
 The inverse translation is:
 
 ~~~
-officialSID = firstSID - (privateSID - offset + 1)
+current_sid = entry_point - (privateSID - offset + 1)
 ~~~
 
-Both endpoints MUST be configured with identical values of `firstSID` and
+Both endpoints MUST be configured with identical values of `entry_point` and
 `offset` for the translation to be consistent. The translation table is
 therefore fully determined by these two parameters together with the official
 SID range of the model.
@@ -170,7 +175,7 @@ is therefore purely opt-in per model: untranslated models and translated
 models can coexist within the same message, each identified by whether
 the SID falls in the negative (private) or positive (official) range.
 
-# Case Studies
+# Use Cases
 
 ## SCHC Management
 
@@ -203,21 +208,15 @@ integers (one byte each), and identityref values mapped into the -1 to -24 range
 also encode in a single byte, reducing the per-entry identityref overhead from
 12 bytes to 4.
 
-This makes SCHC management an ideal candidate for private SID translation: the
-set of nodes is fixed and known at deployment time, the two endpoints share an
-implicit translation context, and the reduction in encoding size directly lowers
-the overhead of management messages on the constrained link that SCHC itself is
-compressing.
-
 Note that if the Data Model is augmented, the additional nodes can either be
-covered by a separate private SID zone or left with their official SIDs.
+covered by a separate private SID zone defined with `offset` or left with their official SIDs.
 
 An illustration of this translation applied to an IPv6/UDP/CoAP compression
 rule is provided in {{sec-example-schc}}.
 
 ## PEN 
 
-Private Enterprise Numbers (PENs) are IANA-assigned identifiers used by
+Private Enterprise Numbers (PENs) {{RFC9371}} are IANA-assigned identifiers used by
 organizations to define their own private SID ranges, following the formula
 described in {{RFC9595}}. Since PENs can reach values up to 2^32, the resulting
 SID values can be very large and require up to 9 bytes of CBOR encoding.
@@ -251,10 +250,10 @@ efficiency that the IETF enjoys by virtue of its early allocation.
 # SID Allocation Strategy
 
 The ordering of nodes within the official SID range directly determines which
-private SIDs they receive. Since the formula maps the node at `firstSID` to
-`offset - 1` (e.g., -1 when offset=0), `firstSID+1` to `offset - 2` (e.g., -2), and so on,
+private SIDs they receive. Since the formula maps the node at `entry_point` to
+`offset - 1` (e.g., -1 when offset=0), `entry_point+1` to `offset - 2` (e.g., -2), and so on,
 nodes that appear most frequently in on-wire messages SHOULD be allocated
-the lowest offsets from `firstSID` so that they receive the smallest private
+the lowest offsets from `entry_point` so that they receive the smallest private
 SIDs and benefit from single-byte CBOR encoding (values -1 to -24).
 
 For a YANG Data Model containing identityref leaves, the values of those
@@ -271,7 +270,7 @@ Action (CDA), and a Field Length function. These three categories of
 identityref appear in every field descriptor of every rule and are therefore
 the most bandwidth-sensitive values.
 
-The allocation for the SCHC Rule Data Model uses `firstSID` = 2551 and
+The allocation for the SCHC Rule Data Model uses `entry_point` = 2551 and
 `offset` = 0. The first 24 entries (private SIDs -1 to -24) cover MO, CDA,
 Direction Indicator, and Field Length identities, all encoding in a single CBOR
 byte. Field Identifiers (FID) start at rank 24 (private SID -25) and require
@@ -333,7 +332,7 @@ private SID delta equals the negative of the official delta:
 direction-indicator, matching-operator, comp-decomp-action) are also replaced
 by their private SID aliases. Target values are encoded as h'hex'.
 
-The following example shows the translation from a SCHC rule into the private SID address space. The start of the rule in JSON si given for clarity. The full Set or Rules contains 5 compression rules. The file before translation is 3994 byte long and after translation 3057, so a compression rate of 23 %. 
+The following example shows the translation from a SCHC rule into the private SID address space. The start of the rule in JSON is given for clarity. The full Set or Rules contains 5 compression rules. The file before translation is 3994 byte long and after translation 3057, so a compression rate of 23 %. 
  
 
 ~~~~
@@ -449,62 +448,62 @@ The following example shows the translation from a SCHC rule into the private SI
 
 {-151: {-23: [
   {-23: [
-    {-1: 0,  -2: -26, -5: 4,  -8: 1, -7: -13, -12: -2, -16: -6,
+    {-1: 0,  -2: -25, -5: 4,  -8: 1, -7: -12, -12: -1, -16: -5,
                                -9: [{-1: 0, -2: h'06'}]},
-    {-1: 1,  -2: -27, -5: 8,  -8: 1, -7: -13, -12: -3, -16: -7,
+    {-1: 1,  -2: -26, -5: 8,  -8: 1, -7: -12, -12: -2, -16: -6,
                                -9: [{-1: 0, -2: h'00'}]},
-    {-1: 2,  -2: -30, -5: 20, -8: 1, -7: -13, -12: -3, -16: -7,
+    {-1: 2,  -2: -29, -5: 20, -8: 1, -7: -12, -12: -2, -16: -6,
                                -9: [{-1: 0, -2: h'00'}]},
-    {-1: 3,  -2: -31, -5: 16, -8: 1, -7: -13, -12: -3, -16: -10},
-    {-1: 4,  -2: -32, -5: 8,  -8: 1, -7: -13, -12: -2, -16: -6,
+    {-1: 3,  -2: -30, -5: 16, -8: 1, -7: -12, -12: -2, -16: -9},
+    {-1: 4,  -2: -31, -5: 8,  -8: 1, -7: -12, -12: -1, -16: -5,
                                -9: [{-1: 0, -2: h'11'}]},
-    {-1: 5,  -2: -33, -5: 8,  -8: 1, -7: -13, -12: -3, -16: -6,
+    {-1: 5,  -2: -32, -5: 8,  -8: 1, -7: -12, -12: -2, -16: -5,
                                -9: [{-1: 0, -2: h'ff'}]},
-    {-1: 6,  -2: -35, -5: 64, -8: 1, -7: -13, -12: -2, -16: -6,
+    {-1: 6,  -2: -34, -5: 64, -8: 1, -7: -12, -12: -1, -16: -5,
                                -9: [{-1: 0, -2: h'2001066073015c4c'}]},
-    {-1: 7,  -2: -34, -5: 64, -8: 1, -7: -13, -12: -2, -16: -6,
+    {-1: 7,  -2: -33, -5: 64, -8: 1, -7: -12, -12: -1, -16: -5,
                                -9: [{-1: 0, -2: h'0000000000000005'}]},
-    {-1: 8,  -2: -37, -5: 64, -8: 1, -7: -13, -12: -3, -16: -7},
-    {-1: 9,  -2: -36, -5: 64, -8: 1, -7: -13, -12: -3, -16: -7},
-    {-1: 10, -2: -41, -5: 16, -8: 1, -7: -13, -12: -2, -16: -6,
+    {-1: 8,  -2: -36, -5: 64, -8: 1, -7: -12, -12: -2, -16: -6},
+    {-1: 9,  -2: -35, -5: 64, -8: 1, -7: -12, -12: -2, -16: -6},
+    {-1: 10, -2: -40, -5: 16, -8: 1, -7: -12, -12: -1, -16: -5,
                                -9: [{-1: 0, -2: h'1633'}]},
-    {-1: 11, -2: -42, -5: 16, -8: 1, -7: -13, -12: -3, -16: -7},
-    {-1: 12, -2: -43, -5: 16, -8: 1, -7: -13, -12: -3, -16: -10,
+    {-1: 11, -2: -41, -5: 16, -8: 1, -7: -12, -12: -2, -16: -6},
+    {-1: 12, -2: -42, -5: 16, -8: 1, -7: -12, -12: -2, -16: -9,
                                -9: [{-1: 0, -2: h'00'}]},
-    {-1: 13, -2: -44, -5: 16, -8: 1, -7: -13, -12: -3, -16: -10,
+    {-1: 13, -2: -43, -5: 16, -8: 1, -7: -12, -12: -2, -16: -9,
                                -9: [{-1: 0, -2: h'00'}]},
-    {-1: 14, -2: -51, -5: 2,  -8: 1, -7: -13, -12: -2, -16: -6,
+    {-1: 14, -2: -50, -5: 2,  -8: 1, -7: -12, -12: -1, -16: -5,
                                -9: [{-1: 0, -2: h'01'}]},
-    {-1: 15, -2: -52, -5: 2,  -8: 1, -7: -13, -12: -2, -16: -6,
+    {-1: 15, -2: -51, -5: 2,  -8: 1, -7: -12, -12: -1, -16: -5,
                                -9: [{-1: 0, -2: h'01'}]},
-    {-1: 16, -2: -53, -5: 4,  -8: 1, -7: -13, -12: -3, -16: -7,
+    {-1: 16, -2: -52, -5: 4,  -8: 1, -7: -12, -12: -2, -16: -6,
                                -9: [{-1: 0, -2: h'00'}]},
-    {-1: 17, -2: -54, -5: 8,  -8: 1, -7: -13, -12: -4, -16: -8,
+    {-1: 17, -2: -53, -5: 8,  -8: 1, -7: -12, -12: -3, -16: -7,
                                -9: [{-1: 0, -2: h'05'},
                                     {-1: 1, -2: h'07'},
                                     {-1: 2, -2: h'45'}]},
-    {-1: 18, -2: -57, -5: 16, -8: 1, -7: -13, -12: -3, -16: -7,
+    {-1: 18, -2: -56, -5: 16, -8: 1, -7: -12, -12: -2, -16: -6,
                                -9: [{-1: 0, -2: h'00'}]},
-    {-1: 19, -2: -58, -5: CBORTag(45, -17), -6: 16,
-              -8: 1, -7: -13, -12: -3, -16: -7},
-    {-1: 20, -3: -22, -4: 11, -5: CBORTag(45, -19),
-              -8: 1, -7: -14, -12: -4, -16: -8,
+    {-1: 19, -2: -57, -5: CBORTag(45, -16), -6: 16,
+              -8: 1, -7: -12, -12: -2, -16: -6},
+    {-1: 20, -3: -21, -4: 11, -5: CBORTag(45, -18),
+              -8: 1, -7: -13, -12: -3, -16: -7,
                                -9: [{-1: 0, -2: h'63'},
                                     {-1: 1, -2: h'73'}]},
-    {-1: 21, -3: -22, -4: 12, -5: CBORTag(45, -19),
-              -8: 1, -7: -14, -12: -4, -16: -8,
+    {-1: 21, -3: -21, -4: 12, -5: CBORTag(45, -18),
+              -8: 1, -7: -13, -12: -3, -16: -7,
                                -9: [{-1: 0, -2: h'8d'},
                                     {-1: 1, -2: h'8e'}]},
-    {-1: 22, -3: -22, -4: 12, -5: CBORTag(45, -19),
-              -8: 1, -7: -15, -12: -2, -16: -6,
+    {-1: 22, -3: -21, -4: 12, -5: CBORTag(45, -18),
+              -8: 1, -7: -14, -12: -1, -16: -5,
                                -9: [{-1: 0, -2: h'8e'}]},
-    {-1: 23, -3: -22, -4: 15, -5: CBORTag(45, -19),
-              -8: 1, -7: -14, -12: -2, -16: -6,
+    {-1: 23, -3: -21, -4: 15, -5: CBORTag(45, -18),
+              -8: 1, -7: -13, -12: -1, -16: -5,
                                -9: [{-1: 0, -2: h'643d30'}]},
-    {-1: 24, -3: -22, -4: 17, -5: CBORTag(45, -19),
-              -8: 1, -7: -14, -12: -2, -16: -6,
+    {-1: 24, -3: -21, -4: 17, -5: CBORTag(45, -18),
+              -8: 1, -7: -13, -12: -1, -16: -5,
                                -9: [{-1: 0, -2: h'8e'}]}],
-  -2: 0, -1: 5, -3: -106},
+  -2: 0, -1: 5, -3: -105},
 
 ~~~~
 {: #fig-schc-rule-private title="IPv6/UDP/CoAP rule with private SID translation" artwork-align="left"}
@@ -530,7 +529,7 @@ cover multiple YANG Data Models translated in the same session:
 
 `first-sid`:
 : The lowest SID value in the official range allocated to a given YANG
-  Data Model (the `firstSID` parameter as defined in this document).
+  Data Model (the `entry_point` parameter as defined in this document).
 
 `sid-range`:
 : The number of consecutive SIDs covered by the translation range for
