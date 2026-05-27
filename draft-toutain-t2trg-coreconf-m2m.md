@@ -120,11 +120,14 @@ The model covers the following use cases:
 CBOR is designed to be concise to represent numerical information since it is directly coded in binary and not represented in ASCII. CBOR also uses binary representation to encode structures such as Maps and Arrays.
 The length of a numerical value depends on its value; for instance, numbers between -24 and 23 are coded on a single byte, values between -255 and 255 on two bytes,...
 
-Nevertheless, some representations may be less efficient numerically or less precise. CBOR defines 3 IEEE 754 encodings on 3, 5, or 9 bytes. The smallest representation introduces a close to 1% error. 
+Nevertheless, some representations may be less efficient numerically or less precise. CBOR defines 3 IEEE 754 encodings on 3, 5, or 9 bytes. The smallest representation introduces a close to 1% error.
+CBOR also provides a decimal fraction type (tag 4) encoding a value as a `[exponent, mantissa]` pair, which avoids floating-point rounding. However, this representation requires the exponent (the divider) to be repeated alongside every individual quantity, adding overhead for each encoded value.
 
 The assumption leading to this YANG module is to avoid floating-point numbers for their size or precision and rely on integers with a precision parameter indicating, if positive, the number of digits after the decimal point, or the power of 10 if negative. 
 
 The module also introduces the notion of time series to record several measurements during a period of time and send them in a single message using a notification. Time series values may further be compressed depending on the nature of the data. This version proposes a compression based on delta encoding: instead of transmitting absolute values, each sample is encoded as the difference from the previous one, which significantly reduces the CBOR payload size for slowly-varying measurements.
+
+The device can also send an alert when a measured value reaches a threshold, allowing the receiver to react promptly without waiting for a scheduled report.
 
 
 ## Requirements Language
@@ -176,21 +179,30 @@ TODO: Add further terminology as needed.
 
 # The coreconf-m2m YANG Module
 
+The device acts as a CoAP server implementing CORECONF and exposes its state
+through a set of Transducers. A Transducer represents either a sensor (providing
+measurements) or an actuator (accepting commands). Each Transducer type is
+identified by a YANG identity. When multiple Transducers of the same type are
+present on the device, they are distinguished by an instance identifier.
+
 ## Module Overview
 
-The module is divided into two parts. The first part defines a set of transducer identities. For convenience they are joined to the Data Model, but since they are specific to a device, they should be present in another YANG module. 
+For simplicity reasons, we regroup in a single YANG module two elements. The
+first element is a set of Transducer identities, which in a real deployment
+would typically reside in a separate device-specific module. In this example,
+12 transducers are defined, corresponding to the weather station ATMOS41
+(see https://metergroup.com/fr/products/atmos-41/).
 
-In this example, the module defines 12 transducers related to a weather station ATMOS41 (see https://metergroup.com/fr/products/atmos-41/). 
-
-The second part defines the data structures:
+The second element defines the data structures:
 
 * a container including a device description and a list of associated transducers. Each transducer is identified by an identityref and an instance number, allowing several transducers of the same type. Each transducer contains:
 
-  * a quantity measured from the field or setup by the client.
-  * a list of statistics.
-  * a set of parameters used to control notifications
+  * a quantity measured from the field or set by the client.
+  * a list of statistics (mean, variance, min, max), resettable via RPC.
+  * alert parameters: threshold values (minimum and maximum) triggering a notification when the measured quantity crosses them.
+  * time series parameters: collection settings controlling when a series of samples is sent (number of samples, duration, message size).
 
-* an RPC to reset all statistics
+* an RPC, now limited to resetting all statistics
 
 * two notification types: one to collect time-series history, and one to alert when a quantity reaches a minimum or maximum threshold.
 
@@ -272,10 +284,12 @@ They are still under development and their content is not yet fully defined.
 
 Transducers sub-tree contains the list of transducers (i.e. sensors, actuators) maintained by the device.
 A transducer is identified by two elements:
+
 * a "type" identityref giving the nature of the transducer,
 * an "id" giving the instance number allowing several transducers of the same type.
 
 At this level, three other leaves are defined:
+
 * "unit" is a string giving the nature of the quantity. This value may be taken from SenML maintained by IANA. 
 The use of a string, instead of identityref is intentional. Units are short names. YANG Identity may be larger and less flexible.
 * "nature" reveals if a transducer is a sensor, from which the quantity can be read, or an actuator where the quantity can be written. 
@@ -288,6 +302,7 @@ A query with depth=1 is also possible and returns transducers together with thei
 ### quantity
 
 The "quantity" sub-tree pushes the leaves to a deeper level, to avoid being retrieved during the resource discovery phase. Quantity contains:
+
 * the value adjusted with the precision to be an integer,
 * the timestamp in seconds and microseconds,
 * the entity in charge of the timestamp, which can be the device itself or the receiver.
@@ -314,10 +329,13 @@ The model supports two kinds of notifications:
       * "max-payload" is based on the size of the time series. Since small numbers take less space than large numbers in CBOR, a time series may contain a different number of samples.
       * the "time-period" after which the collection should be sent.
 
+The read-only `active` flag in both notification types is set when one or more clients observe a notification. Parameters are common to all observations of a particular transducer.
+
 ## Starting Notifications
 
-A client wishing to initiate a notification may first send an iPATCH to set up notification parameters.
-To start the notification, the client sends a FETCH+Observe on the notification stream resource (/s), with a body containing the SID of the transducer to observe. If several clients observe the same transducer, they each receive a copy of the same notification.
+A client wishing to initiate a notification MAY first send an iPATCH to set up notification parameters. Parameters set during an active notification are immedialty applied.
+
+Notification is started by sending a FETCH+Observe request on the notification stream resource (`/s`), with a body identifying the SID of the transducer to observe. Multiple clients may observe the same transducer simultaneously; each receives an independent copy of every notification.
 
 # CORECONF Overview in the M2M Context
 
@@ -518,7 +536,7 @@ CoAP Response:
 
 The iPATCH key `[100066, 100008, 0]` is an instance-identifier targeting the notification-parameters node (SID 100066) for solar-radiation (SID 100008), instance 0. The value `{100066: {6: 5000, 4: 3, 2: 1}}` sets three history parameters using delta SIDs relative to 100066: step=5000 ms (one sample every 5 seconds), max-samples=3, and encoding=delta (value 1).
 
-The client then initiates an Observe subscription with a FETCH on the notification stream resource /s, as shown in {{fig-notification-observe}}.
+The client then initiates an Observe subscription with a FETCH on the notification stream resource `/s`, as shown in {{fig-notification-observe}}.
 
 ~~~~
 CoAP Request:
@@ -550,7 +568,7 @@ CoAP Notification:
   Payload: 43 bytes
     {100042: {2: [{6: 100008, 1: 0, 7: [1043, 82, 82, 362, 316, 318, 226, 94, -147, -16]}]}}
 ~~~~
-{: #fig-notification-observe title="FETCH+Observe subscription on /s and history notification for solar-radiation" artwork-align="left"}
+{: #fig-notification-observe title="FETCH+Observe subscription on `/s` and history notification for solar-radiation" artwork-align="left"}
 
 The FETCH body `[100044, 100008, 0]` subscribes to the history time-series stream (SID 100044) for solar-radiation. The server acknowledges with an empty map `{}`. In the notification, the outer key 100042 identifies the history notification; the inner structure uses delta SIDs to encode type, id, and the values list. The values `[1043, 82, 82, ...]` use delta encoding: 1043 is the absolute reference (104.3 W/m²), and each subsequent value is the difference from the previous one, yielding a compact representation of slowly-varying measurements.
 
@@ -574,7 +592,8 @@ The client decodes the delta-encoded time-series values and displays the result 
 
 # SID Allocation
 
-The SID range 100000–100399 is allocated to the coreconf-m2m module.
+The SID range 100000–100399 is used as an example throughout this document.
+Official values MUST be assigned by IANA prior to publication.
 The complete SID file is provided in {{fig-sid-csv}}.
 
 # Security Considerations
@@ -596,8 +615,10 @@ registry {{RFC7950}}:
 
 ## SID Range Allocation
 
-This document requests the SID range starting at entry-point 100000 with a size of 400,
+This document requests the SID range starting at entry-point TBD with a size of 100,
 as defined in {{I-D.ietf-core-sid}}.
+
+Transducer identites  MUST be sperated from this document and defined in anjother YANG module. 
 
 --- back
 
@@ -956,7 +977,7 @@ module coreconf-m2m {
             type boolean;
             config false;
             description
-              "True when a FETCH+Observe subscription is active on /s
+              "True when a FETCH+Observe subscription is active on `/s`
                for this transducer history stream.";
           }
           leaf step {
@@ -1002,7 +1023,7 @@ module coreconf-m2m {
             type boolean;
             config false;
             description
-              "True when a FETCH+Observe subscription is active on /s
+              "True when a FETCH+Observe subscription is active on `/s`
                for this transducer sensor-alert stream.";
           }
           leaf t-min {
