@@ -1,7 +1,7 @@
 ---
 title: "Private SID Translation for CORECONF"
 abbrev: "private-sid-translation"
-category: info
+category: std
 ipr: trust200902
 
 docname: draft-toutain-core-private-sid-translation-00
@@ -527,23 +527,32 @@ in the rule.
 The CDA takes the following Function Arguments, which MAY be repeated to
 cover multiple YANG Data Models translated in the same session:
 
-`first-sid`:
-: The lowest SID value in the official range allocated to a given YANG
-  Data Model (the `entry_point` parameter as defined in this document).
+`sid-file`:
+: A reference to an augmented SID file for a given YANG Data Model.
+  The augmented SID file extends the standard SID allocation file with
+  two additional pieces of information:
 
-`sid-range`:
-: The number of consecutive SIDs covered by the translation range for
-  that model, starting from `first-sid`.
+  * **Leaf types**: for each node in the model, the SID file records
+    whether the corresponding YANG leaf carries an `identityref` value.
+    This allows the CDA to identify which fields in the CBOR encoding
+    contain SID values that require translation, in addition to the map
+    keys that always carry SID deltas.
+
+  * **`entry_point`** and **`sid_range`**: the lowest SID value allocated
+    to the model and the number of consecutive SIDs in its range.  These
+    two values, already present in any standard SID file, are used as the
+    translation parameters defined in this document.
 
 `offset`:
 : The offset parameter for that model's private SID translation, as
-  defined in this document.  Combined with `first-sid`, it fully determines
+  defined in this document.  Combined with the `entry_point` and
+  `sid_range` values extracted from the `sid-file`, it fully determines
   the bijective mapping between official and private SIDs.
 
-Each (`first-sid`, `sid-range`, `offset`) triplet describes the translation
-for one YANG Data Model. When multiple models are translated in the same
-session, one triplet per model is included in the Function Arguments list,
-ordered by ascending `first-sid`.
+Each (`sid-file`, `offset`) pair describes the translation for one YANG
+Data Model. When multiple models are translated in the same session, one
+pair per model is included in the Function Arguments list, ordered by
+ascending `entry_point`.
 
 During compression, the residue sent for a field carrying an official SID
 that falls within a configured range is the corresponding private SID.
@@ -552,15 +561,15 @@ unchanged. During decompression, the inverse formula is applied to recover
 the official SID.
 
 The following example shows a SCHC rule entry that applies `sid-translation`
-to the CORECONF payload field, covering the SCHC Rule Data Model SID range
-(first-sid=2550, sid-range=400) with no additional offset (offset=0):
+to the CORECONF payload field, using the SCHC Rule Data Model SID file
+(`file.sid`, offset=0):
 
 ~~~~
 /--------+-----+----+----+----+--------+------------------------\
 |  FID   | FL  | FP | DI | TV |   MO   |          CDA           |
 +========+=====+====+====+====+========+========================+
 | CoAP   | var |  1 | bi |    | ignore | sid-translation        |
-| Payload|     |    |    |    |        | (2550, 400, 0)         |
+| Payload|     |    |    |    |        | (file.sid, 0)          |
 \--------+-----+----+----+----+--------+------------------------/
 ~~~~
 {: #fig-sid-translation-rule title="SCHC rule entry for CORECONF SID translation" artwork-align="left"}
@@ -593,4 +602,4 @@ The following table summarizes the requested addition to the SID registry:
 # Acknowledgments
 {:numbered="false"}
 
-TODO
+This work has been supported by the SCHC Chair from IMT Atlantique and Afnic.
