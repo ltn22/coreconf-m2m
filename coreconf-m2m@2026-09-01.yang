@@ -1,0 +1,723 @@
+module coreconf-m2m {
+  yang-version 1.1;
+  namespace "urn:ietf:params:xml:ns:yang:coreconf-m2m";
+  prefix ccm2m;
+
+  import ietf-geo-location {
+    prefix geo;
+    reference "RFC 9179";
+  }
+
+  organization "IETF";
+  contact
+    "Internet Engineering Task Force (IETF)
+     https://www.ietf.org/";
+
+  description
+    "YANG data model for a generic M2M CoMI weather station.
+     This model defines the operational state data for sensor readings.";
+
+  revision 2026-09-01 {
+    description
+      "Move container statistics out of container quantity, making it a
+       sibling of quantity under list transducer. Statistics accumulate
+       over a window and are not part of the current measurement, so
+       nesting them under quantity conflated two different lifetimes and
+       cost one extra level of delta encoding on every statistics access.
+       This reverts the nesting introduced in revision 2026-03-29.";
+  }
+
+  revision 2026-08-28 {
+    description
+      "Rename the 'states' container to 'bootstrap', since it holds
+       operational data determined once at bootstrap time.
+       Split the transducer list: unit-override, precision-override and
+       category-override are moved out of /transducers/transducer into a
+       new /bootstrap/inventory list (also keyed by type). This list
+       describes the fixed configuration of each transducer instance,
+       determined at bootstrap and not expected to change afterwards,
+       separately from the transducer's runtime data (quantity,
+       statistics, notification parameters) which stays in
+       /transducers/transducer.
+       Hoist check-interval from notification-parameters/history and
+       notification-parameters/sensor-alert to notification-parameters:
+       it was defined identically in both containers, and a single
+       CON/NON cadence now applies to both notification streams.";
+  }
+
+  revision 2026-08-24 {
+    description
+      "Remove type from list keys; id alone now identifies a transducer
+       instance, distinguishing multiple actuators of the same type. This
+       reduces the key size.
+       Add a reference-epoch leaf in the state container; other epochs in
+       the model are relative to this one.
+       Move all concrete transducer-type identities (solar-radiation,
+       precipitation, air-temperature, relative-humidity,
+       barometric-pressure, vapor-pressure, wind-speed, wind-direction,
+       wind-gust, north-wind-speed, east-wind-speed, strike-count,
+       average-distance, tilt, x-orientation, y-orientation,
+       humidity-sensor-temperature, compass-heading) out of coreconf-m2m and
+       into the new atmos module; coreconf-m2m now only defines the base
+       transducer-type identity, which product-specific modules extend.
+       Rename transducer/unit and transducer/precision to unit-override and
+       precision-override (both now optional, no default): they only need
+       to be set when they differ from the default-unit/default-precision
+       extension declared on the transducer's type identity.
+       Add default-unit and default-precision extensions, for use by
+       product-specific modules (e.g. atmos) annotating the transducer-type
+       identities they define.
+       Add SOSA/SAREF-aligned leafs to the characteristics container
+       (description, manufacturer, model, hosted-by, installation-time);
+       move uptime back into states, as bootstrap operational data.
+       Add default-category extension, for product-specific modules to mark
+       each transducer-type identity as 'sensor', 'actuator' or
+       'sensor-actuator', and a matching category-override leaf on the
+       transducer list for per-instance overrides.
+       Remove u-timestamp: all timestamps are now second-resolution only;
+       sub-second precision would require a model update.
+       Change history/step units from milliseconds to seconds, for the
+       same reason.
+       Add minimal-step leaf in states and a must constraint requiring
+       history/step >= states/minimal-step.
+       Move geo-location from states into characteristics: it is
+       configuration data set once at deployment, not runtime state.
+       Make states/uptime mandatory.
+       Revert the id-based key: transducer, transducers-list/time-series
+       and sensor-alert/target are again keyed on type alone, and the id
+       leaf is removed from all three lists (only one transducer per
+       type is supported).";
+  }
+
+  revision 2026-06-07 {
+    description
+      "Add humidity-sensor-temperature and compass-heading transducer-type identities.";
+  }
+
+  revision 2026-05-26 {
+    description
+      "Add check-interval leaf to history and sensor-alert notification parameters.";
+  }
+
+  revision 2026-03-29 {
+    description
+      "Move container statistics inside container quantity.";
+  }
+
+  revision 2026-03-25 {
+    description
+      "Add dampening leaf to sensor-alert notification parameters.";
+  }
+
+  revision 2026-03-23 {
+    description
+      "Make active leaf config false (reflects observe subscription state).
+       Add must constraint t-min < t-max on sensor-alert.
+       Add timestamp-source enum in quantity to indicate timestamp origin
+       (source = timestamped by the sensor, receiver = timestamped on receipt).";
+  }
+
+  revision 2026-03-22 {
+    description
+      "Rename branch measurement to transducer
+       (container, list, identity, notification).";
+  }
+
+  revision 2026-03-08 {
+    description
+      "Module renamed to coreconf-m2m for generic M2M CoMI use.";
+  }
+
+  revision 2026-03-02 {
+    description
+      "Major update for CoMI compliance:
+       - Added multi-sensor support (id key).
+       - Measurements are now configurable (writable).
+       - Added standard deviation (stdev).
+       - Added uptime to state.
+       - Removed tilt from fixed state (now a measurement type).
+       - Removed legacy RPCs (subscribe, get-stats) in favor of CoMI/Observe.
+       - Cleaned up measurement lists and notifications.";
+  }
+
+  revision 2026-02-27 {
+    description
+      "Initial revision for testing.";
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Extensions                                                           */
+  /* ------------------------------------------------------------------ */
+
+  extension default-unit {
+    argument "senml-unit";
+    description
+      "Recommended default value for a transducer's unit-override leaf,
+       expressed as a SenML (RFC 8428) unit string. Applied by
+       product-specific modules to the transducer-type identities they
+       define. Intended as guidance for clients populating
+       /transducers/transducer/unit-override; not enforced by the schema.";
+  }
+
+  extension default-precision {
+    argument "decimal-places";
+    description
+      "Recommended default value for a transducer's precision-override leaf
+       (number of decimal places, i.e. real value = raw_value * 10^-precision)
+       when using the default-unit. Applied by product-specific modules to
+       the transducer-type identities they define. Intended as guidance for
+       clients populating /transducers/transducer/precision-override; not
+       enforced by the schema.";
+  }
+
+  extension default-category {
+    argument "category";
+    description
+      "Recommended default value for a transducer's category-override leaf.
+       Extension arguments are plain strings and cannot be constrained to
+       an enumeration by the YANG language itself; the value SHOULD be one
+       of the category-override enums: 'sensor' (the transducer-type
+       identity represents an observed property), 'actuator' (it
+       represents a property acted upon), or 'sensor-actuator' (both).
+       Applied by
+       product-specific modules to the transducer-type identities they
+       define, since this role is a property of the measurement type, not
+       of the device as a whole (a device can carry a mix of sensor- and
+       actuator-typed transducers).
+       For example, in the SOSA/SSN ontology 'sensor' corresponds to
+       sosa:Sensor/sosa:ObservableProperty and 'actuator' to
+       sosa:Actuator; in SAREF they correspond to the SensingFunction and
+       ActuatingFunction classes respectively.";
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Measurement-type identity hierarchy                                  */
+  /* ------------------------------------------------------------------ */
+
+  identity transducer-type {
+    description
+      "Base identity for all measurement types. Concrete transducer types
+       are defined by product-specific modules, e.g. atmos.";
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Typedefs                                                             */
+  /* ------------------------------------------------------------------ */
+
+  typedef encoding-type {
+    type enumeration {
+      enum direct {
+        value 0;
+        description "Value is encoded directly as an integer.";
+      }
+      enum delta {
+        value 1;
+        description "Value is encoded as a delta from the previous value.";
+      }
+    }
+    description "Encoding used for the measurement values.";
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Shared grouping used by notifications                                */
+  /* ------------------------------------------------------------------ */
+
+  grouping transducers-list {
+    list time-series {
+      key "type";
+      description
+        "List of measurements included in this notification.";
+
+      leaf type {
+        type identityref {
+          base transducer-type;
+        }
+        description "The type of measurement (e.g., air-temperature).";
+      }
+
+      leaf-list values {
+        type int64;
+        ordered-by user;
+        description
+          "List of encoded measurement values.";
+      }
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* State data                                                           */
+  /* ------------------------------------------------------------------ */
+
+  container bootstrap {
+    config false;
+    description
+      "Operational data determined once at bootstrap time.";
+
+    leaf reference-epoch {
+      type uint64;
+      units "seconds";
+      description
+        "Epoch timestamp used as the reference point for the device's
+         internal clock. Other epoch/timestamp values in this model are
+         relative to this reference epoch.";
+    }
+
+    leaf uptime {
+      type uint64;
+      units "seconds";
+      mandatory true;
+      description "Time elapsed since the last boot.";
+    }
+
+    leaf minimal-step {
+      type uint32;
+      units "seconds";
+      description
+        "Minimum interval at which the underlying system refreshes
+         transducer values, i.e. the smallest meaningful value for
+         history/step. Determined by the hardware/firmware and not
+         configurable (e.g. an atmospheric station may have a
+         minimal-step of 120 seconds).";
+    }
+
+    list inventory {
+      key "type";
+      description
+        "List of transducers known to the device, with their
+         per-instance configuration overrides. Determined once at
+         bootstrap and not expected to change afterwards.";
+
+      leaf type {
+        type identityref {
+          base transducer-type;
+        }
+        description "The type of measurement.";
+      }
+
+      leaf unit-override {
+        type string;
+        description
+          "Unit of measurement (e.g., 'Cel', 'm/s', '%'), overriding the
+           default-unit extension declared on the transducer's type identity
+           (if any). When absent, clients should use that identity's
+           default-unit; if the identity declares no default-unit, the unit
+           is undefined.";
+      }
+
+      leaf precision-override {
+        type uint8;
+        description
+          "Number of decimal places for the measurement value
+           (real value = raw_value * 10^-precision), overriding the
+           default-precision extension declared on the transducer's type
+           identity (if any). Applies to the current measurement value
+           (polling/iPATCH), not to the time-series encoding in
+           notifications. When absent, clients should use that identity's
+           default-precision; if the identity declares no default-precision,
+           the precision is undefined.";
+      }
+
+      leaf category-override {
+        type enumeration {
+          enum sensor {
+            description "The transducer represents an observed property.";
+          }
+          enum actuator {
+            description "The transducer represents a property acted upon.";
+          }
+          enum sensor-actuator {
+            description
+              "The transducer both observes and can be acted upon
+               (e.g. a setpoint that also reports the measured value).";
+          }
+        }
+        description
+          "Role of this transducer instance, overriding the
+           default-category extension declared on the transducer's type
+           identity (if any). When absent, clients should use that
+           identity's default-category; if the identity declares no
+           default-category, the role is undefined.";
+      }
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Device Characteristics                                               */
+  /* ------------------------------------------------------------------ */
+
+  container characteristics {
+    description
+      "Static descriptive information about the device.";
+
+    uses geo:geo-location {
+      description
+        "Fixed geographic position of the weather station.
+         Populated once at deployment; not expected to change
+         during normal operation.";
+      refine "geo-location/reference-frame/geodetic-system/geodetic-datum" {
+        default "wgs-84";
+      }
+    }
+
+    leaf name {
+      type string;
+      description "Human-readable name of the device.";
+    }
+
+    leaf version {
+      type string;
+      description "Firmware or software version of the device.";
+    }
+
+    leaf identifier {
+      type string;
+      description "Unique identifier of the device (e.g., serial number or EUI).";
+    }
+
+    leaf description {
+      type string;
+      description
+        "Free-text description of the device, its purpose or its
+         deployment context. For example, in SOSA/SSN this corresponds to
+         rdfs:comment on the sosa:Sensor/sosa:Platform individual, and in
+         SAREF to saref:hasDescription.";
+    }
+
+    leaf manufacturer {
+      type string;
+      description
+        "Name of the device manufacturer. For example, in SAREF this
+         corresponds to saref:hasManufacturer.";
+    }
+
+    leaf model {
+      type string;
+      description
+        "Commercial model name/number of the device. For example, in
+         SAREF this corresponds to saref:hasModel.";
+    }
+
+    leaf hosted-by {
+      type string;
+      description
+        "Identifier of the platform hosting this device, when applicable.
+         Left as an opaque string here; resolution to an actual platform
+         resource is deployment-specific. For example, in SOSA this
+         corresponds to the sosa:isHostedBy relation
+         (device -> sosa:Platform).";
+    }
+
+    leaf installation-time {
+      type uint64;
+      units "seconds";
+      description
+        "Absolute Unix epoch timestamp (UTC) at which the device was
+         installed/commissioned. Unlike bootstrap/reference-epoch, this is
+         an absolute epoch value, not a relative reference point for the
+         device's internal clock.";
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Measurements Configuration & Data                                    */
+  /* ------------------------------------------------------------------ */
+
+  container transducers {
+    // config true (default);
+    description
+      "Current measurement values accessible via polling or configuration.";
+
+    list transducer {
+      key "type";
+      description
+        "List of available measurements.";
+
+      leaf type {
+        type identityref {
+          base transducer-type;
+        }
+        description "The type of measurement.";
+      }
+
+      container quantity {
+        config false;
+        description "Operational state for this transducer.";
+
+        leaf value {
+          type int64;
+          description
+            "The current raw integer value of the transducer.";
+        }
+
+        leaf timestamp {
+          type uint64;
+          units "seconds";
+          description "Epoch timestamp (seconds) of the last transducer update.";
+        }
+
+        leaf timestamp-source {
+          type enumeration {
+            enum source {
+              value 0;
+              description
+                "The timestamp was generated by the sensor itself.";
+            }
+            enum receiver {
+              value 1;
+              description
+                "The timestamp was applied by the receiver upon message arrival.";
+            }
+          }
+          description
+            "Indicates the origin of the timestamp associated with this measurement.";
+        }
+      }
+
+      container statistics {
+        config false;
+        description "Read-only accumulated statistics for this measurement.";
+
+        leaf min {
+          type int64;
+          description "Minimum value observed since last reset.";
+        }
+
+        leaf max {
+          type int64;
+          description "Maximum value observed since last reset.";
+        }
+
+        leaf mean {
+          type int64;
+          description "Mean value observed since last reset.";
+        }
+
+        leaf median {
+          type int64;
+          description
+            "Estimated median value observed since last reset.
+             This median is computed incrementally from the current stored
+             statistics and the newest sample, without keeping full history.";
+        }
+
+        leaf stdev {
+          type uint64;
+          description
+            "Standard deviation of values observed since last reset.
+             Scaled by same precision as value.";
+        }
+
+        leaf sample-count {
+          type uint64;
+          description "Number of samples used for statistics calculation.";
+        }
+      }
+
+      container notification-parameters {
+        description
+          "Configuration parameters controlling how this transducer
+           is reported in CoMI notification streams.";
+
+        container history {
+          description "Parameters for the history time-series stream.";
+
+          leaf active {
+            type boolean;
+            config false;
+            description
+              "Read-only. True when a FETCH+Observe subscription is active on /s
+               for this transducer history stream. False when no observer is registered.";
+          }
+
+          leaf step {
+            type uint32;
+            units "seconds";
+            must ". >= /bootstrap/minimal-step or not(/bootstrap/minimal-step)" {
+              error-message
+                "step must be greater than or equal to bootstrap/minimal-step.";
+            }
+            description
+              "Time interval between samples in the notification stream.
+               Must be at least bootstrap/minimal-step, the system's minimum
+               refresh interval.";
+          }
+
+          leaf precision {
+            type uint8;
+            default 1;
+            description
+              "Number of decimal places for values encoded in time-series notifications.
+               Real value = raw_value * 10^-precision.";
+          }
+
+          leaf max-samples {
+            type uint32;
+            description "Maximum number of samples kept in the time-series buffer.";
+          }
+
+          leaf time-period {
+            type uint32;
+            units "seconds";
+            description "Duration of the time window covered by the history buffer.";
+          }
+
+          leaf encoding {
+            type encoding-type;
+            default "delta";
+            description "Encoding used for the values list in notifications.";
+          }
+
+          leaf max-payload {
+            type uint32;
+            units "bytes";
+            description
+              "Maximum size in bytes of the encoded time-series payload in
+               a single history notification.  When the encoded buffer would
+               exceed this limit, the notification is sent early (before
+               max-samples or time-period is reached).  0 means no size limit.";
+          }
+
+        }
+
+        container sensor-alert {
+          description "Parameters for threshold-based sensor-alert notifications.";
+
+          must "not(t-min and t-max) or t-min < t-max" {
+            error-message "t-min must be strictly less than t-max.";
+          }
+
+          leaf active {
+            type boolean;
+            config false;
+            description
+              "Read-only. True when a FETCH+Observe subscription is active on /s
+               for this transducer sensor-alert stream. False when no observer is registered.";
+          }
+
+          leaf t-min {
+            type int32;
+            description
+              "Minimum threshold value. A sensor-alert is raised when the
+               transducer value falls below this value.";
+          }
+
+          leaf t-max {
+            type int32;
+            description
+              "Maximum threshold value. A sensor-alert is raised when the
+               transducer value exceeds this value.";
+          }
+
+          leaf hysteresis {
+            type uint8 {
+              range "0..100";
+            }
+            default 5;
+            units "percent";
+            description
+              "Hysteresis applied to threshold crossings, expressed as a
+               percentage of the threshold value.";
+          }
+
+          leaf dampening {
+            type uint32;
+            default 0;
+            units "milliseconds";
+            description
+              "Minimum time that must elapse between two consecutive sensor-alert
+               notifications for the same transducer.  A new alert is suppressed
+               until the dampening period has expired since the last sent alert.
+               0 (default) means no dampening.";
+          }
+        }
+
+        leaf check-interval {
+          type uint16;
+          default 0;
+          description
+            "Controls how often a CON (confirmable) notification is sent
+             instead of NON (non-confirmable), for both the history and
+             sensor-alert streams of this transducer.
+             0 = disabled, all notifications are NON.
+             1 = every notification is CON.
+             N = one CON every N notifications, all others are NON.";
+        }
+      }
+
+      action reset-stats {
+        description
+          "Reset the accumulated statistics (min, max, mean, median, stdev)
+           for this measurement. Counters restart from the next sample received.";
+      }
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* RPCs                                                                 */
+  /* ------------------------------------------------------------------ */
+
+  rpc reset-stats {
+    description
+      "Reset the accumulated statistics for all measurements.
+       The counters restart from the next sample received after the call.";
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Notifications                                                        */
+  /* ------------------------------------------------------------------ */
+
+  notification history {
+    description
+      "Measurement event sent to observers of the notification stream.
+       To receive this, a CoLA/CoMI client must Observe the stream resource.";
+
+    leaf last {
+      type boolean;
+      default "false";
+      description "True if this is the last notification for the current series.";
+    }
+
+    uses transducers-list {
+      augment "time-series" {
+        container internal {
+          description "Internal operational state for this time-series entry.";
+          leaf last-update {
+            type uint64;
+            units "seconds";
+            description "Epoch timestamp of the last sample appended to this time-series.";
+          }
+          leaf start-time {
+            type uint64;
+            units "seconds";
+            description "Epoch timestamp of the first sample; set when the Observe subscription is created.";
+          }
+          leaf messages-sent {
+            type uint64;
+            description "Number of notification messages sent for this time-series since the Observe subscription was created.";
+          }
+        }
+      }
+    }
+  }
+
+  notification sensor-alert {
+    description
+      "Alert notification when a value exceeds a threshold.";
+
+    list target {
+      key "type";
+      description "Measurement instances that triggered this alert.";
+
+      leaf type {
+        type identityref {
+          base transducer-type;
+        }
+      }
+
+      leaf value {
+        type int64;
+        description "The measurement value that triggered this alert.";
+      }
+    }
+  }
+}

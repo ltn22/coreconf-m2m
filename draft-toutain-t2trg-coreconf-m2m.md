@@ -436,18 +436,18 @@ module: coreconf-m2m
      +--rw transducer* [type]
         +--rw type                       identityref
         +--ro quantity
-           +--ro value?              int64
-           +--ro timestamp?          uint64
-           +--ro timestamp-source?   enumeration
-           +--ro statistics
-              +--ro min?            int64
-              +--ro max?            int64
-              +--ro mean?           int64
-              +--ro median?         int64
-              +--ro stdev?          uint64
-              +--ro sample-count?   uint64
+        |  +--ro value?              int64
+        |  +--ro timestamp?          uint64
+        |  +--ro timestamp-source?   enumeration
+        +--ro statistics
+           +--ro min?            int64
+           +--ro max?            int64
+           +--ro mean?           int64
+           +--ro median?         int64
+           +--ro stdev?          uint64
+           +--ro sample-count?   uint64
 ~~~~
-{: #fig-transducer-tree title="transducer sub-tree (type and quantity)" artwork-align="center"}
+{: #fig-transducer-tree title="transducer sub-tree (type, quantity and statistics)" artwork-align="center"}
 
 The transducers sub-tree contains the list of transducers (i.e., sensors and
 actuators) maintained by the device, listed in "/bootstrap/inventory". A
@@ -465,10 +465,12 @@ Quantity contains:
 * "timestamp": the relative time of the measurement, in seconds,
 * the entity in charge of the timestamp, which can be the device itself or the
   receiver.
-* the "statistics" sub-level holds the main statistics
-locally computed for a specific transducer. Statistics can be reset for a
-single transducer via the "reset-stats" action, or for all transducers at
-once via the "reset-stats" RPC.
+
+"statistics" is a sibling of "quantity" and holds the main statistics
+locally computed for a specific transducer, accumulated over a window of
+samples rather than tied to the current measurement. Statistics can be
+reset for a single transducer via the "reset-stats" action, or for all
+transducers at once via the "reset-stats" RPC.
 
 
 ~~~~
@@ -535,9 +537,16 @@ particular transducer.
 
 ## Starting Notifications
 
+As seen in the previous section, each transducer has a
+"notification-parameters" branch holding its notification settings. A
+client MAY FETCH this branch to retrieve its content and check the current
+status of the notification (e.g., the "active" flag).
+
 A client wishing to start a notification MAY first send an iPATCH to
 configure its parameters. Parameters changed while a notification is
-already active take effect immediately.
+already active take effect immediately. These parameters are global to
+the transducer: a modification impacts every notification currently
+active for that transducer, regardless of which client configured it.
 
 Notification is started by sending a FETCH+Observe request on the notification
 stream resource (`/s`), with a body identifying the SID of the transducer to
@@ -735,12 +744,12 @@ transducer:
 ~~~~
 {: #fig-query-stats title="FETCH request and response for air-temperature statistics" artwork-align="left"}
 
-The FETCH body `[100082, 100001, 0]` requests the quantity sub-tree (SID 100082)
-for air-temperature (100001), instance 0. In the response, the inner map keys
-are delta SIDs relative to 100082, each encoding the difference between
-consecutive SIDs to minimize CBOR size. The six values correspond to the
-statistics leaves: min, max, mean, median, stdev, and sample-count, all scaled
-by the transducer precision.
+The FETCH body `[100082, 100001, 0]` requests the statistics sub-tree (SID
+100082) for air-temperature (100001), instance 0. In the response, the
+inner map keys are delta SIDs relative to 100082, each encoding the
+difference between consecutive SIDs to minimize CBOR size. The six values
+correspond to the statistics leaves: min, max, mean, median, stdev, and
+sample-count, all scaled by the transducer precision.
 
 The client decodes the response and displays the statistics as shown in
 {{fig-stats-display}}:
@@ -932,13 +941,13 @@ module: coreconf-m2m
         |  +--ro value?              int64
         |  +--ro timestamp?          uint64
         |  +--ro timestamp-source?   enumeration
-        |  +--ro statistics
-        |     +--ro min?            int64
-        |     +--ro max?            int64
-        |     +--ro mean?           int64
-        |     +--ro median?         int64
-        |     +--ro stdev?          uint64
-        |     +--ro sample-count?   uint64
+        +--ro statistics
+        |  +--ro min?            int64
+        |  +--ro max?            int64
+        |  +--ro mean?           int64
+        |  +--ro median?         int64
+        |  +--ro stdev?          uint64
+        |  +--ro sample-count?   uint64
         +--rw notification-parameters
         |  +--rw history
         |  |  +--ro active?        boolean
@@ -998,6 +1007,16 @@ module coreconf-m2m {
   description
     "YANG data model for a generic M2M CoMI weather station.
      This model defines the operational state data for sensor readings.";
+
+  revision 2026-09-01 {
+    description
+      "Move container statistics out of container quantity, making it a
+       sibling of quantity under list transducer. Statistics accumulate
+       over a window and are not part of the current measurement, so
+       nesting them under quantity conflated two different lifetimes and
+       cost one extra level of delta encoding on every statistics access.
+       This reverts the nesting introduced in revision 2026-03-29.";
+  }
 
   revision 2026-08-28 {
     description
@@ -1443,45 +1462,45 @@ module coreconf-m2m {
           description
             "Indicates the origin of the timestamp associated with this measurement.";
         }
+      }
 
-        container statistics {
-          config false;
-          description "Read-only accumulated statistics for this measurement.";
+      container statistics {
+        config false;
+        description "Read-only accumulated statistics for this measurement.";
 
-          leaf min {
-            type int64;
-            description "Minimum value observed since last reset.";
-          }
+        leaf min {
+          type int64;
+          description "Minimum value observed since last reset.";
+        }
 
-          leaf max {
-            type int64;
-            description "Maximum value observed since last reset.";
-          }
+        leaf max {
+          type int64;
+          description "Maximum value observed since last reset.";
+        }
 
-          leaf mean {
-            type int64;
-            description "Mean value observed since last reset.";
-          }
+        leaf mean {
+          type int64;
+          description "Mean value observed since last reset.";
+        }
 
-          leaf median {
-            type int64;
-            description
-              "Estimated median value observed since last reset.
-               This median is computed incrementally from the current stored
-               statistics and the newest sample, without keeping full history.";
-          }
+        leaf median {
+          type int64;
+          description
+            "Estimated median value observed since last reset.
+             This median is computed incrementally from the current stored
+             statistics and the newest sample, without keeping full history.";
+        }
 
-          leaf stdev {
-            type uint64;
-            description
-              "Standard deviation of values observed since last reset.
-               Scaled by same precision as value.";
-          }
+        leaf stdev {
+          type uint64;
+          description
+            "Standard deviation of values observed since last reset.
+             Scaled by same precision as value.";
+        }
 
-          leaf sample-count {
-            type uint64;
-            description "Number of samples used for statistics calculation.";
-          }
+        leaf sample-count {
+          type uint64;
+          description "Number of samples used for statistics calculation.";
         }
       }
 
