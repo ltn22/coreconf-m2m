@@ -1,0 +1,135 @@
+{
+  "ietf-sid-file:sid-file": {
+    "module-name": "atmos",
+    "module-revision": "2026-08-24",
+    "sid-file-status": "unpublished",
+    "dependency-revision": [
+      {
+        "module-name": "coreconf-m2m",
+        "module-revision": "2026-09-01"
+      }
+    ],
+    "assignment-range": [
+      {
+        "entry-point": "10000000",
+        "size": "100"
+      }
+    ],
+    "item": [
+      {
+        "namespace": "module",
+        "identifier": "atmos",
+        "status": "unstable",
+        "sid": "10000000"
+      },
+      {
+        "namespace": "identity",
+        "identifier": "air-temperature",
+        "status": "unstable",
+        "sid": "10000001"
+      },
+      {
+        "namespace": "identity",
+        "identifier": "average-distance",
+        "status": "unstable",
+        "sid": "10000002"
+      },
+      {
+        "namespace": "identity",
+        "identifier": "barometric-pressure",
+        "status": "unstable",
+        "sid": "10000003"
+      },
+      {
+        "namespace": "identity",
+        "identifier": "compass-heading",
+        "status": "unstable",
+        "sid": "10000004"
+      },
+      {
+        "namespace": "identity",
+        "identifier": "east-wind-speed",
+        "status": "unstable",
+        "sid": "10000005"
+      },
+      {
+        "namespace": "identity",
+        "identifier": "humidity-sensor-temperature",
+        "status": "unstable",
+        "sid": "10000006"
+      },
+      {
+        "namespace": "identity",
+        "identifier": "north-wind-speed",
+        "status": "unstable",
+        "sid": "10000007"
+      },
+      {
+        "namespace": "identity",
+        "identifier": "precipitation",
+        "status": "unstable",
+        "sid": "10000008"
+      },
+      {
+        "namespace": "identity",
+        "identifier": "relative-humidity",
+        "status": "unstable",
+        "sid": "10000009"
+      },
+      {
+        "namespace": "identity",
+        "identifier": "solar-radiation",
+        "status": "unstable",
+        "sid": "10000010"
+      },
+      {
+        "namespace": "identity",
+        "identifier": "strike-count",
+        "status": "unstable",
+        "sid": "10000011"
+      },
+      {
+        "namespace": "identity",
+        "identifier": "tilt",
+        "status": "unstable",
+        "sid": "10000012"
+      },
+      {
+        "namespace": "identity",
+        "identifier": "vapor-pressure",
+        "status": "unstable",
+        "sid": "10000013"
+      },
+      {
+        "namespace": "identity",
+        "identifier": "wind-direction",
+        "status": "unstable",
+        "sid": "10000014"
+      },
+      {
+        "namespace": "identity",
+        "identifier": "wind-gust",
+        "status": "unstable",
+        "sid": "10000015"
+      },
+      {
+        "namespace": "identity",
+        "identifier": "wind-speed",
+        "status": "unstable",
+        "sid": "10000016"
+      },
+      {
+        "namespace": "identity",
+        "identifier": "x-orientation",
+        "status": "unstable",
+        "sid": "10000017"
+      },
+      {
+        "namespace": "identity",
+        "identifier": "y-orientation",
+        "status": "unstable",
+        "sid": "10000018"
+      }
+    ]
+  }
+}

@@ -518,7 +518,7 @@ particular transducer.</t>
 
 </section>
 </section>
-<section anchor="starting-notifications" title="Starting Notifications">
+<section anchor="notifications" title="Notifications">
 
 <t>As seen in the previous section, each transducer has a
 “notification-parameters” branch holding its notification settings. A
@@ -535,6 +535,19 @@ active for that transducer, regardless of which client configured it.</t>
 stream resource (<spanx style="verb">/s</spanx>), with a body identifying the SID of the transducer to
 observe. Multiple clients may observe the same transducer simultaneously; each
 receives an independent copy of every notification.</t>
+
+<t>The notification ends when either:</t>
+
+<t><list style="symbols">
+  <t>the client explicitly sends a termination message (a GET/FETCH with the
+Observe option set to 1, i.e. deregister, using the same token as the
+original observation), or</t>
+  <t>the server sends Confirmable notifications and does not receive an
+acknowledgment, or</t>
+  <t>an ICMPv6 unreachable message is received by the
+server in response to the IPv6/UDP/CoAP packet carrying the
+notification’s token.</t>
+</list></t>
 
 </section>
 </section>
@@ -585,93 +598,118 @@ accordingly. A RST response from the client is also a valid way to signal that
 the subscription should be terminated.</t>
 
 </section>
+<section anchor="sid-allocations" title="SID Allocations">
+
+<t>The coreconf-m2m model is intended to be assigned in the IETF experimental
+SID space, with a model entry point of 62000. <xref target="annex-sid"/> gives the
+complete SID mapping for this model.</t>
+
+<t>The atmos module, however, cannot be assigned SIDs in the IETF or another
+SDO space, unless this commercial module is itself standardized. For
+commercial modules, we assume that a registrar allocates SIDs and
+implements the constraints defined in <xref target="I-D.ietf-core-comi"/>. In this
+example, we assume that the registrar owns a 10 million SID mega-range.
+<xref target="annex-atmos-yang"/> gives the atmos.yang model, and <xref target="annex-atmos-sid"/>
+gives the corresponding SID mapping, composed of the identities
+representing the transducers.</t>
+
+</section>
 </section>
 <section anchor="coreconf-traffic" title="CORECONF Traffic">
 
-<t>The following examples show some CoAP messages between a client and a device
-(the CoAP server). In the example, the device is an ATMOS41 weather station,
-able to measure 12 parameters. An identity is associated with each parameter and
-a unique SID, as illustrated in <xref target="fig-identity-excerpt"/>:</t>
-
-<figure title="Excerpt of YANG identity definitions for the ATMOS41 transducers (see Appendix for the complete module)" anchor="fig-identity-excerpt"><artwork align="left"><![CDATA[
-  identity solar-radiation {
-    base transducer-type;
-    description "Solar radiation measurement (W/m2).";
-  }
-
-  identity precipitation {
-    base transducer-type;
-    description "Precipitation measurement (mm).";
-  }
-
-  identity air-temperature {
-    base transducer-type;
-    description "Air temperature measurement (°C).";
-  }
-]]></artwork></figure>
+<t>This section illustrates different traffic patterns used in coreconf-m2m.</t>
 
 <section anchor="resource-discovery" title="Resource Discovery">
 
 <t>The client does not know the transducers managed by the device. It sends a FETCH
-on “/transducers/transducer” with a depth of 0, as shown in
+on “/bootstrap” (SID 62002) as shown in
 <xref target="fig-resource-discovery"/>.</t>
 
 <figure title="Resource discovery: FETCH request and response" anchor="fig-resource-discovery"><artwork align="left"><![CDATA[
   CoAP Request:
-  Non-Confirmable, FETCH, MID:47709
-    Token: 8ed4
+  Non-Confirmable, FETCH, MID:39919
+    Token: 2aaf
     Opt #1: Uri-Path: c
     Opt #2: Content-Format: 141 (application/yang-fetch+cbor)
-    Opt #3: Uri-Query: d=0
-    Opt #4: Accept: 142 (application/yang-data+cbor;id=sid)
+    Opt #3: Accept: 142 (application/yang-data+cbor;id=sid)
 
-  Payload: 5 bytes
-    1A 000186DF  # unsigned(100063) : /transducers/transducer
+  Payload: 3 bytes
+    19 F2 32  # unsigned(62002) : /bootstrap
 
   CoAP Response:
-  Non-Confirmable, 2.05 Content, MID:39441
-    Token: 8ed4
+  Non-Confirmable, 2.05 Content, MID:57745
+    Token: 2aaf
     Opt #1: Content-Format: 142 (application/yang-data+cbor;id=sid)
 
-  Payload: 220 bytes
-    {100063:
-      [{33: 100008, 1: 0, 17: 1, 34: "W/m2"},
-       {33: 100006, 1: 0, 17: 3, 34: "mm"},
-       {33: 100009, 1: 0, 17: 0, 34: ""},
-       {33: 100002, 1: 0, 17: 1, 34: "km"},
-       {33: 100013, 1: 0, 17: 1, 34: "deg"},
-       {33: 100015, 1: 0, 17: 2, 34: "m/s"},
-       {33: 100014, 1: 0, 17: 2, 34: "m/s"},
-       {33: 100010, 1: 0, 17: 1, 34: "deg"},
-       {33: 100001, 1: 0, 17: 1, 34: "degC"},
-       {33: 100012, 1: 0, 17: 3, 34: "kPa"},
-       {33: 100003, 1: 0, 17: 2, 34: "kPa"},
-       {33: 100007, 1: 0, 17: 1, 34: "%RH"}]}
+  Payload: 118 bytes
+    {62002:
+      {7: 1788334280, 8: 30172, 6: 120,
+       1: [{3: 10000010}, {3: 10000008}, {3: 10000011}, {3: 10000002},
+           {3: 10000014}, {3: 10000016}, {3: 10000015}, {3: 10000012},
+           {3: 10000001}, {3: 10000013}, {3: 10000003}, {3: 10000009},
+           {3: 10000006}, {3: 10000004}]}}
 ]]></artwork></figure>
 
-<t>In the request, the payload <spanx style="verb">1A 000186DF</spanx> is the CBOR encoding of the unsigned
-integer 100063, which is the SID of “/transducers/transducer”. In the response,
-the outer key 100063 identifies the list, and each entry is a CBOR map whose
-keys are delta SIDs relative to the list SID, as defined in <xref target="RFC9254"/>. The
-values encode the transducer type (as an identity SID), instance id, precision,
-and unit string.</t>
+<t>In the request, the payload <spanx style="verb">19 F2 32</spanx> is the CBOR encoding of the unsigned
+integer 62002, which is the SID of “/bootstrap”. In the response, the outer
+key 62002 identifies the bootstrap branch, and the inner keys are delta
+SIDs relative to 62002, as defined in <xref target="RFC9254"/>: 7 (reference-epoch), 8
+(uptime), 6 (minimal-step), and 1 (the “inventory” list). Each entry in
+the inventory list is itself a map whose key 3 is a delta SID relative to
+the list SID (62003), i.e. “type”, carrying the identity SID of one
+transducer known to the device; no override is present here, meaning every
+transducer uses the default-unit, default-precision and default-category
+declared on its identity.</t>
 
-<t>The client may translate the identityref values to the names defined in the YANG
-module. <xref target="fig-transducer-list"/> shows the resulting transducer table:</t>
+<t>The client MUST have access to the corresponding YANG file to discover the
+transducers’ default parameters, indicating the unit, the precision and
+the nature of the transducer.</t>
 
-<figure title="Decoded transducer list from resource discovery response" anchor="fig-transducer-list"><artwork align="left"><![CDATA[
-  1  solar-radiation      W/m2  [type='solar-radiation'][id='0']
-  2  precipitation        mm    [type='precipitation'][id='0']
-  3  strike-count               [type='strike-count'][id='0']
-  4  average-distance     km    [type='average-distance'][id='0']
-  5  wind-direction       deg   [type='wind-direction'][id='0']
-  6  wind-speed           m/s   [type='wind-speed'][id='0']
-  7  wind-gust            m/s   [type='wind-gust'][id='0']
-  8  tilt                 deg   [type='tilt'][id='0']
-  9  air-temperature      degC  [type='air-temperature'][id='0']
- 10  vapor-pressure       kPa   [type='vapor-pressure'][id='0']
- 11  barometric-pressure  kPa   [type='barometric-pressure'][id='0']
- 12  relative-humidity    %RH   [type='relative-humidity'][id='0']
+<figure title="Decoded transducer inventory from resource discovery response" anchor="fig-transducer-list"><artwork align="left"><![CDATA[
+ coreconf-m2m:bootstrap
+    reference-epoch  1788334280  (2026-09-02 09:31:20)   ← origin of every timestamp in the model
+    uptime           30172 s
+    minimal-step     120 s   ← floor for history/step
+
+  coreconf-m2m:bootstrap/inventory — SID → module → YANG defaults resolution
+        SID  Identity                           Module         Unit      Prec.  Category
+  ────────────────────────────────────────────────────────────────────────────────────────────
+   10000010  atmos:solar-radiation              atmos          W/m2          0  sensor
+   10000008  atmos:precipitation                atmos          mm            3  sensor
+   10000011  atmos:strike-count                 atmos          count         0  sensor
+   10000002  atmos:average-distance             atmos          km            0  sensor
+   10000014  atmos:wind-direction               atmos          deg           0  sensor
+   10000016  atmos:wind-speed                   atmos          m/s           2  sensor
+   10000015  atmos:wind-gust                    atmos          m/s           2  sensor
+   10000012  atmos:tilt                         atmos          deg           1  sensor
+   10000001  atmos:air-temperature              atmos          Cel           1  sensor
+   10000013  atmos:vapor-pressure               atmos          kPa           2  sensor
+   10000003  atmos:barometric-pressure          atmos          kPa           2  sensor
+   10000009  atmos:relative-humidity            atmos          %RH           1  sensor
+   10000006  atmos:humidity-sensor-temperature  atmos          Cel           1  sensor
+   10000004  atmos:compass-heading              atmos          deg           0  sensor
+  ────────────────────────────────────────────────────────────────────────────────────────────
+  * override sent by the device; without a star, default value read from the YANG module.
+    The inventory completed this way stays local: bootstrap is config false and is never sent back.
+Connected. 14 sensor(s) discovered, minimal step 120 s.
+
+    #  Type                         Unit     Prec.  Filter
+  ──────────────────────────────────────────────────────────────────────────────
+    1  solar-radiation              W/m2         0  [type='atmos:solar-radiation']
+    2  precipitation                mm           3  [type='atmos:precipitation']
+    3  strike-count                 count        0  [type='atmos:strike-count']
+    4  average-distance             km           0  [type='atmos:average-distance']
+    5  wind-direction               deg          0  [type='atmos:wind-direction']
+    6  wind-speed                   m/s          2  [type='atmos:wind-speed']
+    7  wind-gust                    m/s          2  [type='atmos:wind-gust']
+    8  tilt                         deg          1  [type='atmos:tilt']
+    9  air-temperature              Cel          1  [type='atmos:air-temperature']
+   10  vapor-pressure               kPa          2  [type='atmos:vapor-pressure']
+   11  barometric-pressure          kPa          2  [type='atmos:barometric-pressure']
+   12  relative-humidity            %RH          1  [type='atmos:relative-humidity']
+   13  humidity-sensor-temperature  Cel          1  [type='atmos:humidity-sensor-temperature']
+   14  compass-heading              deg          0  [type='atmos:compass-heading']
+
 ]]></artwork></figure>
 
 </section>
@@ -836,13 +874,6 @@ as shown in <xref target="fig-notification-decoded"/>:</t>
 ]]></artwork></figure>
 
 </section>
-</section>
-<section anchor="sid-allocation" title="SID Allocation">
-
-<t>The SID range 100000–100399 is used as an example throughout this document.
-Official values MUST be assigned by IANA prior to publication. The complete SID
-file is provided in <xref target="fig-sid-csv"/>.</t>
-
 </section>
 <section anchor="security-considerations" title="Security Considerations">
 
@@ -1776,112 +1807,337 @@ module coreconf-m2m {
 ]]></artwork></figure>
 
 </section>
-<section anchor="sid-file-csv" title="SID File (CSV)">
+<section anchor="annex-sid" title="SID File (CSV)">
 
 <t>The following table lists the SID assignments for the coreconf-m2m module
-(assignment range: 100000–100399, revision 2026-03-29).</t>
+(assignment range: 62000-62399, revision 2026-09-01). The transducer-type
+identities defined by manufacturer modules such as atmos are assigned
+separately and are not yet included in this table.</t>
 
 <figure title="SID assignments for coreconf-m2m (CSV format)" anchor="fig-sid-csv"><artwork align="left"><![CDATA[
 SID,Namespace,Identifier
-100000,module,coreconf-m2m
-100001,identity,air-temperature
-100002,identity,average-distance
-100003,identity,barometric-pressure
-100004,identity,east-wind-speed
-100005,identity,north-wind-speed
-100006,identity,precipitation
-100007,identity,relative-humidity
-100008,identity,solar-radiation
-100009,identity,strike-count
-100010,identity,tilt
-100011,identity,transducer-type
-100012,identity,vapor-pressure
-100013,identity,wind-direction
-100014,identity,wind-gust
-100015,identity,wind-speed
-100016,identity,x-orientation
-100017,identity,y-orientation
-100018,data,/coreconf-m2m:characteristics
-100019,data,/coreconf-m2m:characteristics/geo-location
-100020,data,/coreconf-m2m:characteristics/geo-location/height
-100021,data,/coreconf-m2m:characteristics/geo-location/latitude
-100022,data,/coreconf-m2m:characteristics/geo-location/longitude
-100023,data,/coreconf-m2m:characteristics/geo-location/reference-frame
-100024,data,/coreconf-m2m:characteristics/geo-location/reference-frame/alternate-system
-100025,data,/coreconf-m2m:characteristics/geo-location/reference-frame/astronomical-body
-100026,data,/coreconf-m2m:characteristics/geo-location/reference-frame/geodetic-system
-100027,data,/coreconf-m2m:characteristics/geo-location/reference-frame/geodetic-system/coord-accuracy
-100028,data,/coreconf-m2m:characteristics/geo-location/reference-frame/geodetic-system/geodetic-datum
-100029,data,/coreconf-m2m:characteristics/geo-location/reference-frame/geodetic-system/height-accuracy
-100030,data,/coreconf-m2m:characteristics/geo-location/timestamp
-100031,data,/coreconf-m2m:characteristics/geo-location/valid-until
-100032,data,/coreconf-m2m:characteristics/geo-location/velocity
-100033,data,/coreconf-m2m:characteristics/geo-location/velocity/v-east
-100034,data,/coreconf-m2m:characteristics/geo-location/velocity/v-north
-100035,data,/coreconf-m2m:characteristics/geo-location/velocity/v-up
-100036,data,/coreconf-m2m:characteristics/geo-location/x
-100037,data,/coreconf-m2m:characteristics/geo-location/y
-100038,data,/coreconf-m2m:characteristics/geo-location/z
-100039,data,/coreconf-m2m:characteristics/identifier
-100040,data,/coreconf-m2m:characteristics/name
-100041,data,/coreconf-m2m:characteristics/version
-100042,data,/coreconf-m2m:history
-100043,data,/coreconf-m2m:history/last
-100044,data,/coreconf-m2m:history/time-series
-100045,data,/coreconf-m2m:history/time-series/id
-100046,data,/coreconf-m2m:history/time-series/internal
-100047,data,/coreconf-m2m:history/time-series/internal/last-update
-100048,data,/coreconf-m2m:history/time-series/internal/messages-sent
-100049,data,/coreconf-m2m:history/time-series/internal/start-time
-100050,data,/coreconf-m2m:history/time-series/type
-100051,data,/coreconf-m2m:history/time-series/values
-100052,data,/coreconf-m2m:reset-stats
-100053,data,/coreconf-m2m:reset-stats/input
-100054,data,/coreconf-m2m:reset-stats/output
-100055,data,/coreconf-m2m:sensor-alert
-100056,data,/coreconf-m2m:sensor-alert/target
-100057,data,/coreconf-m2m:sensor-alert/target/id
-100058,data,/coreconf-m2m:sensor-alert/target/type
-100059,data,/coreconf-m2m:sensor-alert/target/value
-100060,data,/coreconf-m2m:state
-100061,data,/coreconf-m2m:state/uptime
-100062,data,/coreconf-m2m:transducers
-100063,data,/coreconf-m2m:transducers/transducer
-100064,data,/coreconf-m2m:transducers/transducer/id
-100065,data,/coreconf-m2m:transducers/transducer/nature
-100066,data,/coreconf-m2m:transducers/transducer/notification-parameters
-100067,data,/coreconf-m2m:transducers/transducer/notification-parameters/history
-100068,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/active
-100069,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/encoding
-100070,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/max-payload
-100071,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/max-samples
-100072,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/precision
-100073,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/step
-100074,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/time-period
-100075,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert
-100076,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/active
-100077,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/dampening
-100078,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/hysteresis
-100079,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/t-max
-100080,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/t-min
-100081,data,/coreconf-m2m:transducers/transducer/precision
-100082,data,/coreconf-m2m:transducers/transducer/quantity
-100083,data,/coreconf-m2m:transducers/transducer/quantity/statistics
-100084,data,/coreconf-m2m:transducers/transducer/quantity/statistics/max
-100085,data,/coreconf-m2m:transducers/transducer/quantity/statistics/mean
-100086,data,/coreconf-m2m:transducers/transducer/quantity/statistics/median
-100087,data,/coreconf-m2m:transducers/transducer/quantity/statistics/min
-100088,data,/coreconf-m2m:transducers/transducer/quantity/statistics/sample-count
-100089,data,/coreconf-m2m:transducers/transducer/quantity/statistics/stdev
-100090,data,/coreconf-m2m:transducers/transducer/quantity/timestamp
-100091,data,/coreconf-m2m:transducers/transducer/quantity/timestamp-source
-100092,data,/coreconf-m2m:transducers/transducer/quantity/u-timestamp
-100093,data,/coreconf-m2m:transducers/transducer/quantity/value
-100094,data,/coreconf-m2m:transducers/transducer/reset-stats
-100095,data,/coreconf-m2m:transducers/transducer/reset-stats/input
-100096,data,/coreconf-m2m:transducers/transducer/reset-stats/output
-100097,data,/coreconf-m2m:transducers/transducer/type
-100098,data,/coreconf-m2m:transducers/transducer/unit
+62000,module,coreconf-m2m
+62001,identity,transducer-type
+62002,data,/coreconf-m2m:bootstrap
+62003,data,/coreconf-m2m:bootstrap/inventory
+62004,data,/coreconf-m2m:bootstrap/inventory/category-override
+62005,data,/coreconf-m2m:bootstrap/inventory/precision-override
+62006,data,/coreconf-m2m:bootstrap/inventory/type
+62007,data,/coreconf-m2m:bootstrap/inventory/unit-override
+62008,data,/coreconf-m2m:bootstrap/minimal-step
+62009,data,/coreconf-m2m:bootstrap/reference-epoch
+62010,data,/coreconf-m2m:bootstrap/uptime
+62011,data,/coreconf-m2m:characteristics
+62012,data,/coreconf-m2m:characteristics/description
+62013,data,/coreconf-m2m:characteristics/geo-location
+62014,data,/coreconf-m2m:characteristics/geo-location/height
+62015,data,/coreconf-m2m:characteristics/geo-location/latitude
+62016,data,/coreconf-m2m:characteristics/geo-location/longitude
+62017,data,/coreconf-m2m:characteristics/geo-location/reference-frame
+62018,data,/coreconf-m2m:characteristics/geo-location/reference-frame/alternate-system
+62019,data,/coreconf-m2m:characteristics/geo-location/reference-frame/astronomical-body
+62020,data,/coreconf-m2m:characteristics/geo-location/reference-frame/geodetic-system
+62021,data,/coreconf-m2m:characteristics/geo-location/reference-frame/geodetic-system/coord-accuracy
+62022,data,/coreconf-m2m:characteristics/geo-location/reference-frame/geodetic-system/geodetic-datum
+62023,data,/coreconf-m2m:characteristics/geo-location/reference-frame/geodetic-system/height-accuracy
+62024,data,/coreconf-m2m:characteristics/geo-location/timestamp
+62025,data,/coreconf-m2m:characteristics/geo-location/valid-until
+62026,data,/coreconf-m2m:characteristics/geo-location/velocity
+62027,data,/coreconf-m2m:characteristics/geo-location/velocity/v-east
+62028,data,/coreconf-m2m:characteristics/geo-location/velocity/v-north
+62029,data,/coreconf-m2m:characteristics/geo-location/velocity/v-up
+62030,data,/coreconf-m2m:characteristics/geo-location/x
+62031,data,/coreconf-m2m:characteristics/geo-location/y
+62032,data,/coreconf-m2m:characteristics/geo-location/z
+62033,data,/coreconf-m2m:characteristics/hosted-by
+62034,data,/coreconf-m2m:characteristics/identifier
+62035,data,/coreconf-m2m:characteristics/installation-time
+62036,data,/coreconf-m2m:characteristics/manufacturer
+62037,data,/coreconf-m2m:characteristics/model
+62038,data,/coreconf-m2m:characteristics/name
+62039,data,/coreconf-m2m:characteristics/version
+62040,data,/coreconf-m2m:history
+62041,data,/coreconf-m2m:history/last
+62042,data,/coreconf-m2m:history/time-series
+62043,data,/coreconf-m2m:history/time-series/internal
+62044,data,/coreconf-m2m:history/time-series/internal/last-update
+62045,data,/coreconf-m2m:history/time-series/internal/messages-sent
+62046,data,/coreconf-m2m:history/time-series/internal/start-time
+62047,data,/coreconf-m2m:history/time-series/type
+62048,data,/coreconf-m2m:history/time-series/values
+62049,data,/coreconf-m2m:reset-stats
+62050,data,/coreconf-m2m:reset-stats/input
+62051,data,/coreconf-m2m:reset-stats/output
+62052,data,/coreconf-m2m:sensor-alert
+62053,data,/coreconf-m2m:sensor-alert/target
+62054,data,/coreconf-m2m:sensor-alert/target/type
+62055,data,/coreconf-m2m:sensor-alert/target/value
+62056,data,/coreconf-m2m:transducers
+62057,data,/coreconf-m2m:transducers/transducer
+62058,data,/coreconf-m2m:transducers/transducer/notification-parameters
+62059,data,/coreconf-m2m:transducers/transducer/notification-parameters/check-interval
+62060,data,/coreconf-m2m:transducers/transducer/notification-parameters/history
+62061,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/active
+62062,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/encoding
+62063,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/max-payload
+62064,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/max-samples
+62065,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/precision
+62066,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/step
+62067,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/time-period
+62068,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert
+62069,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/active
+62070,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/dampening
+62071,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/hysteresis
+62072,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/t-max
+62073,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/t-min
+62074,data,/coreconf-m2m:transducers/transducer/quantity
+62075,data,/coreconf-m2m:transducers/transducer/quantity/timestamp
+62076,data,/coreconf-m2m:transducers/transducer/quantity/timestamp-source
+62077,data,/coreconf-m2m:transducers/transducer/quantity/value
+62078,data,/coreconf-m2m:transducers/transducer/reset-stats
+62079,data,/coreconf-m2m:transducers/transducer/reset-stats/input
+62080,data,/coreconf-m2m:transducers/transducer/reset-stats/output
+62081,data,/coreconf-m2m:transducers/transducer/statistics
+62082,data,/coreconf-m2m:transducers/transducer/statistics/max
+62083,data,/coreconf-m2m:transducers/transducer/statistics/mean
+62084,data,/coreconf-m2m:transducers/transducer/statistics/median
+62085,data,/coreconf-m2m:transducers/transducer/statistics/min
+62086,data,/coreconf-m2m:transducers/transducer/statistics/sample-count
+62087,data,/coreconf-m2m:transducers/transducer/statistics/stdev
+62088,data,/coreconf-m2m:transducers/transducer/type
+]]></artwork></figure>
+
+</section>
+<section anchor="annex-atmos-yang" title="atmos YANG Module">
+
+<figure title="atmos.yang module" anchor="fig-atmos-yang"><artwork><![CDATA[
+module atmos {
+  yang-version 1.1;
+  namespace "urn:ietf:params:xml:ns:yang:atmos";
+  prefix atmos;
+
+  import coreconf-m2m {
+    prefix ccm2m;
+  }
+
+  organization "METER Group, Inc.";
+  contact
+    "Technical Support
+     https://www.metergroup.com/";
+
+  description
+    "Atmospheric/weather transducer-type identities for use with the
+     coreconf-m2m generic M2M CoMI data model.";
+
+  revision 2026-08-24 {
+    description
+      "Initial revision. Extracted all concrete transducer-type identities
+       from coreconf-m2m: atmospheric/weather (solar-radiation,
+       precipitation, air-temperature, relative-humidity,
+       barometric-pressure, vapor-pressure, wind-speed, wind-direction,
+       wind-gust, north-wind-speed, east-wind-speed), lightning
+       (strike-count, average-distance), orientation (tilt, x-orientation,
+       y-orientation, compass-heading), and humidity-sensor-temperature.
+       coreconf-m2m now only defines the base transducer-type identity;
+       atmos is the product-specific module extending it.
+       Applied the ccm2m:default-unit and ccm2m:default-precision
+       extensions (defined in coreconf-m2m) to each identity, to advertise
+       the recommended SenML (RFC 8428) unit and decimal precision for a
+       transducer of that type.";
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Environmental                                                        */
+  /* ------------------------------------------------------------------ */
+
+  identity solar-radiation {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "W/m2";
+    ccm2m:default-precision "0";
+    description "Solar radiation measurement (W/m2).";
+  }
+
+  identity precipitation {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "mm";
+    ccm2m:default-precision "1";
+    description "Precipitation measurement (mm).";
+  }
+
+  identity air-temperature {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "Cel";
+    ccm2m:default-precision "2";
+    description "Air temperature measurement (°C).";
+  }
+
+  identity relative-humidity {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "%RH";
+    ccm2m:default-precision "1";
+    description "Relative humidity measurement (%).";
+  }
+
+  identity barometric-pressure {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "Pa";
+    ccm2m:default-precision "0";
+    description "Barometric pressure measurement (kPa).";
+  }
+
+  identity vapor-pressure {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "Pa";
+    ccm2m:default-precision "0";
+    description "Vapor pressure measurement (kPa).";
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Wind                                                                 */
+  /* ------------------------------------------------------------------ */
+
+  identity wind-speed {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "m/s";
+    ccm2m:default-precision "1";
+    description "Horizontal wind speed measurement (m/s).";
+  }
+
+  identity wind-direction {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "deg";
+    ccm2m:default-precision "0";
+    description "Wind direction measurement (degrees).";
+  }
+
+  identity wind-gust {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "m/s";
+    ccm2m:default-precision "1";
+    description "Wind gust measurement (m/s).";
+  }
+
+  identity north-wind-speed {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "m/s";
+    ccm2m:default-precision "1";
+    description "North wind speed component (m/s).";
+  }
+
+  identity east-wind-speed {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "m/s";
+    ccm2m:default-precision "1";
+    description "East wind speed component (m/s).";
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Lightning                                                            */
+  /* ------------------------------------------------------------------ */
+
+  identity strike-count {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "count";
+    ccm2m:default-precision "0";
+    description "Lightning strike count.";
+  }
+
+  identity average-distance {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "km";
+    ccm2m:default-precision "1";
+    description "Average lightning distance (km).";
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Orientation                                                          */
+  /* ------------------------------------------------------------------ */
+
+  identity tilt {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "deg";
+    ccm2m:default-precision "1";
+    description "Sensor tilt measurement (degrees).";
+  }
+
+  identity x-orientation {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    description "X-axis orientation (raw accelerometer data).";
+  }
+
+  identity y-orientation {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    description "Y-axis orientation (raw accelerometer data).";
+  }
+
+  identity compass-heading {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "deg";
+    ccm2m:default-precision "0";
+    description "Compass heading clockwise from north reference (degrees).";
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Internal                                                             */
+  /* ------------------------------------------------------------------ */
+
+  identity humidity-sensor-temperature {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "Cel";
+    ccm2m:default-precision "2";
+    description "Internal temperature of the humidity sensor (°C).";
+  }
+}
+]]></artwork></figure>
+
+</section>
+<section anchor="annex-atmos-sid" title="atmos SID File (CSV)">
+
+<t>The following table illustrates the SID assignments for the atmos module,
+assuming a registrar-owned range with an illustrative entry point of
+10000000 (out of a 10 million SID mega-range assumed for this example).
+These SIDs are commercial/vendor assignments, not IETF or SDO ones, and
+are provided here for illustration only.</t>
+
+<figure title="SID assignments for atmos (CSV format, illustrative)" anchor="fig-atmos-sid-csv"><artwork align="left"><![CDATA[
+SID,Namespace,Identifier
+10000000,module,atmos
+10000001,identity,air-temperature
+10000002,identity,average-distance
+10000003,identity,barometric-pressure
+10000004,identity,compass-heading
+10000005,identity,east-wind-speed
+10000006,identity,humidity-sensor-temperature
+10000007,identity,north-wind-speed
+10000008,identity,precipitation
+10000009,identity,relative-humidity
+10000010,identity,solar-radiation
+10000011,identity,strike-count
+10000012,identity,tilt
+10000013,identity,vapor-pressure
+10000014,identity,wind-direction
+10000015,identity,wind-gust
+10000016,identity,wind-speed
+10000017,identity,x-orientation
+10000018,identity,y-orientation
 ]]></artwork></figure>
 
 </section>
@@ -1894,438 +2150,478 @@ SID,Namespace,Identifier
   </back>
 
 <!-- ##markdown-source:
-H4sIAIXul2oAA+197XIbSZLY/36KMibWImcBkAA/REKem+NS0g5tfa1I7fpi
-Y3xqAg2yTw00trshiquh4yL8CPaDOPwI9wJ+h3sS51dVZXU3QELSbJwdZuxq
-SKA+s/K7MrN6vV5UpVWWjEzn9PXbZ6evXz0307wwL+PxdTpPelXek1/NaT6b
-LefpOK7SfN6J4svLIvkI/cZ5kYzz+bQ3G846EXydXOXF7cik82kepYtiZKpi
-WVbD3d3j3WEUTfLxPJ7BhJMinlYwwbKK03mvGlbFVU+P1dsdROXycpaWJUxY
-3S6gz9nbi+fRfDm7TIpRNIGpRhE0L5N5uSxHZhpnZRLBmvaiKC6SWNrf5MWH
-qyJfLkbmAnZyhZuiX8zbpEziYnxtfo9fm62L4cXb329H0YfkFjpNRpExPWPh
-wn/kL8/ol384efV7/uR3r9/KVydv6JeXw5f037P8gv6LK6wK2GQyMZPkYzpO
-Svr8/OxpFH1M5ssEJ7IrxCXAn7zfcIHw8SxOMwAoAuvv06Ka9vPiCjun1fXy
-Eg4jq+bD4U54JFG8rK7zgnYD/zdmuswyPoMX8bJI5pW54FOgb2HEeJ7+lY4Z
-IPjywpxUWTyv0r8sE2qQ8CIy7tuXE/z7dFb1YteyPy2iaJ4XMxjnI23w7fPT
-x8OD4QhG+M4CCz87PtjlzxCkZtAf8OdHhwP5/PTp0xfy2ePhPn92fvrTqXx2
-BJ/xr8fDg30/VE9OBr/YO9xTXwDgzRaOwFPO8skyS7ah6VnvaT9NqinhIfwz
-S0dRhHgcbuNo7/EhD/fizZ9OXpn8Y1J8TJMbmWzw+FhtiE4OkQ3J6vdJflXE
-i+t0bF7kTEmljHm8L738sh/vHcs8//H89SvzMimuEvMmrsbX0md/eCTgSOYv
-X1gg7AmMXyUVor65SLJkllTFrQXsnl7f+fKyHBfpJSDnq7xKp6lfVgiOMiWC
-CD+8jYGexpeMXfjV1XKSCjEDWc6yXlw6qrZtLtPiw3We/VV64ziVXSO2ef3y
-pPfiBshoRPhmGdSL9Oq6uknwX8ufTJW7Xy+S8TWyp8ycL5Kx28gIcK1IOjxS
-DBCsRua6qhblaGfn5uamny9gmfllmiVxlqXxfJwgTe0UsKC4THbUpLCgnT8O
-/nHYG+4OdweDwW7vZAeXenHeC1v9I87YqzXtLyZTS18j8xpmNS9pWnMi85ot
-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
-TMwJm6oy+P0emLfYmAC4wsG7tfYh7G29p1ZfsDlFVxVuoUioOrf3As4xFESe
-fxVf+98qwIzKf3ztzze/+CwW45bTa82Xv+fUWjJOdVVijPzf5FQ4nF9S2LPs
-V0sPfLVJGuDf7FgCWg79hW1FeNRFc/KRvNxSgMiqlM76Wuemucgt9ImmushF
-8xcnO1zSh1+gJJlndWIuuBq8WBzmaJF8CeIwalq7M4dJY2+7zDYd0snTqY2E
-8IKr8fRq4Ocny7IWKUIxjisyLoGZLa+4eoQyTbWR420yFzGx0h47sy2aVdW9
-dRAEwFdFLS7bQVAeIlil/ITe902cI/XbYH0HLOQImh/XyLAJaGrRq4O6xc9q
-H0b4m60cJLVb+pOg7Gn7e9x4b0RO1IaVVdtL8HLDQ7ez4iIkQFs7MFNsK2p4
-da39TfH43k14sW3/vWswmRY3Q1u5umZFOrGWQ5Mo9ip+LZaFSyU+KI4lZGw2
-Qr5k5bsq0qsrct8RwFh//dUDWsKsjnq4SNsFaCMAphEVtH4/zZOrvWVN72XY
-1zn44Q73BkdQ+k09gLjygVZ+CfI5Pnq6dXr+x21+ntU/1Un11qTmWCXPQPLT
-qhzQ5bhw8+mQaMs3ZKN2VH/ttdtWpnHbvmoPc3Xd055dHygZ8ShdnqYbvNJI
-Xw26rsZeLamcvx+q72sFrrnBnm/QUoyb2+z7NrVa2vz9gf++Xn2bGxz6BkGt
-cP72sf+2USk8khfDXYtaDXL+/lh9r2p705eDXf8llrvjDxXc6uWB6HsFt7Ac
-OX+toBZWJOev92tfY2Vy/uag9o0H0kABKag5zt8qIN02vz3qYpp5d0cjyKj+
-1iS1PH5Ay53gKUrsNtzdtNsOP3LIvQcb97YPL3L/4eb97WuMPMDexgPUn9yk
-Yfa/dpid+lucPO7B149bf76TBz786oHrT33SsI+/9bA74fufPMtDkHqzWcIs
-GJ5lY4K4d5ba06Q0zd7mBOQ0QB5gcxpSD13yEJuTkXvok/pvTkW2/w6/+MnD
-bE5FahgSMDzO5lSjxlkKWDenkE/ccXMaEChujtZ/5Y4PwtQ01B32H4R3c8vh
-9h+EZZJhxT1akco+k0ctWtHG1pfILFrst6KFbaZLlVPr1sNvaQ0A4Q6tB93a
-wb6dR91aj3ldtx1l1vIQrQe+dojAJONBWg9/7SDeRqURDloxoW0EpwUdtGJD
-Wxe+uudOrQih31ekVq1IoVrBPhZL3vtBK2botvmyco1bESO4qqBmrejQUvme
-W7diQUtri20HrWfe1sEDu/WE27pwKQLsc9h6puSK4e9bD5C+l7cEuFnrkekX
-fKlV65G110PlDq3ntqKAqgDusPX4VvSZe0PnsPU8V/Vb8RQtDdR61JsNtKPZ
-32ErKnzZgDt8M8/jtuLLF45ro3po5MetWPWFI6vAHB68FSW/YnCJVeHB70Pk
-TQb3zwTR0Btg/71DYyQgj7oJidw3qgrV4cE3oqUHPBTHo34DSgtG1Uj9+FtQ
-XzC4u9Hl8b8FMQbj+7AHnuBbUGXI9DFWhMY++hZ0WR87ZfQ+2oQsQ8o42oTo
-3Evt1HMTmrI9d9Rr6jTIJiTUMsiOA+8m5NI6ED76TCNtQiLtI+GlMI+1CUW0
-jmVPeBPUbxtI50rwiJvgeuuIeOdNQx1vgtpuqNBCPt4EhZtjSIofD/UlKL2j
-nt7iUb4Ivb12d7wJZtcV7ONNsLld7z7eBI1XqOPHm6Cv04WPN8FVKosWXBuU
-6aQ3Lj/aK4M2R37gxMfrAMNlZLbXXB+cjLEsYJZM6Cq1hOk4XDyZ/CB3vHcR
-ZW5hd4pKuqRkAvt4lQ3GPj/96RSL8aTyUOHZywtzUmV4/ljKAMNST6bzdNyP
-ov8DrSYySmEXAQA=
+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
+4qAVT75svgEHC9C0rSj1hdPaOCOauBULv3BiFSlEc7ci7c+YW2JnaO5W9P7C
+uX3XIpz5Lip4yMzWWjx4ANXcOamKG6K5vwKFDerc6eBrkFvAbTwyH34Nmgvm
+dnfLNP3XIMFgeh9/QfN/DVoMGTHGrNDUX4Ma61OnhNaHDyFG1/QdH3wIpdkH
+Qxvm8CEk1ZxCMsRopofQkZvJSbjDh5BKTVk4fAhFtOoQRw/B+3bV4ughuO1v
+WenRh6Ctf3QgqHn0ENTUj2O7bnz+IfgXPI+X+DTDQxBRz8AEcPQQJFSP6zwW
+muchKKjnwSgEmuAhSEjqXOC4L8G2n5QfrdO+zXseeM7RIW+4kMv2Bgc+O7fb
+um/TN209uPkRvMf4Gc23aRK6sJAu2vSB7rrdaPVdb9Dd2lj75bPzZ2/Nb7Fe
+btecLiZ8KTLRXbbPk8nVAl1m5owbyvCtiW6oTSyViu72J/l8XVvtY193cWBr
+12woJG97FNqih/zaYJuNXju+aXd7F+3N/Vrr7Vn62Hug4OpW92xRam+mKPoi
+wFxddtJt/19JQ9NtbLd0eVUtVDOSraDHaaO5KbUmcG1MzVZbq1M7VdjxtNHN
+lGu4bOit5mIw7te8dG33RXfvyCQt0RJrKrhLC1PusN5otUA3d0iX40bnzvDj
+9a1CSwof5GbIi2Br2xhPQH0kffsrLEMyxRZ9qerOyjnRrlNHe8cb7iYqKTcu
+zYcCktxEPniXYgViLof/7VoaLT6mRb7gPFTzhT/frqtAjaiF4RBq8eG23oSH
+5+7K0HUYnzttg+h8Or8fzEetX/vT6tjY5uDC/AzXafw6g2qnOKvuk+Z2F7Cm
+b723+fyunQ3bdvYmWGOwr/m8dVc1Dvut93WSZHdtbNS2seMUG4b5ZQZb+6d/
+PGndW0NYfOvd/ertj190bG9teR230GB/v2rdXYvA+9b7exN/Eb39xq3UuJUG
+G/zwJm7dYii+f6G7+x0u8n4b+7rS4Pegh3ypEPgLSAOvJn1zZjkov4jsfgT1
+6s85yVJcrOHFhlxzULZiZqg8fusNTpPLL0JNwhC/ymBnMGeRJBt2hzrwL/Xk
+aGO0wHudVl2R/6Vu6xWuU+Miqvz5YuPeaibJL3VrzzD89147+7pM8oW1z36Z
+TFIbi9/66OglX8RHPBB5vZx10apO1szdb72nD1+mJx/zMr31btyCtz7Mvx02
+vlam/y8QG6kp8b+8LGs9Mi5oy0u8tyAL/Cpfc2fB0v62F39Ky9Cvg3X6sC5j
+lpDumxTko2td5M1fZJF/9/MWWXM+/QKwpJVTnfAyjV0mFR+9TmGV5JkkRUAV
+MW1Dnq9L8S5l5+f8fDuK3+A9/KW6AhxE9VolVcfZz1KQMXAN1FIc/MWFvSzh
+ppP0iWQ0qLuPNSkMPMv6RIY0y1YYv23rI65LZ+CXSGB/BCNgJzBJLDUbirjo
+5dfo8+TMfbocwBp1dnr0HlC6lxTmzWfRcId/zBYWmcOCrWa4YyhPHeCIC5kn
+l3GPJ6Q3upIw2K+Ray9v93FbJS2csxsmrg724GOymKI/1O+HCwafPjt/jpU9
+zp6+xtTgkjzVETUvLvKPKfpcsV40vczvAOvpYL2Mu3Ig7L5sGgSBzn6qUiBq
+ri07YqRG1LQVO2TXD2nxsthRe35UjTvaEft+RE1NtyMO/IgNpGhHH/rRdZPG
+DjnyQwKHpf3+sf++4R6TMcMdP6bm0rUjFJS1Bmu/ViBGeW0/VmANPTt2gIJo
+aGDbAfu1AWgC2u8Oat9psAwV5AKdwH6vwBaI4zaWcY8rVqZmdbfaDSh1003r
+8QRboGXJlNJGS3g3l8ZKpt9LPuttRFUq8XGqwHBBhdP4jtIXnjo7+fEEG4+k
+BYu+05fn5rjKMOYBy7bj7cbxbJFOgNz+D0XuFvA4QQEA
 
 -->
 

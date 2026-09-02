@@ -535,7 +535,7 @@ The read-only `active` flag in both notification types is set when one or more
 clients observe a notification. Parameters are common to all observations of a
 particular transducer.
 
-## Starting Notifications
+##  Notifications
 
 As seen in the previous section, each transducer has a
 "notification-parameters" branch holding its notification settings. A
@@ -552,6 +552,17 @@ Notification is started by sending a FETCH+Observe request on the notification
 stream resource (`/s`), with a body identifying the SID of the transducer to
 observe. Multiple clients may observe the same transducer simultaneously; each
 receives an independent copy of every notification.
+
+The notification ends when either:
+
+* the client explicitly sends a termination message (a GET/FETCH with the
+  Observe option set to 1, i.e. deregister, using the same token as the
+  original observation), or
+* the server sends Confirmable notifications and does not receive an
+  acknowledgment, or
+* an ICMPv6 unreachable message is received by the
+  server in response to the IPv6/UDP/CoAP packet carrying the
+  notification's token.
 
 # CORECONF Overview in the M2M Context
 
@@ -596,97 +607,119 @@ reachable when no ACK is received, and to cancel the Observe subscription
 accordingly. A RST response from the client is also a valid way to signal that
 the subscription should be terminated.
 
+## SID Allocations
+
+The coreconf-m2m model is intended to be assigned in the IETF experimental
+SID space, with a model entry point of 62000. {{annex-sid}} gives the
+complete SID mapping for this model.
+
+The atmos module, however, cannot be assigned SIDs in the IETF or another
+SDO space, unless this commercial module is itself standardized. For
+commercial modules, we assume that a registrar allocates SIDs and
+implements the constraints defined in {{I-D.ietf-core-comi}}. In this
+example, we assume that the registrar owns a 10 million SID mega-range.
+{{annex-atmos-yang}} gives the atmos.yang model, and {{annex-atmos-sid}}
+gives the corresponding SID mapping, composed of the identities
+representing the transducers.
+
 # CORECONF Traffic
 
-The following examples show some CoAP messages between a client and a device
-(the CoAP server). In the example, the device is an ATMOS41 weather station,
-able to measure 12 parameters. An identity is associated with each parameter and
-a unique SID, as illustrated in {{fig-identity-excerpt}}:
-
-~~~~
-  identity solar-radiation {
-    base transducer-type;
-    description "Solar radiation measurement (W/m2).";
-  }
-
-  identity precipitation {
-    base transducer-type;
-    description "Precipitation measurement (mm).";
-  }
-
-  identity air-temperature {
-    base transducer-type;
-    description "Air temperature measurement (°C).";
-  }
-~~~~
-{: #fig-identity-excerpt title="Excerpt of YANG identity definitions for the ATMOS41 transducers (see Appendix for the complete module)" artwork-align="left"}
-
+This section illustrates different traffic patterns used in coreconf-m2m.
 
 ## Resource Discovery
 
 The client does not know the transducers managed by the device. It sends a FETCH
-on "/transducers/transducer" with a depth of 0, as shown in
+on "/bootstrap" (SID 62002) as shown in
 {{fig-resource-discovery}}.
 
 ~~~~
   CoAP Request:
-  Non-Confirmable, FETCH, MID:47709
-    Token: 8ed4
+  Non-Confirmable, FETCH, MID:39919
+    Token: 2aaf
     Opt #1: Uri-Path: c
     Opt #2: Content-Format: 141 (application/yang-fetch+cbor)
-    Opt #3: Uri-Query: d=0
-    Opt #4: Accept: 142 (application/yang-data+cbor;id=sid)
+    Opt #3: Accept: 142 (application/yang-data+cbor;id=sid)
 
-  Payload: 5 bytes
-    1A 000186DF  # unsigned(100063) : /transducers/transducer
+  Payload: 3 bytes
+    19 F2 32  # unsigned(62002) : /bootstrap
 
   CoAP Response:
-  Non-Confirmable, 2.05 Content, MID:39441
-    Token: 8ed4
+  Non-Confirmable, 2.05 Content, MID:57745
+    Token: 2aaf
     Opt #1: Content-Format: 142 (application/yang-data+cbor;id=sid)
 
-  Payload: 220 bytes
-    {100063:
-      [{33: 100008, 1: 0, 17: 1, 34: "W/m2"},
-       {33: 100006, 1: 0, 17: 3, 34: "mm"},
-       {33: 100009, 1: 0, 17: 0, 34: ""},
-       {33: 100002, 1: 0, 17: 1, 34: "km"},
-       {33: 100013, 1: 0, 17: 1, 34: "deg"},
-       {33: 100015, 1: 0, 17: 2, 34: "m/s"},
-       {33: 100014, 1: 0, 17: 2, 34: "m/s"},
-       {33: 100010, 1: 0, 17: 1, 34: "deg"},
-       {33: 100001, 1: 0, 17: 1, 34: "degC"},
-       {33: 100012, 1: 0, 17: 3, 34: "kPa"},
-       {33: 100003, 1: 0, 17: 2, 34: "kPa"},
-       {33: 100007, 1: 0, 17: 1, 34: "%RH"}]}
+  Payload: 118 bytes
+    {62002:
+      {7: 1788334280, 8: 30172, 6: 120,
+       1: [{3: 10000010}, {3: 10000008}, {3: 10000011}, {3: 10000002},
+           {3: 10000014}, {3: 10000016}, {3: 10000015}, {3: 10000012},
+           {3: 10000001}, {3: 10000013}, {3: 10000003}, {3: 10000009},
+           {3: 10000006}, {3: 10000004}]}}
 ~~~~
 {: #fig-resource-discovery title="Resource discovery: FETCH request and response" artwork-align="left"}
 
-In the request, the payload `1A 000186DF` is the CBOR encoding of the unsigned
-integer 100063, which is the SID of "/transducers/transducer". In the response,
-the outer key 100063 identifies the list, and each entry is a CBOR map whose
-keys are delta SIDs relative to the list SID, as defined in {{RFC9254}}. The
-values encode the transducer type (as an identity SID), instance id, precision,
-and unit string.
+In the request, the payload `19 F2 32` is the CBOR encoding of the unsigned
+integer 62002, which is the SID of "/bootstrap". In the response, the outer
+key 62002 identifies the bootstrap branch, and the inner keys are delta
+SIDs relative to 62002, as defined in {{RFC9254}}: 7 (reference-epoch), 8
+(uptime), 6 (minimal-step), and 1 (the "inventory" list). Each entry in
+the inventory list is itself a map whose key 3 is a delta SID relative to
+the list SID (62003), i.e. "type", carrying the identity SID of one
+transducer known to the device; no override is present here, meaning every
+transducer uses the default-unit, default-precision and default-category
+declared on its identity.
 
-The client may translate the identityref values to the names defined in the YANG
-module. {{fig-transducer-list}} shows the resulting transducer table:
+The client MUST have access to the corresponding YANG file to discover the
+transducers' default parameters, indicating the unit, the precision and
+the nature of the transducer.
 
 ~~~~
-  1  solar-radiation      W/m2  [type='solar-radiation'][id='0']
-  2  precipitation        mm    [type='precipitation'][id='0']
-  3  strike-count               [type='strike-count'][id='0']
-  4  average-distance     km    [type='average-distance'][id='0']
-  5  wind-direction       deg   [type='wind-direction'][id='0']
-  6  wind-speed           m/s   [type='wind-speed'][id='0']
-  7  wind-gust            m/s   [type='wind-gust'][id='0']
-  8  tilt                 deg   [type='tilt'][id='0']
-  9  air-temperature      degC  [type='air-temperature'][id='0']
- 10  vapor-pressure       kPa   [type='vapor-pressure'][id='0']
- 11  barometric-pressure  kPa   [type='barometric-pressure'][id='0']
- 12  relative-humidity    %RH   [type='relative-humidity'][id='0']
+ coreconf-m2m:bootstrap
+    reference-epoch  1788334280  (2026-09-02 09:31:20)   ← origin of every timestamp in the model
+    uptime           30172 s
+    minimal-step     120 s   ← floor for history/step
+
+  coreconf-m2m:bootstrap/inventory — SID → module → YANG defaults resolution
+        SID  Identity                           Module         Unit      Prec.  Category
+  ────────────────────────────────────────────────────────────────────────────────────────────
+   10000010  atmos:solar-radiation              atmos          W/m2          0  sensor
+   10000008  atmos:precipitation                atmos          mm            3  sensor
+   10000011  atmos:strike-count                 atmos          count         0  sensor
+   10000002  atmos:average-distance             atmos          km            0  sensor
+   10000014  atmos:wind-direction               atmos          deg           0  sensor
+   10000016  atmos:wind-speed                   atmos          m/s           2  sensor
+   10000015  atmos:wind-gust                    atmos          m/s           2  sensor
+   10000012  atmos:tilt                         atmos          deg           1  sensor
+   10000001  atmos:air-temperature              atmos          Cel           1  sensor
+   10000013  atmos:vapor-pressure               atmos          kPa           2  sensor
+   10000003  atmos:barometric-pressure          atmos          kPa           2  sensor
+   10000009  atmos:relative-humidity            atmos          %RH           1  sensor
+   10000006  atmos:humidity-sensor-temperature  atmos          Cel           1  sensor
+   10000004  atmos:compass-heading              atmos          deg           0  sensor
+  ────────────────────────────────────────────────────────────────────────────────────────────
+  * override sent by the device; without a star, default value read from the YANG module.
+    The inventory completed this way stays local: bootstrap is config false and is never sent back.
+Connected. 14 sensor(s) discovered, minimal step 120 s.
+
+    #  Type                         Unit     Prec.  Filter
+  ──────────────────────────────────────────────────────────────────────────────
+    1  solar-radiation              W/m2         0  [type='atmos:solar-radiation']
+    2  precipitation                mm           3  [type='atmos:precipitation']
+    3  strike-count                 count        0  [type='atmos:strike-count']
+    4  average-distance             km           0  [type='atmos:average-distance']
+    5  wind-direction               deg          0  [type='atmos:wind-direction']
+    6  wind-speed                   m/s          2  [type='atmos:wind-speed']
+    7  wind-gust                    m/s          2  [type='atmos:wind-gust']
+    8  tilt                         deg          1  [type='atmos:tilt']
+    9  air-temperature              Cel          1  [type='atmos:air-temperature']
+   10  vapor-pressure               kPa          2  [type='atmos:vapor-pressure']
+   11  barometric-pressure          kPa          2  [type='atmos:barometric-pressure']
+   12  relative-humidity            %RH          1  [type='atmos:relative-humidity']
+   13  humidity-sensor-temperature  Cel          1  [type='atmos:humidity-sensor-temperature']
+   14  compass-heading              deg          0  [type='atmos:compass-heading']
+
 ~~~~
-{: #fig-transducer-list title="Decoded transducer list from resource discovery response" artwork-align="left"}
+{: #fig-transducer-list title="Decoded transducer inventory from resource discovery response" artwork-align="left"}
 
 
 ## Querying a quantity
@@ -855,12 +888,6 @@ as shown in {{fig-notification-decoded}}:
 {: #fig-notification-decoded title="Decoded solar-radiation time-series from history notification" artwork-align="left"}
 
 
-
-# SID Allocation
-
-The SID range 100000–100399 is used as an example throughout this document.
-Official values MUST be assigned by IANA prior to publication. The complete SID
-file is provided in {{fig-sid-csv}}.
 
 # Security Considerations
 
@@ -1715,114 +1742,339 @@ module coreconf-m2m {
 ~~~~
 {: #fig-yang-module title="Complete coreconf-m2m YANG module" artwork-align="left"}
 
-# SID File (CSV)
+# SID File (CSV) {#annex-sid}
 
 The following table lists the SID assignments for the coreconf-m2m module
-(assignment range: 100000–100399, revision 2026-03-29).
+(assignment range: 62000-62399, revision 2026-09-01). The transducer-type
+identities defined by manufacturer modules such as atmos are assigned
+separately and are not yet included in this table.
 
 ~~~~
 SID,Namespace,Identifier
-100000,module,coreconf-m2m
-100001,identity,air-temperature
-100002,identity,average-distance
-100003,identity,barometric-pressure
-100004,identity,east-wind-speed
-100005,identity,north-wind-speed
-100006,identity,precipitation
-100007,identity,relative-humidity
-100008,identity,solar-radiation
-100009,identity,strike-count
-100010,identity,tilt
-100011,identity,transducer-type
-100012,identity,vapor-pressure
-100013,identity,wind-direction
-100014,identity,wind-gust
-100015,identity,wind-speed
-100016,identity,x-orientation
-100017,identity,y-orientation
-100018,data,/coreconf-m2m:characteristics
-100019,data,/coreconf-m2m:characteristics/geo-location
-100020,data,/coreconf-m2m:characteristics/geo-location/height
-100021,data,/coreconf-m2m:characteristics/geo-location/latitude
-100022,data,/coreconf-m2m:characteristics/geo-location/longitude
-100023,data,/coreconf-m2m:characteristics/geo-location/reference-frame
-100024,data,/coreconf-m2m:characteristics/geo-location/reference-frame/alternate-system
-100025,data,/coreconf-m2m:characteristics/geo-location/reference-frame/astronomical-body
-100026,data,/coreconf-m2m:characteristics/geo-location/reference-frame/geodetic-system
-100027,data,/coreconf-m2m:characteristics/geo-location/reference-frame/geodetic-system/coord-accuracy
-100028,data,/coreconf-m2m:characteristics/geo-location/reference-frame/geodetic-system/geodetic-datum
-100029,data,/coreconf-m2m:characteristics/geo-location/reference-frame/geodetic-system/height-accuracy
-100030,data,/coreconf-m2m:characteristics/geo-location/timestamp
-100031,data,/coreconf-m2m:characteristics/geo-location/valid-until
-100032,data,/coreconf-m2m:characteristics/geo-location/velocity
-100033,data,/coreconf-m2m:characteristics/geo-location/velocity/v-east
-100034,data,/coreconf-m2m:characteristics/geo-location/velocity/v-north
-100035,data,/coreconf-m2m:characteristics/geo-location/velocity/v-up
-100036,data,/coreconf-m2m:characteristics/geo-location/x
-100037,data,/coreconf-m2m:characteristics/geo-location/y
-100038,data,/coreconf-m2m:characteristics/geo-location/z
-100039,data,/coreconf-m2m:characteristics/identifier
-100040,data,/coreconf-m2m:characteristics/name
-100041,data,/coreconf-m2m:characteristics/version
-100042,data,/coreconf-m2m:history
-100043,data,/coreconf-m2m:history/last
-100044,data,/coreconf-m2m:history/time-series
-100045,data,/coreconf-m2m:history/time-series/id
-100046,data,/coreconf-m2m:history/time-series/internal
-100047,data,/coreconf-m2m:history/time-series/internal/last-update
-100048,data,/coreconf-m2m:history/time-series/internal/messages-sent
-100049,data,/coreconf-m2m:history/time-series/internal/start-time
-100050,data,/coreconf-m2m:history/time-series/type
-100051,data,/coreconf-m2m:history/time-series/values
-100052,data,/coreconf-m2m:reset-stats
-100053,data,/coreconf-m2m:reset-stats/input
-100054,data,/coreconf-m2m:reset-stats/output
-100055,data,/coreconf-m2m:sensor-alert
-100056,data,/coreconf-m2m:sensor-alert/target
-100057,data,/coreconf-m2m:sensor-alert/target/id
-100058,data,/coreconf-m2m:sensor-alert/target/type
-100059,data,/coreconf-m2m:sensor-alert/target/value
-100060,data,/coreconf-m2m:state
-100061,data,/coreconf-m2m:state/uptime
-100062,data,/coreconf-m2m:transducers
-100063,data,/coreconf-m2m:transducers/transducer
-100064,data,/coreconf-m2m:transducers/transducer/id
-100065,data,/coreconf-m2m:transducers/transducer/nature
-100066,data,/coreconf-m2m:transducers/transducer/notification-parameters
-100067,data,/coreconf-m2m:transducers/transducer/notification-parameters/history
-100068,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/active
-100069,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/encoding
-100070,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/max-payload
-100071,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/max-samples
-100072,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/precision
-100073,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/step
-100074,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/time-period
-100075,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert
-100076,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/active
-100077,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/dampening
-100078,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/hysteresis
-100079,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/t-max
-100080,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/t-min
-100081,data,/coreconf-m2m:transducers/transducer/precision
-100082,data,/coreconf-m2m:transducers/transducer/quantity
-100083,data,/coreconf-m2m:transducers/transducer/quantity/statistics
-100084,data,/coreconf-m2m:transducers/transducer/quantity/statistics/max
-100085,data,/coreconf-m2m:transducers/transducer/quantity/statistics/mean
-100086,data,/coreconf-m2m:transducers/transducer/quantity/statistics/median
-100087,data,/coreconf-m2m:transducers/transducer/quantity/statistics/min
-100088,data,/coreconf-m2m:transducers/transducer/quantity/statistics/sample-count
-100089,data,/coreconf-m2m:transducers/transducer/quantity/statistics/stdev
-100090,data,/coreconf-m2m:transducers/transducer/quantity/timestamp
-100091,data,/coreconf-m2m:transducers/transducer/quantity/timestamp-source
-100092,data,/coreconf-m2m:transducers/transducer/quantity/u-timestamp
-100093,data,/coreconf-m2m:transducers/transducer/quantity/value
-100094,data,/coreconf-m2m:transducers/transducer/reset-stats
-100095,data,/coreconf-m2m:transducers/transducer/reset-stats/input
-100096,data,/coreconf-m2m:transducers/transducer/reset-stats/output
-100097,data,/coreconf-m2m:transducers/transducer/type
-100098,data,/coreconf-m2m:transducers/transducer/unit
+62000,module,coreconf-m2m
+62001,identity,transducer-type
+62002,data,/coreconf-m2m:bootstrap
+62003,data,/coreconf-m2m:bootstrap/inventory
+62004,data,/coreconf-m2m:bootstrap/inventory/category-override
+62005,data,/coreconf-m2m:bootstrap/inventory/precision-override
+62006,data,/coreconf-m2m:bootstrap/inventory/type
+62007,data,/coreconf-m2m:bootstrap/inventory/unit-override
+62008,data,/coreconf-m2m:bootstrap/minimal-step
+62009,data,/coreconf-m2m:bootstrap/reference-epoch
+62010,data,/coreconf-m2m:bootstrap/uptime
+62011,data,/coreconf-m2m:characteristics
+62012,data,/coreconf-m2m:characteristics/description
+62013,data,/coreconf-m2m:characteristics/geo-location
+62014,data,/coreconf-m2m:characteristics/geo-location/height
+62015,data,/coreconf-m2m:characteristics/geo-location/latitude
+62016,data,/coreconf-m2m:characteristics/geo-location/longitude
+62017,data,/coreconf-m2m:characteristics/geo-location/reference-frame
+62018,data,/coreconf-m2m:characteristics/geo-location/reference-frame/alternate-system
+62019,data,/coreconf-m2m:characteristics/geo-location/reference-frame/astronomical-body
+62020,data,/coreconf-m2m:characteristics/geo-location/reference-frame/geodetic-system
+62021,data,/coreconf-m2m:characteristics/geo-location/reference-frame/geodetic-system/coord-accuracy
+62022,data,/coreconf-m2m:characteristics/geo-location/reference-frame/geodetic-system/geodetic-datum
+62023,data,/coreconf-m2m:characteristics/geo-location/reference-frame/geodetic-system/height-accuracy
+62024,data,/coreconf-m2m:characteristics/geo-location/timestamp
+62025,data,/coreconf-m2m:characteristics/geo-location/valid-until
+62026,data,/coreconf-m2m:characteristics/geo-location/velocity
+62027,data,/coreconf-m2m:characteristics/geo-location/velocity/v-east
+62028,data,/coreconf-m2m:characteristics/geo-location/velocity/v-north
+62029,data,/coreconf-m2m:characteristics/geo-location/velocity/v-up
+62030,data,/coreconf-m2m:characteristics/geo-location/x
+62031,data,/coreconf-m2m:characteristics/geo-location/y
+62032,data,/coreconf-m2m:characteristics/geo-location/z
+62033,data,/coreconf-m2m:characteristics/hosted-by
+62034,data,/coreconf-m2m:characteristics/identifier
+62035,data,/coreconf-m2m:characteristics/installation-time
+62036,data,/coreconf-m2m:characteristics/manufacturer
+62037,data,/coreconf-m2m:characteristics/model
+62038,data,/coreconf-m2m:characteristics/name
+62039,data,/coreconf-m2m:characteristics/version
+62040,data,/coreconf-m2m:history
+62041,data,/coreconf-m2m:history/last
+62042,data,/coreconf-m2m:history/time-series
+62043,data,/coreconf-m2m:history/time-series/internal
+62044,data,/coreconf-m2m:history/time-series/internal/last-update
+62045,data,/coreconf-m2m:history/time-series/internal/messages-sent
+62046,data,/coreconf-m2m:history/time-series/internal/start-time
+62047,data,/coreconf-m2m:history/time-series/type
+62048,data,/coreconf-m2m:history/time-series/values
+62049,data,/coreconf-m2m:reset-stats
+62050,data,/coreconf-m2m:reset-stats/input
+62051,data,/coreconf-m2m:reset-stats/output
+62052,data,/coreconf-m2m:sensor-alert
+62053,data,/coreconf-m2m:sensor-alert/target
+62054,data,/coreconf-m2m:sensor-alert/target/type
+62055,data,/coreconf-m2m:sensor-alert/target/value
+62056,data,/coreconf-m2m:transducers
+62057,data,/coreconf-m2m:transducers/transducer
+62058,data,/coreconf-m2m:transducers/transducer/notification-parameters
+62059,data,/coreconf-m2m:transducers/transducer/notification-parameters/check-interval
+62060,data,/coreconf-m2m:transducers/transducer/notification-parameters/history
+62061,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/active
+62062,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/encoding
+62063,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/max-payload
+62064,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/max-samples
+62065,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/precision
+62066,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/step
+62067,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/time-period
+62068,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert
+62069,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/active
+62070,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/dampening
+62071,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/hysteresis
+62072,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/t-max
+62073,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/t-min
+62074,data,/coreconf-m2m:transducers/transducer/quantity
+62075,data,/coreconf-m2m:transducers/transducer/quantity/timestamp
+62076,data,/coreconf-m2m:transducers/transducer/quantity/timestamp-source
+62077,data,/coreconf-m2m:transducers/transducer/quantity/value
+62078,data,/coreconf-m2m:transducers/transducer/reset-stats
+62079,data,/coreconf-m2m:transducers/transducer/reset-stats/input
+62080,data,/coreconf-m2m:transducers/transducer/reset-stats/output
+62081,data,/coreconf-m2m:transducers/transducer/statistics
+62082,data,/coreconf-m2m:transducers/transducer/statistics/max
+62083,data,/coreconf-m2m:transducers/transducer/statistics/mean
+62084,data,/coreconf-m2m:transducers/transducer/statistics/median
+62085,data,/coreconf-m2m:transducers/transducer/statistics/min
+62086,data,/coreconf-m2m:transducers/transducer/statistics/sample-count
+62087,data,/coreconf-m2m:transducers/transducer/statistics/stdev
+62088,data,/coreconf-m2m:transducers/transducer/type
 ~~~~
 {: #fig-sid-csv title="SID assignments for coreconf-m2m (CSV format)" artwork-align="left"}
+
+# atmos YANG Module {#annex-atmos-yang}
+
+~~~~
+module atmos {
+  yang-version 1.1;
+  namespace "urn:ietf:params:xml:ns:yang:atmos";
+  prefix atmos;
+
+  import coreconf-m2m {
+    prefix ccm2m;
+  }
+
+  organization "METER Group, Inc.";
+  contact
+    "Technical Support
+     https://www.metergroup.com/";
+
+  description
+    "Atmospheric/weather transducer-type identities for use with the
+     coreconf-m2m generic M2M CoMI data model.";
+
+  revision 2026-08-24 {
+    description
+      "Initial revision. Extracted all concrete transducer-type identities
+       from coreconf-m2m: atmospheric/weather (solar-radiation,
+       precipitation, air-temperature, relative-humidity,
+       barometric-pressure, vapor-pressure, wind-speed, wind-direction,
+       wind-gust, north-wind-speed, east-wind-speed), lightning
+       (strike-count, average-distance), orientation (tilt, x-orientation,
+       y-orientation, compass-heading), and humidity-sensor-temperature.
+       coreconf-m2m now only defines the base transducer-type identity;
+       atmos is the product-specific module extending it.
+       Applied the ccm2m:default-unit and ccm2m:default-precision
+       extensions (defined in coreconf-m2m) to each identity, to advertise
+       the recommended SenML (RFC 8428) unit and decimal precision for a
+       transducer of that type.";
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Environmental                                                        */
+  /* ------------------------------------------------------------------ */
+
+  identity solar-radiation {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "W/m2";
+    ccm2m:default-precision "0";
+    description "Solar radiation measurement (W/m2).";
+  }
+
+  identity precipitation {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "mm";
+    ccm2m:default-precision "1";
+    description "Precipitation measurement (mm).";
+  }
+
+  identity air-temperature {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "Cel";
+    ccm2m:default-precision "2";
+    description "Air temperature measurement (°C).";
+  }
+
+  identity relative-humidity {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "%RH";
+    ccm2m:default-precision "1";
+    description "Relative humidity measurement (%).";
+  }
+
+  identity barometric-pressure {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "Pa";
+    ccm2m:default-precision "0";
+    description "Barometric pressure measurement (kPa).";
+  }
+
+  identity vapor-pressure {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "Pa";
+    ccm2m:default-precision "0";
+    description "Vapor pressure measurement (kPa).";
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Wind                                                                 */
+  /* ------------------------------------------------------------------ */
+
+  identity wind-speed {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "m/s";
+    ccm2m:default-precision "1";
+    description "Horizontal wind speed measurement (m/s).";
+  }
+
+  identity wind-direction {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "deg";
+    ccm2m:default-precision "0";
+    description "Wind direction measurement (degrees).";
+  }
+
+  identity wind-gust {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "m/s";
+    ccm2m:default-precision "1";
+    description "Wind gust measurement (m/s).";
+  }
+
+  identity north-wind-speed {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "m/s";
+    ccm2m:default-precision "1";
+    description "North wind speed component (m/s).";
+  }
+
+  identity east-wind-speed {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "m/s";
+    ccm2m:default-precision "1";
+    description "East wind speed component (m/s).";
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Lightning                                                            */
+  /* ------------------------------------------------------------------ */
+
+  identity strike-count {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "count";
+    ccm2m:default-precision "0";
+    description "Lightning strike count.";
+  }
+
+  identity average-distance {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "km";
+    ccm2m:default-precision "1";
+    description "Average lightning distance (km).";
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Orientation                                                          */
+  /* ------------------------------------------------------------------ */
+
+  identity tilt {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "deg";
+    ccm2m:default-precision "1";
+    description "Sensor tilt measurement (degrees).";
+  }
+
+  identity x-orientation {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    description "X-axis orientation (raw accelerometer data).";
+  }
+
+  identity y-orientation {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    description "Y-axis orientation (raw accelerometer data).";
+  }
+
+  identity compass-heading {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "deg";
+    ccm2m:default-precision "0";
+    description "Compass heading clockwise from north reference (degrees).";
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Internal                                                             */
+  /* ------------------------------------------------------------------ */
+
+  identity humidity-sensor-temperature {
+    base ccm2m:transducer-type;
+    ccm2m:default-category "sensor";
+    ccm2m:default-unit "Cel";
+    ccm2m:default-precision "2";
+    description "Internal temperature of the humidity sensor (°C).";
+  }
+}
+~~~~
+{: #fig-atmos-yang title="atmos.yang module"}
+
+# atmos SID File (CSV) {#annex-atmos-sid}
+
+The following table illustrates the SID assignments for the atmos module,
+assuming a registrar-owned range with an illustrative entry point of
+10000000 (out of a 10 million SID mega-range assumed for this example).
+These SIDs are commercial/vendor assignments, not IETF or SDO ones, and
+are provided here for illustration only.
+
+~~~~
+SID,Namespace,Identifier
+10000000,module,atmos
+10000001,identity,air-temperature
+10000002,identity,average-distance
+10000003,identity,barometric-pressure
+10000004,identity,compass-heading
+10000005,identity,east-wind-speed
+10000006,identity,humidity-sensor-temperature
+10000007,identity,north-wind-speed
+10000008,identity,precipitation
+10000009,identity,relative-humidity
+10000010,identity,solar-radiation
+10000011,identity,strike-count
+10000012,identity,tilt
+10000013,identity,vapor-pressure
+10000014,identity,wind-direction
+10000015,identity,wind-gust
+10000016,identity,wind-speed
+10000017,identity,x-orientation
+10000018,identity,y-orientation
+~~~~
+{: #fig-atmos-sid-csv title="SID assignments for atmos (CSV format, illustrative)" artwork-align="left"}
 
 # Acknowledgments
 {:numbered="false"}

@@ -1,0 +1,555 @@
+{
+  "ietf-sid-file:sid-file": {
+    "module-name": "coreconf-m2m",
+    "module-revision": "2026-09-01",
+    "sid-file-status": "unpublished",
+    "dependency-revision": [
+      {
+        "module-name": "ietf-geo-location",
+        "module-revision": "2022-02-11"
+      }
+    ],
+    "assignment-range": [
+      {
+        "entry-point": "62000",
+        "size": "400"
+      }
+    ],
+    "item": [
+      {
+        "namespace": "module",
+        "identifier": "coreconf-m2m",
+        "status": "unstable",
+        "sid": "62000"
+      },
+      {
+        "namespace": "identity",
+        "identifier": "transducer-type",
+        "status": "unstable",
+        "sid": "62001"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:bootstrap",
+        "status": "unstable",
+        "sid": "62002"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:bootstrap/inventory",
+        "status": "unstable",
+        "sid": "62003"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:bootstrap/inventory/category-override",
+        "status": "unstable",
+        "sid": "62004"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:bootstrap/inventory/precision-override",
+        "status": "unstable",
+        "sid": "62005"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:bootstrap/inventory/type",
+        "status": "unstable",
+        "sid": "62006"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:bootstrap/inventory/unit-override",
+        "status": "unstable",
+        "sid": "62007"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:bootstrap/minimal-step",
+        "status": "unstable",
+        "sid": "62008"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:bootstrap/reference-epoch",
+        "status": "unstable",
+        "sid": "62009"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:bootstrap/uptime",
+        "status": "unstable",
+        "sid": "62010"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics",
+        "status": "unstable",
+        "sid": "62011"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/description",
+        "status": "unstable",
+        "sid": "62012"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/geo-location",
+        "status": "unstable",
+        "sid": "62013"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/geo-location/height",
+        "status": "unstable",
+        "sid": "62014"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/geo-location/latitude",
+        "status": "unstable",
+        "sid": "62015"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/geo-location/longitude",
+        "status": "unstable",
+        "sid": "62016"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/geo-location/reference-frame",
+        "status": "unstable",
+        "sid": "62017"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/geo-location/reference-frame/alternate-system",
+        "status": "unstable",
+        "sid": "62018"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/geo-location/reference-frame/astronomical-body",
+        "status": "unstable",
+        "sid": "62019"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/geo-location/reference-frame/geodetic-system",
+        "status": "unstable",
+        "sid": "62020"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/geo-location/reference-frame/geodetic-system/coord-accuracy",
+        "status": "unstable",
+        "sid": "62021"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/geo-location/reference-frame/geodetic-system/geodetic-datum",
+        "status": "unstable",
+        "sid": "62022"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/geo-location/reference-frame/geodetic-system/height-accuracy",
+        "status": "unstable",
+        "sid": "62023"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/geo-location/timestamp",
+        "status": "unstable",
+        "sid": "62024"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/geo-location/valid-until",
+        "status": "unstable",
+        "sid": "62025"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/geo-location/velocity",
+        "status": "unstable",
+        "sid": "62026"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/geo-location/velocity/v-east",
+        "status": "unstable",
+        "sid": "62027"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/geo-location/velocity/v-north",
+        "status": "unstable",
+        "sid": "62028"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/geo-location/velocity/v-up",
+        "status": "unstable",
+        "sid": "62029"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/geo-location/x",
+        "status": "unstable",
+        "sid": "62030"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/geo-location/y",
+        "status": "unstable",
+        "sid": "62031"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/geo-location/z",
+        "status": "unstable",
+        "sid": "62032"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/hosted-by",
+        "status": "unstable",
+        "sid": "62033"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/identifier",
+        "status": "unstable",
+        "sid": "62034"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/installation-time",
+        "status": "unstable",
+        "sid": "62035"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/manufacturer",
+        "status": "unstable",
+        "sid": "62036"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/model",
+        "status": "unstable",
+        "sid": "62037"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/name",
+        "status": "unstable",
+        "sid": "62038"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:characteristics/version",
+        "status": "unstable",
+        "sid": "62039"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:history",
+        "status": "unstable",
+        "sid": "62040"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:history/last",
+        "status": "unstable",
+        "sid": "62041"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:history/time-series",
+        "status": "unstable",
+        "sid": "62042"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:history/time-series/internal",
+        "status": "unstable",
+        "sid": "62043"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:history/time-series/internal/last-update",
+        "status": "unstable",
+        "sid": "62044"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:history/time-series/internal/messages-sent",
+        "status": "unstable",
+        "sid": "62045"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:history/time-series/internal/start-time",
+        "status": "unstable",
+        "sid": "62046"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:history/time-series/type",
+        "status": "unstable",
+        "sid": "62047"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:history/time-series/values",
+        "status": "unstable",
+        "sid": "62048"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:reset-stats",
+        "status": "unstable",
+        "sid": "62049"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:reset-stats/input",
+        "status": "unstable",
+        "sid": "62050"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:reset-stats/output",
+        "status": "unstable",
+        "sid": "62051"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:sensor-alert",
+        "status": "unstable",
+        "sid": "62052"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:sensor-alert/target",
+        "status": "unstable",
+        "sid": "62053"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:sensor-alert/target/type",
+        "status": "unstable",
+        "sid": "62054"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:sensor-alert/target/value",
+        "status": "unstable",
+        "sid": "62055"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers",
+        "status": "unstable",
+        "sid": "62056"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer",
+        "status": "unstable",
+        "sid": "62057"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/notification-parameters",
+        "status": "unstable",
+        "sid": "62058"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/notification-parameters/check-interval",
+        "status": "unstable",
+        "sid": "62059"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/notification-parameters/history",
+        "status": "unstable",
+        "sid": "62060"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/notification-parameters/history/active",
+        "status": "unstable",
+        "sid": "62061"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/notification-parameters/history/encoding",
+        "status": "unstable",
+        "sid": "62062"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/notification-parameters/history/max-payload",
+        "status": "unstable",
+        "sid": "62063"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/notification-parameters/history/max-samples",
+        "status": "unstable",
+        "sid": "62064"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/notification-parameters/history/precision",
+        "status": "unstable",
+        "sid": "62065"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/notification-parameters/history/step",
+        "status": "unstable",
+        "sid": "62066"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/notification-parameters/history/time-period",
+        "status": "unstable",
+        "sid": "62067"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert",
+        "status": "unstable",
+        "sid": "62068"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/active",
+        "status": "unstable",
+        "sid": "62069"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/dampening",
+        "status": "unstable",
+        "sid": "62070"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/hysteresis",
+        "status": "unstable",
+        "sid": "62071"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/t-max",
+        "status": "unstable",
+        "sid": "62072"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/t-min",
+        "status": "unstable",
+        "sid": "62073"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/quantity",
+        "status": "unstable",
+        "sid": "62074"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/quantity/timestamp",
+        "status": "unstable",
+        "sid": "62075"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/quantity/timestamp-source",
+        "status": "unstable",
+        "sid": "62076"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/quantity/value",
+        "status": "unstable",
+        "sid": "62077"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/reset-stats",
+        "status": "unstable",
+        "sid": "62078"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/reset-stats/input",
+        "status": "unstable",
+        "sid": "62079"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/reset-stats/output",
+        "status": "unstable",
+        "sid": "62080"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/statistics",
+        "status": "unstable",
+        "sid": "62081"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/statistics/max",
+        "status": "unstable",
+        "sid": "62082"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/statistics/mean",
+        "status": "unstable",
+        "sid": "62083"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/statistics/median",
+        "status": "unstable",
+        "sid": "62084"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/statistics/min",
+        "status": "unstable",
+        "sid": "62085"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/statistics/sample-count",
+        "status": "unstable",
+        "sid": "62086"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/statistics/stdev",
+        "status": "unstable",
+        "sid": "62087"
+      },
+      {
+        "namespace": "data",
+        "identifier": "/coreconf-m2m:transducers/transducer/type",
+        "status": "unstable",
+        "sid": "62088"
+      }
+    ]
+  }
+}
