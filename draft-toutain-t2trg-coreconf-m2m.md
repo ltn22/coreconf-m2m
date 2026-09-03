@@ -762,43 +762,44 @@ transducer:
 
 ~~~~
   CoAP Request:
-  Non-Confirmable, FETCH, MID:47711
-    Token: 8ed6
+  Non-Confirmable, FETCH, MID:18878
+    Token: 5420
     Opt #1: Uri-Path: c
     Opt #2: Content-Format: 141 (application/yang-fetch+cbor)
     Opt #3: Accept: 142 (application/yang-data+cbor;id=sid)
 
-  Payload: 12 bytes
-    [100082, 100001, 0]
+  Payload: 9 bytes
+    [62081, 10000001]
 
   CoAP Response:
-  Non-Confirmable, 2.05 Content, MID:39443
-    Token: 8ed6
+  Non-Confirmable, 2.05 Content, MID:32290
+    Token: 5420
     Opt #1: Content-Format: 142 (application/yang-data+cbor;id=sid)
 
-  Payload: 24 bytes
-    {100082: {4: 79, 1: 119, 2: 94, 3: 103, 6: 12, 5: 53}}
+  Payload: 21 bytes
+    {62081: {4: 196, 1: 217, 2: 203, 3: 202, 6: 7, 5: 8}}
 ~~~~
 {: #fig-query-stats title="FETCH request and response for air-temperature statistics" artwork-align="left"}
 
-The FETCH body `[100082, 100001, 0]` requests the statistics sub-tree (SID
-100082) for air-temperature (100001), instance 0. In the response, the
-inner map keys are delta SIDs relative to 100082, each encoding the
-difference between consecutive SIDs to minimize CBOR size. The six values
-correspond to the statistics leaves: min, max, mean, median, stdev, and
-sample-count, all scaled by the transducer precision.
+The FETCH body `[62081, 10000001]` requests the statistics sub-tree (SID
+62081) for air-temperature (10000001). In the response, the inner map
+keys are delta SIDs relative to 62081, each encoding the difference
+between consecutive SIDs to minimize CBOR size. The six values correspond
+to the statistics leaves: min (196), max (217), mean (203), median (202),
+stdev (7), and sample-count (8), all scaled by the transducer precision
+except sample-count.
 
 The client decodes the response and displays the statistics as shown in
 {{fig-stats-display}}:
 
 ~~~~
   [9] Statistics — air-temperature:
-    min:     7.9 degC
-    max:     11.9 degC
-    mean:    9.4 degC
-    median:  10.3 degC
-    σ:       1.2 degC
-    n:       53
+    min:     19.6 Cel
+    max:     21.7 Cel
+    mean:    20.3 Cel
+    median:  20.2 Cel
+    σ:       0.7 Cel
+    n:       8
 ~~~~
 {: #fig-stats-display title="Decoded statistics for air-temperature" artwork-align="left"}
 
@@ -879,25 +880,30 @@ The client decodes the delta-encoded time-series values and displays the result
 as shown in {{fig-notification-decoded}}:
 
 ~~~~
-  [9] air-temperature: 18.9 Cel  (HH:MM:SS)
-  [9] air-temperature: 20.3 Cel  (HH:MM:SS)
-  [9] air-temperature: 20.0 Cel  (HH:MM:SS)
-  [9] air-temperature: 20.1 Cel  (HH:MM:SS)
-  [9] air-temperature: 20.6 Cel  (HH:MM:SS)
-  [9] air-temperature: 21.3 Cel  (HH:MM:SS)
-  [9] air-temperature: 21.6 Cel  (HH:MM:SS)
-  [9] air-temperature: 21.8 Cel  (HH:MM:SS)
-  [9] air-temperature: 21.9 Cel  (HH:MM:SS)
-  [9] air-temperature: 22.1 Cel  (HH:MM:SS)
+  [9] air-temperature: 18.9 Cel  (09:57:42)
+  [9] air-temperature: 20.3 Cel  (09:59:42)
+  [9] air-temperature: 20.0 Cel  (10:01:42)
+  [9] air-temperature: 20.1 Cel  (10:03:42)
+  [9] air-temperature: 20.6 Cel  (10:05:42)
+  [9] air-temperature: 21.3 Cel  (10:07:42)
+  [9] air-temperature: 21.6 Cel  (10:09:42)
+  [9] air-temperature: 21.8 Cel  (10:11:42)
+  [9] air-temperature: 21.9 Cel  (10:13:42)
+  [9] air-temperature: 22.1 Cel  (10:15:42)
 ~~~~
 {: #fig-notification-decoded title="Decoded air-temperature time-series from history notification" artwork-align="left"}
 
-The whole batch of samples is decoded from a single notification message
-and printed with the same timestamp, since the device timestamp is not
-carried in this payload — the client stamps it with the local time at
-which the notification was received.
+The whole batch of samples is decoded from a single notification message.
+Since the device timestamp is not carried in this payload, the client
+reconstructs one from the configured "step" (120 s): the last sample is
+stamped with the local time at which the notification was received, and
+earlier samples are stepped back by 120 s each, oldest first.
 
 
+
+# CORECONF Compression
+
+# Interconnection with an Ontology
 
 # Security Considerations
 
