@@ -729,29 +729,33 @@ the exchange for the current value of air-temperature.
 
 ~~~~
   CoAP Request:
-  Non-Confirmable, FETCH, MID:47710
-    Token: 8ed5
+  Non-Confirmable, FETCH, MID:12229
+    Token: 2dae
     Opt #1: Uri-Path: c
     Opt #2: Content-Format: 141 (application/yang-fetch+cbor)
     Opt #3: Accept: 142 (application/yang-data+cbor;id=sid)
 
-  Payload: 12 bytes
-    [100092, 100001, 0]
+  Payload: 9 bytes
+    [62077, 10000001]
 
   CoAP Response:
-  Non-Confirmable, 2.05 Content, MID:39442
-    Token: 8ed5
+  Non-Confirmable, 2.05 Content, MID:57779
+    Token: 2dae
     Opt #1: Content-Format: 142 (application/yang-data+cbor;id=sid)
 
-  Payload: 8 bytes
-    {100092: 112}
+  Payload: 6 bytes
+    {62077: 196}
 ~~~~
 {: #fig-query-value title="FETCH request and response for air-temperature current value" artwork-align="left"}
 
-The FETCH body `[100092, 100001, 0]` is a CORECONF instance-identifier: the
-first element is the SID of the requested leaf, followed by the list key values
-identifying the transducer (type=100001 for air-temperature, id=0). The response
-value 112, combined with precision=1, decodes to 11.2°C.
+The FETCH body `[62077, 10000001]` is a CORECONF instance-identifier: the
+first element (62077) is the SID of "/transducers/transducer/quantity/value",
+followed by the list key value identifying the transducer (type=10000001,
+i.e. atmos:air-temperature). The response carries only that leaf: the
+value 196, combined with the precision=1 declared on the air-temperature
+identity, decodes to 19.6°C. Fetching the "value" leaf directly, rather
+than the whole "quantity" sub-tree, avoids returning timestamp and
+timestamp-source when only the current reading is needed.
 
 {{fig-query-stats}} shows the FETCH for the full statistics table of the same
 transducer:
@@ -801,49 +805,49 @@ The client decodes the response and displays the statistics as shown in
 ## Notification
 
 The client first sends an iPATCH to configure the history notification
-parameters for the solar-radiation transducer, as shown in
+parameters for the air-temperature transducer, as shown in
 {{fig-notification-config}}.
 
 ~~~~
   CoAP Request:
-  Non-Confirmable, iPATCH, MID:47712
-    Token: 8ed7
+  Non-Confirmable, iPATCH, MID:42310
+    Token: 248e
     Opt #1: Uri-Path: c
     Opt #2: Content-Format: 142 (application/yang-data+cbor;id=sid)
 
-  Payload: 28 bytes
-    {[100066, 100008, 0]: {100066: {6: 5000, 4: 3, 2: 1}}}
+  Payload: 22 bytes
+    {[62060, 10000001]: {62060: {6: 120, 4: 10, 2: 1}}}
 
   CoAP Response:
-  Non-Confirmable, 2.04 Changed, MID:39444
-    Token: 8ed7
+  Non-Confirmable, 2.04 Changed, MID:65147
+    Token: 248e
 ~~~~
-{: #fig-notification-config title="iPATCH to configure history notification parameters for solar-radiation" artwork-align="left"}
+{: #fig-notification-config title="iPATCH to configure history notification parameters for air-temperature" artwork-align="left"}
 
-The iPATCH key `[100066, 100008, 0]` is an instance-identifier targeting the
-notification-parameters node (SID 100066) for solar-radiation (SID 100008),
-instance 0. The value `{100066: {6: 5000, 4: 3, 2: 1}}` sets three history
-parameters using delta SIDs relative to 100066: step=5000 ms (one sample every 5
-seconds), max-samples=3, and encoding=delta (value 1).
+The iPATCH key `[62060, 10000001]` is an instance-identifier targeting the
+notification-parameters/history node (SID 62060) for air-temperature (type
+10000001). The value `{62060: {6: 120, 4: 10, 2: 1}}` sets three history
+parameters using delta SIDs relative to 62060: step=120 s, max-samples=10,
+and encoding=delta (value 1).
 
 The client then initiates an Observe subscription with a FETCH on the
 notification stream resource `/s`, as shown in {{fig-notification-observe}}.
 
 ~~~~
   CoAP Request:
-  Non-Confirmable, FETCH, MID:47713
-    Token: 8ed8
+  Non-Confirmable, FETCH, MID:42311
+    Token: 248f
     Opt #1: Observe: 0
     Opt #2: Uri-Path: s
     Opt #3: Content-Format: 141 (application/yang-fetch+cbor)
     Opt #4: Accept: 142 (application/yang-data+cbor;id=sid)
 
-  Payload: 12 bytes
-    [100044, 100008, 0]
+  Payload: 9 bytes
+    [62048, 10000001]
 
 CoAP Response (subscription acknowledgment):
-  Non-Confirmable, 2.05 Content, MID:39445
-    Token: 8ed8
+  Non-Confirmable, 2.05 Content, MID:65148
+    Token: 248f
     Opt #1: Observe: 0
     Opt #2: Content-Format: 142 (application/yang-data+cbor;id=sid)
 
@@ -851,41 +855,47 @@ CoAP Response (subscription acknowledgment):
     {}
 
 CoAP Notification:
-  Non-Confirmable, 2.05 Content, MID:39446
-    Token: 8ed8
+  Non-Confirmable, 2.05 Content, MID:65149
+    Token: 248f
     Opt #1: Observe: 1
     Opt #2: Content-Format: 142 (application/yang-data+cbor;id=sid)
 
-  Payload: 43 bytes
-    {100042: {2: [{6: 100008, 1: 0, 7: [1043, 82, 82, 362, 316, 318, 226, 94, -147, -16]}]}}
+  Payload: 16 bytes
+    {62048: [189, 14, -3, 1, 5, 7, 3, 2, 1, 2]}
 ~~~~
-{: #fig-notification-observe title="FETCH+Observe subscription on `/s` and history notification for solar-radiation" artwork-align="left"}
+{: #fig-notification-observe title="FETCH+Observe subscription on `/s` and history notification for air-temperature" artwork-align="left"}
 
-The FETCH body `[100044, 100008, 0]` subscribes to the history time-series
-stream (SID 100044) for solar-radiation. The server acknowledges with an empty
-map `{}`. In the notification, the outer key 100042 identifies the history
-notification; the inner structure uses delta SIDs to encode type, id, and the
-values list. The values `[1043, 82, 82, ...]` use delta encoding: 1043 is the
-absolute reference (104.3 W/m²), and each subsequent value is the difference
-from the previous one, yielding a compact representation of slowly-varying
-measurements.
+The FETCH body `[62048, 10000001]` subscribes directly to the
+time-series "values" leaf-list (SID 62048) for air-temperature, rather
+than the whole time-series entry: since the subscription is already
+transducer-specific, echoing the "type" back in every notification would
+only repeat what the client already knows. The server acknowledges with
+an empty map `{}`. The notification then carries the values list under
+its absolute SID, `[189, 14, -3, 1, 5, 7, 3, 2, 1, 2]`, using delta
+encoding: 189 is the absolute reference (18.9°C, precision=1), and each
+subsequent value is the difference from the previous one.
 
 The client decodes the delta-encoded time-series values and displays the result
 as shown in {{fig-notification-decoded}}:
 
 ~~~~
-  [1] solar-radiation: 104.3 W/m2  (16:50:29)
-  [1] solar-radiation: 112.5 W/m2  (16:52:29)
-  [1] solar-radiation: 120.7 W/m2  (16:54:29)
-  [1] solar-radiation: 156.9 W/m2  (16:56:29)
-  [1] solar-radiation: 188.5 W/m2  (16:58:29)
-  [1] solar-radiation: 220.3 W/m2  (17:00:29)
-  [1] solar-radiation: 242.9 W/m2  (17:02:29)
-  [1] solar-radiation: 252.3 W/m2  (17:04:29)
-  [1] solar-radiation: 237.6 W/m2  (17:06:29)
-  [1] solar-radiation: 236.0 W/m2  (17:08:29)
+  [9] air-temperature: 18.9 Cel  (HH:MM:SS)
+  [9] air-temperature: 20.3 Cel  (HH:MM:SS)
+  [9] air-temperature: 20.0 Cel  (HH:MM:SS)
+  [9] air-temperature: 20.1 Cel  (HH:MM:SS)
+  [9] air-temperature: 20.6 Cel  (HH:MM:SS)
+  [9] air-temperature: 21.3 Cel  (HH:MM:SS)
+  [9] air-temperature: 21.6 Cel  (HH:MM:SS)
+  [9] air-temperature: 21.8 Cel  (HH:MM:SS)
+  [9] air-temperature: 21.9 Cel  (HH:MM:SS)
+  [9] air-temperature: 22.1 Cel  (HH:MM:SS)
 ~~~~
-{: #fig-notification-decoded title="Decoded solar-radiation time-series from history notification" artwork-align="left"}
+{: #fig-notification-decoded title="Decoded air-temperature time-series from history notification" artwork-align="left"}
+
+The whole batch of samples is decoded from a single notification message
+and printed with the same timestamp, since the device timestamp is not
+carried in this payload — the client stamps it with the local time at
+which the notification was received.
 
 
 
