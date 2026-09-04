@@ -4,8 +4,8 @@
 
 Thing-to-Thing Research Group (T2TRG)                         L. Toutain
 Internet-Draft                                            IMT Atlantique
-Intended status: Informational                          3 September 2026
-Expires: 7 March 2027
+Intended status: Informational                          4 September 2026
+Expires: 8 March 2027
 
 
              CORECONF for Machine-to-Machine Communication
@@ -40,7 +40,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 7 March 2027.
+   This Internet-Draft will expire on 8 March 2027.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Toutain                   Expires 7 March 2027                  [Page 1]
+Toutain                   Expires 8 March 2027                  [Page 1]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -86,30 +86,30 @@ Table of Contents
      5.2.  Querying a quantity . . . . . . . . . . . . . . . . . . .  18
      5.3.  Notification  . . . . . . . . . . . . . . . . . . . . . .  19
    6.  CORECONF Compression  . . . . . . . . . . . . . . . . . . . .  22
-   7.  Interconnection with an Ontology  . . . . . . . . . . . . . .  22
-   8.  Security Considerations . . . . . . . . . . . . . . . . . . .  22
-   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  22
-     9.1.  YANG Module Registration  . . . . . . . . . . . . . . . .  22
-     9.2.  SID Range Allocation  . . . . . . . . . . . . . . . . . .  23
-   10. References  . . . . . . . . . . . . . . . . . . . . . . . . .  23
-     10.1.  Normative References . . . . . . . . . . . . . . . . . .  23
-     10.2.  Informative References . . . . . . . . . . . . . . . . .  24
-   Appendix A.  Module Tree  . . . . . . . . . . . . . . . . . . . .  26
-   Appendix B.  Complete YANG Module . . . . . . . . . . . . . . . .  28
-   Appendix C.  SID File (CSV) . . . . . . . . . . . . . . . . . . .  43
-   Appendix D.  atmos YANG Module  . . . . . . . . . . . . . . . . .  45
-   Appendix E.  atmos SID File (CSV) . . . . . . . . . . . . . . . .  49
-   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  50
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  50
+   7.  From CBOR/SID to Textual Identifiers  . . . . . . . . . . . .  22
+   8.  Interconnection with an Ontology  . . . . . . . . . . . . . .  22
+     8.1.  SOSA  . . . . . . . . . . . . . . . . . . . . . . . . . .  23
+       8.1.1.  Instantiating from YANG . . . . . . . . . . . . . . .  23
+     8.2.  SensorThings  . . . . . . . . . . . . . . . . . . . . . .  24
+     8.3.  SAREF . . . . . . . . . . . . . . . . . . . . . . . . . .  24
+   9.  Security Considerations . . . . . . . . . . . . . . . . . . .  24
+   10. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  24
+     10.1.  YANG Module Registration . . . . . . . . . . . . . . . .  25
+     10.2.  SID Range Allocation . . . . . . . . . . . . . . . . . .  25
+   11. References  . . . . . . . . . . . . . . . . . . . . . . . . .  25
+     11.1.  Normative References . . . . . . . . . . . . . . . . . .  25
+     11.2.  Informative References . . . . . . . . . . . . . . . . .  26
+   Appendix A.  Module Tree  . . . . . . . . . . . . . . . . . . . .  28
+   Appendix B.  Complete YANG Module . . . . . . . . . . . . . . . .  30
+   Appendix C.  SID File (CSV) . . . . . . . . . . . . . . . . . . .  46
+   Appendix D.  atmos YANG Module  . . . . . . . . . . . . . . . . .  48
+   Appendix E.  atmos SID File (CSV) . . . . . . . . . . . . . . . .  52
+   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  53
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  53
 
 
 
-
-
-
-
-
-Toutain                   Expires 7 March 2027                  [Page 2]
+Toutain                   Expires 8 March 2027                  [Page 2]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -165,7 +165,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 7 March 2027                  [Page 3]
+Toutain                   Expires 8 March 2027                  [Page 3]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -221,7 +221,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 7 March 2027                  [Page 4]
+Toutain                   Expires 8 March 2027                  [Page 4]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -277,7 +277,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 7 March 2027                  [Page 5]
+Toutain                   Expires 8 March 2027                  [Page 5]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -333,7 +333,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 7 March 2027                  [Page 6]
+Toutain                   Expires 8 March 2027                  [Page 6]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -389,7 +389,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 7 March 2027                  [Page 7]
+Toutain                   Expires 8 March 2027                  [Page 7]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -410,7 +410,7 @@ Internet-Draft                coreconf-m2m                September 2026
       one to alert when a quantity reaches a minimum or maximum
       threshold.
 
-   Figure 14 in Appendix A gives an overview of the module YANG tree.
+   Figure 16 in Appendix A gives an overview of the module YANG tree.
 
 3.2.1.  Bootstrap Sub-Tree
 
@@ -445,7 +445,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 7 March 2027                  [Page 8]
+Toutain                   Expires 8 March 2027                  [Page 8]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -501,7 +501,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 7 March 2027                  [Page 9]
+Toutain                   Expires 8 March 2027                  [Page 9]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -557,7 +557,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 7 March 2027                 [Page 10]
+Toutain                   Expires 8 March 2027                 [Page 10]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -613,7 +613,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 7 March 2027                 [Page 11]
+Toutain                   Expires 8 March 2027                 [Page 11]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -669,7 +669,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 7 March 2027                 [Page 12]
+Toutain                   Expires 8 March 2027                 [Page 12]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -725,7 +725,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 7 March 2027                 [Page 13]
+Toutain                   Expires 8 March 2027                 [Page 13]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -781,7 +781,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 7 March 2027                 [Page 14]
+Toutain                   Expires 8 March 2027                 [Page 14]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -837,7 +837,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 7 March 2027                 [Page 15]
+Toutain                   Expires 8 March 2027                 [Page 15]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -893,7 +893,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 7 March 2027                 [Page 16]
+Toutain                   Expires 8 March 2027                 [Page 16]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -949,7 +949,7 @@ Connected. 14 sensor(s) discovered, minimal step 120 s.
 
 
 
-Toutain                   Expires 7 March 2027                 [Page 17]
+Toutain                   Expires 8 March 2027                 [Page 17]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1005,7 +1005,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 7 March 2027                 [Page 18]
+Toutain                   Expires 8 March 2027                 [Page 18]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1061,7 +1061,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 7 March 2027                 [Page 19]
+Toutain                   Expires 8 March 2027                 [Page 19]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1117,7 +1117,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 7 March 2027                 [Page 20]
+Toutain                   Expires 8 March 2027                 [Page 20]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1173,7 +1173,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 7 March 2027                 [Page 21]
+Toutain                   Expires 8 March 2027                 [Page 21]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1201,17 +1201,152 @@ Internet-Draft                coreconf-m2m                September 2026
 
 6.  CORECONF Compression
 
-7.  Interconnection with an Ontology
+7.  From CBOR/SID to Textual Identifiers
 
-8.  Security Considerations
+   The examples throughout this document use CBOR payloads keyed by SIDs
+   (application/yang-data+cbor;id=sid), which is the compact
+   representation intended for constrained links.  Ontologies generally
+   use a textual representation, and interacting with a human user
+   likewise requires presenting the information with understandable
+   identifiers (see the example in Figure 7).
+
+   To perform this translation, the recipient of a coreconf-m2m message
+   needs access to the .sid file and, in some cases, the YANG file, in
+   order to recover the transducers' default values.
+   [I-D.toutain-core-sid-encoding] defines a way to use DNS to locate a
+   SID and a YANG file.
+
+8.  Interconnection with an Ontology
+
+   The goal of coreconf-m2m is to provide a lightweight transport for
+   this information and a way to control the information managed by the
+   device; it is not itself an ontology.  This section discusses how the
+   elements it carries relate to some existing ontologies and APIs, so
+   that a gateway or application can align them with a richer semantic
+   model when needed, once translated to textual identifiers as
+   described in Section 7.
+
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 22]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
+8.1.  SOSA
+
+   The Sensor, Observation, Sample, and Actuator (SOSA) ontology is
+   maintained jointly by the W3C and the OGC, as part of the broader SSN
+   (Semantic Sensor Network) ontology [SOSA].  It defines a
+   sosa:Platform as an entity that hosts other objects, such as sensors,
+   actuators, or samplers.  The device described by the
+   "characteristics" sub-tree (Section 3.2.2) maps to a sosa:Platform,
+   and each of its transducers maps to a sosa:Sensor or a sosa:Actuator
+   hosted by that platform.
+
+   Figure 14 shows a generic, abstract example of such a platform,
+   expressed in the Turtle RDF syntax, independently of any particular
+   naming scheme.
+
+   @prefix sosa: <http://www.w3.org/ns/sosa/> .
+
+   <platform> a sosa:Platform ;
+       sosa:hosts <object> .
+
+   <object> a sosa:Sensor ;
+       sosa:isHostedBy <platform> ;
+       sosa:observes <property> .
+
+       Figure 14: Generic Turtle example of a sosa:Platform hosting a
+                                sosa:Sensor
+
+8.1.1.  Instantiating from YANG
+
+   To turn this generic pattern into a concrete graph, the platform's
+   IRI can be derived from the device's DNS name, e.g.
+   station.example.com, and the IRI of each hosted object can in turn be
+   derived from that name and from its entry in "/bootstrap/inventory",
+   e.g. station.example.com/sensor/air-temperature.
+
+   Figure 15 gives the CDDL [RFC8610] for constructing such an object
+   IRI from the platform's DNS name and an inventory entry, using the
+   ".cat" control operator [RFC9165] to express the concatenation of its
+   text fragments.
+
+
+
+
+
+
+
+
+
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 23]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
+   category = "sensor" / "actuator"
+
+   object-iri = platform-name
+                .cat "/"
+                .cat category
+                .cat "/"
+                .cat transducer-name
+
+   platform-name = tstr
+   transducer-name = tstr
+
+     Figure 15: CDDL for a sosa object IRI derived from the platform's
+                                  DNS name
+
+   "category" is not free text: it is one of the two roles a transducer
+   can be given, taken from its default-category (or category-override,
+   see Section 3.1).  A transducer whose category is "sensor" or
+   "actuator" yields a single object IRI under the matching path
+   segment; a transducer whose category is "sensor-actuator" yields two
+   object IRIs, one under each segment, since it is instantiated as both
+   a sosa:Sensor and a sosa:Actuator.  This is unlike a naive
+   instantiation that would generate both roles for every property
+   regardless of its category.
+
+   sosa/sosa_graph.ttl is a fully instantiated example of such a graph
+   for the ATMOS41 station; it was generated against an earlier revision
+   of the coreconf-m2m model, before default-category was introduced,
+   and therefore illustrates every property as both a sosa:Sensor and a
+   sosa:Actuator.
+
+8.2.  SensorThings
+
+   SensorThings is closely related to SOSA/SSN, so the mapping largely
+   mirrors [SOSA].
+
+8.3.  SAREF
+
+9.  Security Considerations
 
    CORECONF operations over CoAP MUST be secured using either DTLS
    [RFC6347] or OSCORE [RFC8613].  In M2M scenarios where a central
    manager is absent, the trust model requires particular attention.
 
-9.  IANA Considerations
+10.  IANA Considerations
 
-9.1.  YANG Module Registration
+
+
+
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 24]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
+10.1.  YANG Module Registration
 
    This document registers the following YANG module in the "YANG Module
    Names" registry [RFC7950]:
@@ -1225,16 +1360,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
                                   Table 1
 
-
-
-
-
-Toutain                   Expires 7 March 2027                 [Page 22]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
-9.2.  SID Range Allocation
+10.2.  SID Range Allocation
 
    This document requests the SID range starting at entry-point TBD with
    a size of 100, as defined in [I-D.ietf-core-sid].
@@ -1242,9 +1368,9 @@ Internet-Draft                coreconf-m2m                September 2026
    Transducer identites MUST be sperated from this document and defined
    in anjother YANG module.
 
-10.  References
+11.  References
 
-10.1.  Normative References
+11.1.  Normative References
 
    [RFC7252]  Shelby, Z., Hartke, K., and C. Bormann, "The Constrained
               Application Protocol (CoAP)", RFC 7252,
@@ -1260,6 +1386,21 @@ Internet-Draft                coreconf-m2m                September 2026
               Express Concise Binary Object Representation (CBOR) and
               JSON Data Structures", RFC 8610, DOI 10.17487/RFC8610,
               June 2019, <https://www.rfc-editor.org/info/rfc8610>.
+
+   [RFC9165]  Bormann, C., "Additional Control Operators for the Concise
+              Data Definition Language (CDDL)", RFC 9165,
+              DOI 10.17487/RFC9165, December 2021,
+              <https://www.rfc-editor.org/info/rfc9165>.
+
+
+
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 25]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
    [RFC8724]  Minaburo, A., Toutain, L., Gomez, C., Barthel, D., and JC.
               Zuniga, "SCHC: Generic Framework for Static Context Header
@@ -1278,17 +1419,6 @@ Internet-Draft                coreconf-m2m                September 2026
               in the Concise Binary Object Representation (CBOR)",
               RFC 9254, DOI 10.17487/RFC9254, July 2022,
               <https://www.rfc-editor.org/info/rfc9254>.
-
-
-
-
-
-
-
-Toutain                   Expires 7 March 2027                 [Page 23]
-
-Internet-Draft                coreconf-m2m                September 2026
-
 
    [RFC9363]  Minaburo, A. and L. Toutain, "A YANG Data Model for Static
               Context Header Compression (SCHC)", RFC 9363,
@@ -1311,7 +1441,7 @@ Internet-Draft                coreconf-m2m                September 2026
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://www.rfc-editor.org/info/rfc8174>.
 
-10.2.  Informative References
+11.2.  Informative References
 
    [RFC8376]  Farrell, S., Ed., "Low-Power Wide Area Network (LPWAN)
               Overview", RFC 8376, DOI 10.17487/RFC8376, May 2018,
@@ -1320,6 +1450,13 @@ Internet-Draft                coreconf-m2m                September 2026
    [RFC9179]  Hopps, C., "A YANG Grouping for Geographic Locations",
               RFC 9179, DOI 10.17487/RFC9179, February 2022,
               <https://www.rfc-editor.org/info/rfc9179>.
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 26]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
    [RFC8949]  Bormann, C. and P. Hoffman, "Concise Binary Object
               Representation (CBOR)", STD 94, RFC 8949,
@@ -1334,17 +1471,6 @@ Internet-Draft                coreconf-m2m                September 2026
               Bormann, "Sensor Measurement Lists (SenML)", RFC 8428,
               DOI 10.17487/RFC8428, August 2018,
               <https://www.rfc-editor.org/info/rfc8428>.
-
-
-
-
-
-
-
-Toutain                   Expires 7 March 2027                 [Page 24]
-
-Internet-Draft                coreconf-m2m                September 2026
-
 
    [RFC9232]  Song, H., Qin, F., Martinez-Julia, P., Ciavaglia, L., and
               A. Wang, "Network Telemetry Framework", RFC 9232,
@@ -1378,12 +1504,29 @@ Internet-Draft                coreconf-m2m                September 2026
               <https://datatracker.ietf.org/doc/html/draft-gudi-t2trg-
               senml-as-coreconf-00>.
 
+
+
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 27]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
    [I-D.birkholz-yang-core-telemetry]
               Birkholz, H. and E. Voit, "Concise YANG Telemetry", Work
               in Progress, Internet-Draft, draft-birkholz-yang-core-
               telemetry-01, 16 July 2018,
               <https://datatracker.ietf.org/doc/html/draft-birkholz-
               yang-core-telemetry-01>.
+
+   [I-D.toutain-core-sid-encoding]
+              Balakrichenan, S., Pelov, A., and L. Toutain, "YANG SID
+              Discovery Using the Domain Name System", Work in Progress,
+              Internet-Draft, draft-toutain-core-sid-encoding-00, 1 July
+              2026, <https://datatracker.ietf.org/doc/html/draft-
+              toutain-core-sid-encoding-00>.
 
    [OMA-LwM2M]
               "Lightweight Machine to Machine Technical Specification:
@@ -1394,13 +1537,9 @@ Internet-Draft                coreconf-m2m                September 2026
    [SOSA]     "Semantic Sensor Network Ontology", 2017,
               <https://www.w3.org/TR/vocab-ssn/>.
 
-
-
-
-Toutain                   Expires 7 March 2027                 [Page 25]
-
-Internet-Draft                coreconf-m2m                September 2026
-
+   [SensorThings]
+              "OGC SensorThings API Part 1: Sensing", 2016,
+              <https://www.ogc.org/standard/sensorthings/>.
 
    [SAREF]    "SAREF: the Smart Applications REFerence ontology", 2020,
               <https://saref.etsi.org/>.
@@ -1420,6 +1559,16 @@ Internet-Draft                coreconf-m2m                September 2026
               <https://www.rfc-editor.org/info/rfc8613>.
 
 Appendix A.  Module Tree
+
+
+
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 28]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
      module: coreconf-m2m
        +--ro bootstrap
@@ -1450,14 +1599,6 @@ Appendix A.  Module Tree
        |  |  |     +--rw y?           decimal64
        |  |  |     +--rw z?           decimal64
        |  |  +--rw velocity
-
-
-
-Toutain                   Expires 7 March 2027                 [Page 26]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
        |  |  |  +--rw v-north?   decimal64
        |  |  |  +--rw v-east?    decimal64
        |  |  |  +--rw v-up?      decimal64
@@ -1477,6 +1618,14 @@ Internet-Draft                coreconf-m2m                September 2026
              +--ro quantity
              |  +--ro value?              int64
              |  +--ro timestamp?          uint64
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 29]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
              |  +--ro timestamp-source?   enumeration
              +--ro statistics
              |  +--ro min?            int64
@@ -1506,14 +1655,6 @@ Internet-Draft                coreconf-m2m                September 2026
        rpcs:
          +---x reset-stats
 
-
-
-
-Toutain                   Expires 7 March 2027                 [Page 27]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
        notifications:
          +---n history
          |  +--ro last?          boolean
@@ -1529,9 +1670,17 @@ Internet-Draft                coreconf-m2m                September 2026
                +--ro type     identityref
                +--ro value?   int64
 
-                    Figure 14: coreconf-m2m module tree
+                    Figure 16: coreconf-m2m module tree
 
 Appendix B.  Complete YANG Module
+
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 30]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
 module coreconf-m2m {
   yang-version 1.1;
@@ -1562,14 +1711,6 @@ module coreconf-m2m {
        This reverts the nesting introduced in revision 2026-03-29.";
   }
 
-
-
-
-Toutain                   Expires 7 March 2027                 [Page 28]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
   revision 2026-08-28 {
     description
       "Rename the 'states' container to 'bootstrap', since it holds
@@ -1589,6 +1730,14 @@ Internet-Draft                coreconf-m2m                September 2026
   }
 
   revision 2026-08-24 {
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 31]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
     description
       "Remove type from list keys; id alone now identifies a transducer
        instance, distinguishing multiple actuators of the same type. This
@@ -1618,14 +1767,6 @@ Internet-Draft                coreconf-m2m                September 2026
        'sensor-actuator', and a matching category-override leaf on the
        transducer list for per-instance overrides.
        Remove u-timestamp: all timestamps are now second-resolution only;
-
-
-
-Toutain                   Expires 7 March 2027                 [Page 29]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
        sub-second precision would require a model update.
        Change history/step units from milliseconds to seconds, for the
        same reason.
@@ -1644,6 +1785,14 @@ Internet-Draft                coreconf-m2m                September 2026
     description
       "Add humidity-sensor-temperature and compass-heading transducer-type identities.";
   }
+
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 32]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
   revision 2026-05-26 {
     description
@@ -1674,14 +1823,6 @@ Internet-Draft                coreconf-m2m                September 2026
        (container, list, identity, notification).";
   }
 
-
-
-
-Toutain                   Expires 7 March 2027                 [Page 30]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
   revision 2026-03-08 {
     description
       "Module renamed to coreconf-m2m for generic M2M CoMI use.";
@@ -1701,6 +1842,14 @@ Internet-Draft                coreconf-m2m                September 2026
 
   revision 2026-02-27 {
     description
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 33]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
       "Initial revision for testing.";
   }
 
@@ -1730,14 +1879,6 @@ Internet-Draft                coreconf-m2m                September 2026
   }
 
   extension default-category {
-
-
-
-Toutain                   Expires 7 March 2027                 [Page 31]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
     argument "category";
     description
       "Recommended default value for a transducer's category-override leaf.
@@ -1756,6 +1897,14 @@ Internet-Draft                coreconf-m2m                September 2026
        sosa:Actuator; in SAREF they correspond to the SensingFunction and
        ActuatingFunction classes respectively.";
   }
+
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 34]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
   /* ------------------------------------------------------------------ */
   /* Measurement-type identity hierarchy                                  */
@@ -1786,14 +1935,6 @@ Internet-Draft                coreconf-m2m                September 2026
   }
 
   /* ------------------------------------------------------------------ */
-
-
-
-Toutain                   Expires 7 March 2027                 [Page 32]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
   /* Shared grouping used by notifications                                */
   /* ------------------------------------------------------------------ */
 
@@ -1813,6 +1954,14 @@ Internet-Draft                coreconf-m2m                September 2026
       leaf-list values {
         type int64;
         ordered-by user;
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 35]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
         description
           "List of encoded measurement values.";
       }
@@ -1842,14 +1991,6 @@ Internet-Draft                coreconf-m2m                September 2026
       units "seconds";
       mandatory true;
       description "Time elapsed since the last boot.";
-
-
-
-Toutain                   Expires 7 March 2027                 [Page 33]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
     }
 
     leaf minimal-step {
@@ -1869,6 +2010,13 @@ Internet-Draft                coreconf-m2m                September 2026
         "List of transducers known to the device, with their
          per-instance configuration overrides. Determined once at
          bootstrap and not expected to change afterwards.";
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 36]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
       leaf type {
         type identityref {
@@ -1898,14 +2046,6 @@ Internet-Draft                coreconf-m2m                September 2026
            notifications. When absent, clients should use that identity's
            default-precision; if the identity declares no default-precision,
            the precision is undefined.";
-
-
-
-Toutain                   Expires 7 March 2027                 [Page 34]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
       }
 
       leaf category-override {
@@ -1926,6 +2066,14 @@ Internet-Draft                coreconf-m2m                September 2026
           "Role of this transducer instance, overriding the
            default-category extension declared on the transducer's type
            identity (if any). When absent, clients should use that
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 37]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
            identity's default-category; if the identity declares no
            default-category, the role is undefined.";
       }
@@ -1955,13 +2103,6 @@ Internet-Draft                coreconf-m2m                September 2026
       description "Human-readable name of the device.";
     }
 
-
-
-Toutain                   Expires 7 March 2027                 [Page 35]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
     leaf version {
       type string;
       description "Firmware or software version of the device.";
@@ -1980,6 +2121,14 @@ Internet-Draft                coreconf-m2m                September 2026
          rdfs:comment on the sosa:Sensor/sosa:Platform individual, and in
          SAREF to saref:hasDescription.";
     }
+
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 38]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
     leaf manufacturer {
       type string;
@@ -2010,14 +2159,6 @@ Internet-Draft                coreconf-m2m                September 2026
       units "seconds";
       description
         "Absolute Unix epoch timestamp (UTC) at which the device was
-
-
-
-Toutain                   Expires 7 March 2027                 [Page 36]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
          installed/commissioned. Unlike bootstrap/reference-epoch, this is
          an absolute epoch value, not a relative reference point for the
          device's internal clock.";
@@ -2037,6 +2178,13 @@ Internet-Draft                coreconf-m2m                September 2026
       key "type";
       description
         "List of available measurements.";
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 39]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
       leaf type {
         type identityref {
@@ -2066,14 +2214,6 @@ Internet-Draft                coreconf-m2m                September 2026
             enum source {
               value 0;
               description
-
-
-
-Toutain                   Expires 7 March 2027                 [Page 37]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
                 "The timestamp was generated by the sensor itself.";
             }
             enum receiver {
@@ -2094,6 +2234,14 @@ Internet-Draft                coreconf-m2m                September 2026
         leaf min {
           type int64;
           description "Minimum value observed since last reset.";
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 40]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
         }
 
         leaf max {
@@ -2122,14 +2270,6 @@ Internet-Draft                coreconf-m2m                September 2026
         }
 
         leaf sample-count {
-
-
-
-Toutain                   Expires 7 March 2027                 [Page 38]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
           type uint64;
           description "Number of samples used for statistics calculation.";
         }
@@ -2150,6 +2290,13 @@ Internet-Draft                coreconf-m2m                September 2026
               "Read-only. True when a FETCH+Observe subscription is active on /s
                for this transducer history stream. False when no observer is registered.";
           }
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 41]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
           leaf step {
             type uint32;
@@ -2178,14 +2325,6 @@ Internet-Draft                coreconf-m2m                September 2026
           }
 
           leaf time-period {
-
-
-
-Toutain                   Expires 7 March 2027                 [Page 39]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
             type uint32;
             units "seconds";
             description "Duration of the time window covered by the history buffer.";
@@ -2206,6 +2345,14 @@ Internet-Draft                coreconf-m2m                September 2026
                exceed this limit, the notification is sent early (before
                max-samples or time-period is reached).  0 means no size limit.";
           }
+
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 42]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
         }
 
@@ -2234,14 +2381,6 @@ Internet-Draft                coreconf-m2m                September 2026
           leaf t-max {
             type int32;
             description
-
-
-
-Toutain                   Expires 7 March 2027                 [Page 40]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
               "Maximum threshold value. A sensor-alert is raised when the
                transducer value exceeds this value.";
           }
@@ -2263,6 +2402,14 @@ Internet-Draft                coreconf-m2m                September 2026
             units "milliseconds";
             description
               "Minimum time that must elapse between two consecutive sensor-alert
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 43]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
                notifications for the same transducer.  A new alert is suppressed
                until the dampening period has expired since the last sent alert.
                0 (default) means no dampening.";
@@ -2290,14 +2437,6 @@ Internet-Draft                coreconf-m2m                September 2026
     }
   }
 
-
-
-
-Toutain                   Expires 7 March 2027                 [Page 41]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
   /* ------------------------------------------------------------------ */
   /* RPCs                                                                 */
   /* ------------------------------------------------------------------ */
@@ -2319,6 +2458,14 @@ Internet-Draft                coreconf-m2m                September 2026
 
     leaf last {
       type boolean;
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 44]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
       default "false";
       description "True if this is the last notification for the current series.";
     }
@@ -2346,14 +2493,6 @@ Internet-Draft                coreconf-m2m                September 2026
     }
   }
 
-
-
-
-Toutain                   Expires 7 March 2027                 [Page 42]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
   notification sensor-alert {
     description
       "Alert notification when a value exceeds a threshold.";
@@ -2376,7 +2515,14 @@ Internet-Draft                coreconf-m2m                September 2026
   }
 }
 
-             Figure 15: Complete coreconf-m2m YANG module
+
+
+Toutain                   Expires 8 March 2027                 [Page 45]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
+             Figure 17: Complete coreconf-m2m YANG module
 
 Appendix C.  SID File (CSV)
 
@@ -2402,14 +2548,6 @@ SID,Namespace,Identifier
 62013,data,/coreconf-m2m:characteristics/geo-location
 62014,data,/coreconf-m2m:characteristics/geo-location/height
 62015,data,/coreconf-m2m:characteristics/geo-location/latitude
-
-
-
-Toutain                   Expires 7 March 2027                 [Page 43]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
 62016,data,/coreconf-m2m:characteristics/geo-location/longitude
 62017,data,/coreconf-m2m:characteristics/geo-location/reference-frame
 62018,data,/coreconf-m2m:characteristics/geo-location/reference-frame/alternate-system
@@ -2432,6 +2570,14 @@ Internet-Draft                coreconf-m2m                September 2026
 62035,data,/coreconf-m2m:characteristics/installation-time
 62036,data,/coreconf-m2m:characteristics/manufacturer
 62037,data,/coreconf-m2m:characteristics/model
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 46]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
 62038,data,/coreconf-m2m:characteristics/name
 62039,data,/coreconf-m2m:characteristics/version
 62040,data,/coreconf-m2m:history
@@ -2458,14 +2604,6 @@ Internet-Draft                coreconf-m2m                September 2026
 62061,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/active
 62062,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/encoding
 62063,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/max-payload
-
-
-
-Toutain                   Expires 7 March 2027                 [Page 44]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
 62064,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/max-samples
 62065,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/precision
 62066,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/step
@@ -2488,11 +2626,19 @@ Internet-Draft                coreconf-m2m                September 2026
 62083,data,/coreconf-m2m:transducers/transducer/statistics/mean
 62084,data,/coreconf-m2m:transducers/transducer/statistics/median
 62085,data,/coreconf-m2m:transducers/transducer/statistics/min
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 47]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
 62086,data,/coreconf-m2m:transducers/transducer/statistics/sample-count
 62087,data,/coreconf-m2m:transducers/transducer/statistics/stdev
 62088,data,/coreconf-m2m:transducers/transducer/type
 
-       Figure 16: SID assignments for coreconf-m2m (CSV format)
+       Figure 18: SID assignments for coreconf-m2m (CSV format)
 
 Appendix D.  atmos YANG Module
 
@@ -2513,14 +2659,6 @@ module atmos {
   description
     "Atmospheric/weather transducer-type identities for use with the
      coreconf-m2m generic M2M CoMI data model.";
-
-
-
-
-Toutain                   Expires 7 March 2027                 [Page 45]
-
-Internet-Draft                coreconf-m2m                September 2026
-
 
   revision 2026-08-24 {
     description
@@ -2544,6 +2682,14 @@ Internet-Draft                coreconf-m2m                September 2026
   /* ------------------------------------------------------------------ */
 
   identity solar-radiation {
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 48]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
     base ccm2m:transducer-type;
     ccm2m:default-category "sensor";
     ccm2m:default-unit "W/m2";
@@ -2570,14 +2716,6 @@ Internet-Draft                coreconf-m2m                September 2026
   identity relative-humidity {
     base ccm2m:transducer-type;
     ccm2m:default-category "sensor";
-
-
-
-Toutain                   Expires 7 March 2027                 [Page 46]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
     ccm2m:default-unit "%RH";
     ccm2m:default-precision "1";
     description "Relative humidity measurement (%).";
@@ -2600,6 +2738,14 @@ Internet-Draft                coreconf-m2m                September 2026
   }
 
   /* ------------------------------------------------------------------ */
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 49]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
   /* Wind                                                                 */
   /* ------------------------------------------------------------------ */
 
@@ -2627,13 +2773,6 @@ Internet-Draft                coreconf-m2m                September 2026
     description "Wind gust measurement (m/s).";
   }
 
-
-
-Toutain                   Expires 7 March 2027                 [Page 47]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
   identity north-wind-speed {
     base ccm2m:transducer-type;
     ccm2m:default-category "sensor";
@@ -2655,6 +2794,14 @@ Internet-Draft                coreconf-m2m                September 2026
   /* ------------------------------------------------------------------ */
 
   identity strike-count {
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 50]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
     base ccm2m:transducer-type;
     ccm2m:default-category "sensor";
     ccm2m:default-unit "count";
@@ -2682,14 +2829,6 @@ Internet-Draft                coreconf-m2m                September 2026
     description "Sensor tilt measurement (degrees).";
   }
 
-
-
-
-Toutain                   Expires 7 March 2027                 [Page 48]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
   identity x-orientation {
     base ccm2m:transducer-type;
     ccm2m:default-category "sensor";
@@ -2711,6 +2850,14 @@ Internet-Draft                coreconf-m2m                September 2026
   }
 
   /* ------------------------------------------------------------------ */
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 51]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
   /* Internal                                                             */
   /* ------------------------------------------------------------------ */
 
@@ -2723,7 +2870,7 @@ Internet-Draft                coreconf-m2m                September 2026
   }
 }
 
-                     Figure 17: atmos.yang module
+                     Figure 19: atmos.yang module
 
 Appendix E.  atmos SID File (CSV)
 
@@ -2732,19 +2879,6 @@ Appendix E.  atmos SID File (CSV)
    point of 10000000 (out of a 10 million SID mega-range assumed for
    this example).  These SIDs are commercial/vendor assignments, not
    IETF or SDO ones, and are provided here for illustration only.
-
-
-
-
-
-
-
-
-
-Toutain                   Expires 7 March 2027                 [Page 49]
-
-Internet-Draft                coreconf-m2m                September 2026
-
 
    SID,Namespace,Identifier
    10000000,module,atmos
@@ -2767,7 +2901,18 @@ Internet-Draft                coreconf-m2m                September 2026
    10000017,identity,x-orientation
    10000018,identity,y-orientation
 
-      Figure 18: SID assignments for atmos (CSV format, illustrative)
+      Figure 20: SID assignments for atmos (CSV format, illustrative)
+
+
+
+
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 52]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
 Acknowledgments
 
@@ -2797,4 +2942,27 @@ Author's Address
 
 
 
-Toutain                   Expires 7 March 2027                 [Page 50]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Toutain                   Expires 8 March 2027                 [Page 53]

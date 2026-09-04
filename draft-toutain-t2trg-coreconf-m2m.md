@@ -41,6 +41,7 @@ normative:
   RFC7252:   # CoAP
   RFC7950:   # YANG 1.1
   RFC8610:   # CDDL
+  RFC9165:   # CDDL additional control operators
   RFC8724:   # SCHC
   RFC8824:
   RFC9254:   # YANG-CBOR
@@ -59,6 +60,7 @@ informative:
   I-D.ietf-core-yang-cbor:
   I-D.gudi-t2trg-senml-as-coreconf:
   I-D.birkholz-yang-core-telemetry:
+  I-D.toutain-core-sid-encoding:
   OMA-LwM2M:
     title: "Lightweight Machine to Machine Technical Specification: Core"
     target: https://www.openmobilealliance.org/release/LightweightM2M/V1_2-20201110-A/OMA-TS-LightweightM2M_Core-V1_2-20201110-A.pdf
@@ -69,6 +71,11 @@ informative:
     target: https://www.w3.org/TR/vocab-ssn/
     org: W3C/OGC
     date: 2017
+  SensorThings:
+    title: "OGC SensorThings API Part 1: Sensing"
+    target: https://www.ogc.org/standard/sensorthings/
+    org: OGC
+    date: 2016
   SAREF:
     title: "SAREF: the Smart Applications REFerence ontology"
     target: https://saref.etsi.org/
@@ -903,7 +910,105 @@ earlier samples are stepped back by 120 s each, oldest first.
 
 # CORECONF Compression
 
-# Interconnection with an Ontology
+# From CBOR/SID to Textual Identifiers {#from-cbor-sid-to-textual-identifiers}
+
+The examples throughout this document use CBOR payloads keyed by SIDs
+(`application/yang-data+cbor;id=sid`), which is the compact
+representation intended for constrained links. Ontologies generally use a
+textual representation, and interacting with a human user likewise
+requires presenting the information with understandable identifiers (see
+the example in {{fig-transducer-list}}).
+
+To perform this translation, the recipient of a coreconf-m2m message
+needs access to the .sid file and, in some cases, the YANG file, in order
+to recover the transducers' default values. {{I-D.toutain-core-sid-encoding}}
+defines a way to use DNS to locate a SID and a YANG file.
+
+# Interconnection with an Ontology {#interconnection-with-an-ontology}
+
+The goal of coreconf-m2m is to provide a lightweight transport for this
+information and a way to control the information managed by the device;
+it is not itself an ontology. This section discusses how the elements it
+carries relate to some existing ontologies and APIs, so that a gateway or
+application can align them with a richer semantic model when needed, once
+translated to textual identifiers as described in
+{{from-cbor-sid-to-textual-identifiers}}.
+
+## SOSA
+
+The Sensor, Observation, Sample, and Actuator (SOSA) ontology is
+maintained jointly by the W3C and the OGC, as part of the broader SSN
+(Semantic Sensor Network) ontology {{SOSA}}. It defines a sosa:Platform
+as an entity that hosts other objects,
+such as sensors, actuators, or samplers. The device described by the
+"characteristics" sub-tree ({{characteristics-sub-tree}}) maps to a
+sosa:Platform, and each of its transducers maps to a sosa:Sensor or a
+sosa:Actuator hosted by that platform.
+
+{{fig-sosa-platform}} shows a generic, abstract example of such a
+platform, expressed in the Turtle RDF syntax, independently of any
+particular naming scheme.
+
+~~~~
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+
+<platform> a sosa:Platform ;
+    sosa:hosts <object> .
+
+<object> a sosa:Sensor ;
+    sosa:isHostedBy <platform> ;
+    sosa:observes <property> .
+~~~~
+{: #fig-sosa-platform title="Generic Turtle example of a sosa:Platform hosting a sosa:Sensor" artwork-align="left"}
+
+### Instantiating from YANG
+
+To turn this generic pattern into a concrete graph, the platform's IRI
+can be derived from the device's DNS name, e.g. `station.example.com`,
+and the IRI of each hosted object can in turn be derived from that name
+and from its entry in "/bootstrap/inventory", e.g.
+`station.example.com/sensor/air-temperature`.
+
+{{fig-object-iri-cddl}} gives the CDDL {{RFC8610}} for constructing such
+an object IRI from the platform's DNS name and an inventory entry, using
+the ".cat" control operator {{RFC9165}} to express the concatenation of
+its text fragments.
+
+~~~~
+category = "sensor" / "actuator"
+
+object-iri = platform-name
+             .cat "/"
+             .cat category
+             .cat "/"
+             .cat transducer-name
+
+platform-name = tstr
+transducer-name = tstr
+~~~~
+{: #fig-object-iri-cddl title="CDDL for a sosa object IRI derived from the platform's DNS name" artwork-align="left"}
+
+"category" is not free text: it is one of the two roles a transducer can
+be given, taken from its default-category (or category-override, see
+{{identities-data-model}}). A transducer whose category is "sensor" or
+"actuator" yields a single object IRI under the matching path segment; a
+transducer whose category is "sensor-actuator" yields two object IRIs,
+one under each segment, since it is instantiated as both a sosa:Sensor
+and a sosa:Actuator. This is unlike a naive instantiation that would
+generate both roles for every property regardless of its category.
+
+`sosa/sosa_graph.ttl` is a fully instantiated example of such a graph for
+the ATMOS41 station; it was generated against an earlier revision of the
+coreconf-m2m model, before default-category was introduced, and
+therefore illustrates every property as both a sosa:Sensor and a
+sosa:Actuator.
+
+## SensorThings
+
+SensorThings is closely related to SOSA/SSN, so the mapping largely
+mirrors {{SOSA}}.
+
+## SAREF
 
 # Security Considerations
 
