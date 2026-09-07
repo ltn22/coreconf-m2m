@@ -96,16 +96,16 @@ Table of Contents
        8.2.4.  Storing Actuator Commands . . . . . . . . . . . . . .  30
      8.3.  SensorThings  . . . . . . . . . . . . . . . . . . . . . .  32
        8.3.1.  Example . . . . . . . . . . . . . . . . . . . . . . .  32
-     8.4.  SAREF . . . . . . . . . . . . . . . . . . . . . . . . . .  36
-   9.  MCP . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  36
-   10. Conclusion  . . . . . . . . . . . . . . . . . . . . . . . . .  39
-   11. Security Considerations . . . . . . . . . . . . . . . . . . .  40
-   12. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  40
-     12.1.  YANG Module Registration . . . . . . . . . . . . . . . .  40
-     12.2.  SID Range Allocation . . . . . . . . . . . . . . . . . .  40
-   13. References  . . . . . . . . . . . . . . . . . . . . . . . . .  40
-     13.1.  Normative References . . . . . . . . . . . . . . . . . .  40
-     13.2.  Informative References . . . . . . . . . . . . . . . . .  41
+     8.4.  SAREF . . . . . . . . . . . . . . . . . . . . . . . . . .  37
+   9.  MCP . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  37
+   10. Conclusion  . . . . . . . . . . . . . . . . . . . . . . . . .  40
+   11. Security Considerations . . . . . . . . . . . . . . . . . . .  41
+   12. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  41
+     12.1.  YANG Module Registration . . . . . . . . . . . . . . . .  41
+     12.2.  SID Range Allocation . . . . . . . . . . . . . . . . . .  41
+   13. References  . . . . . . . . . . . . . . . . . . . . . . . . .  41
+     13.1.  Normative References . . . . . . . . . . . . . . . . . .  41
+     13.2.  Informative References . . . . . . . . . . . . . . . . .  42
 
 
 
@@ -114,14 +114,14 @@ Toutain                   Expires 11 March 2027                 [Page 2]
 Internet-Draft                coreconf-m2m                September 2026
 
 
-   Appendix A.  Module Tree  . . . . . . . . . . . . . . . . . . . .  44
-   Appendix B.  Complete YANG Module . . . . . . . . . . . . . . . .  46
-   Appendix C.  SID File (CSV) . . . . . . . . . . . . . . . . . . .  61
-   Appendix D.  atmos YANG Module  . . . . . . . . . . . . . . . . .  63
-   Appendix E.  atmos SID File (CSV) . . . . . . . . . . . . . . . .  67
-   Appendix F.  ccm2m Ontology . . . . . . . . . . . . . . . . . . .  68
-   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  72
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  72
+   Appendix A.  Module Tree  . . . . . . . . . . . . . . . . . . . .  45
+   Appendix B.  Complete YANG Module . . . . . . . . . . . . . . . .  47
+   Appendix C.  SID File (CSV) . . . . . . . . . . . . . . . . . . .  62
+   Appendix D.  atmos YANG Module  . . . . . . . . . . . . . . . . .  64
+   Appendix E.  atmos SID File (CSV) . . . . . . . . . . . . . . . .  68
+   Appendix F.  ccm2m Ontology . . . . . . . . . . . . . . . . . . .  69
+   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  73
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  73
 
 1.  Introduction
 
@@ -410,7 +410,7 @@ Internet-Draft                coreconf-m2m                September 2026
       one to alert when a quantity reaches a minimum or maximum
       threshold.
 
-   Figure 26 in Appendix A gives an overview of the module YANG tree.
+   Figure 27 in Appendix A gives an overview of the module YANG tree.
 
 3.2.1.  Bootstrap Sub-Tree
 
@@ -1962,6 +1962,71 @@ Toutain                   Expires 11 March 2027                [Page 35]
 Internet-Draft                coreconf-m2m                September 2026
 
 
+   For actuation, SensorThings has a separate set of entities (the
+   "Tasking Core" profile): Actuator, TaskingCapability, and Task,
+   mirroring Sensor, Datastream, and Observation respectively.
+   Figure 25 transposes the fictitious pump of Figure 19 into these
+   entities.
+
+   GET /Actuators(1)
+
+   {
+     "@iot.id": 1,
+     "name": "rotation-speed",
+     "description": "rotation-speed actuator on pump.example.com",
+     "encodingType": "application/pdf",
+     "metadata": "https://pump.example.com/docs/pump-datasheet.pdf",
+     "properties": {
+       "ccm2m:type": "PPPPPP"
+     }
+   }
+
+   GET /TaskingCapabilities(1)
+
+   {
+     "@iot.id": 1,
+     "name": "pump.example.com/rotation-speed",
+     "description": "Set the pump's rotation speed",
+     "taskingParameters": {
+       "type": "object",
+       "properties": {
+         "rotation-speed": { "type": "integer" }
+       }
+     },
+     "properties": {
+       "ccm2m:targetSid": 62077
+     }
+   }
+
+   GET /TaskingCapabilities(1)/Tasks
+
+   {
+     "value": [{
+       "@iot.id": 1,
+       "creationTime": "2026-09-07T14:22:10Z",
+       "taskingParameters": { "rotation-speed": 1500 }
+     }]
+   }
+
+           Figure 25: Actuator, TaskingCapability, and Task, the
+               SensorThings equivalent of fig-sosa-actuation
+
+
+
+Toutain                   Expires 11 March 2027                [Page 36]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
+   The Actuator plays the same role as the Sensor of Figure 23,
+   including the same application/pdf/metadata pattern for its
+   datasheet. ccm2m:targetSid on the TaskingCapability plays the role of
+   ccm2m:targetSid on the SOSA ccm2m:Control for "instant-write": both
+   name the SID to iPATCH to actually issue the command.  A Task's
+   taskingParameters plays the role of sosa:hasResult, and creationTime
+   of sosa:resultTime; as with the Sensor's ccm2m:type, "PPPPPP" is a
+   placeholder, since this pump has no real identity SID.
+
 8.4.  SAREF
 
    To be defined.
@@ -2000,6 +2065,15 @@ Internet-Draft                coreconf-m2m                September 2026
    *  stop_history_notify(hostname, sensor) -- cancel a running
       subscription;
 
+
+
+
+
+Toutain                   Expires 11 March 2027                [Page 37]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
    *  list_active_history_subscriptions() -- list every subscription
       currently running, across clients.
 
@@ -2009,14 +2083,6 @@ Internet-Draft                coreconf-m2m                September 2026
 
    *  list_service_capabilities() -- the entity sets this FROST-Server
       instance exposes;
-
-
-
-
-Toutain                   Expires 11 March 2027                [Page 36]
-
-Internet-Draft                coreconf-m2m                September 2026
-
 
    *  query_entities(entity_set, filter, expand, select, orderby, top,
       skip, count) -- list/filter an entity set, e.g. query_entities(
@@ -2038,7 +2104,7 @@ Internet-Draft                coreconf-m2m                September 2026
    call read_instant for one of them -- without separately tracking SID
    files or CoAP endpoints itself.
 
-   Figure 25 illustrates this with a concrete question: "what is the
+   Figure 26 illustrates this with a concrete question: "what is the
    temperature right now in Rennes?"  The agent first uses FROST to turn
    "Rennes" into a device and a sensor, then uses coreconf-m2m to read
    that sensor live; the result is written back to FROST as it comes in,
@@ -2059,17 +2125,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-
-
-
-
-
-
-
-
-
-
-Toutain                   Expires 11 March 2027                [Page 37]
+Toutain                   Expires 11 March 2027                [Page 38]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2113,7 +2169,7 @@ Internet-Draft                coreconf-m2m                September 2026
    |                 |--------------------------------------->
    |                 |                   |                   |
 
-         Figure 25: Answering "what is the temperature right now in
+         Figure 26: Answering "what is the temperature right now in
      Rennes?" by combining the frost-sensorthings and coreconf-m2m MCP
                                   servers
 
@@ -2125,7 +2181,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 11 March 2027                [Page 38]
+Toutain                   Expires 11 March 2027                [Page 39]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2181,7 +2237,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 11 March 2027                [Page 39]
+Toutain                   Expires 11 March 2027                [Page 40]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2237,7 +2293,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 11 March 2027                [Page 40]
+Toutain                   Expires 11 March 2027                [Page 41]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2293,7 +2349,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 11 March 2027                [Page 41]
+Toutain                   Expires 11 March 2027                [Page 42]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2349,7 +2405,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 11 March 2027                [Page 42]
+Toutain                   Expires 11 March 2027                [Page 43]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2405,7 +2461,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 11 March 2027                [Page 43]
+Toutain                   Expires 11 March 2027                [Page 44]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2461,7 +2517,7 @@ Appendix A.  Module Tree
 
 
 
-Toutain                   Expires 11 March 2027                [Page 44]
+Toutain                   Expires 11 March 2027                [Page 45]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2517,7 +2573,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 11 March 2027                [Page 45]
+Toutain                   Expires 11 March 2027                [Page 46]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2525,7 +2581,7 @@ Internet-Draft                coreconf-m2m                September 2026
                +--ro type     identityref
                +--ro value?   int64
 
-                    Figure 26: coreconf-m2m module tree
+                    Figure 27: coreconf-m2m module tree
 
 Appendix B.  Complete YANG Module
 
@@ -2573,7 +2629,7 @@ module coreconf-m2m {
 
 
 
-Toutain                   Expires 11 March 2027                [Page 46]
+Toutain                   Expires 11 March 2027                [Page 47]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2629,7 +2685,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 11 March 2027                [Page 47]
+Toutain                   Expires 11 March 2027                [Page 48]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2685,7 +2741,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 11 March 2027                [Page 48]
+Toutain                   Expires 11 March 2027                [Page 49]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2741,7 +2797,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 11 March 2027                [Page 49]
+Toutain                   Expires 11 March 2027                [Page 50]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2797,7 +2853,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 11 March 2027                [Page 50]
+Toutain                   Expires 11 March 2027                [Page 51]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2853,7 +2909,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 11 March 2027                [Page 51]
+Toutain                   Expires 11 March 2027                [Page 52]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2909,7 +2965,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 11 March 2027                [Page 52]
+Toutain                   Expires 11 March 2027                [Page 53]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2965,7 +3021,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 11 March 2027                [Page 53]
+Toutain                   Expires 11 March 2027                [Page 54]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3021,7 +3077,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 11 March 2027                [Page 54]
+Toutain                   Expires 11 March 2027                [Page 55]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3077,7 +3133,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 11 March 2027                [Page 55]
+Toutain                   Expires 11 March 2027                [Page 56]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3133,7 +3189,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 11 March 2027                [Page 56]
+Toutain                   Expires 11 March 2027                [Page 57]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3189,7 +3245,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 11 March 2027                [Page 57]
+Toutain                   Expires 11 March 2027                [Page 58]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3245,7 +3301,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 11 March 2027                [Page 58]
+Toutain                   Expires 11 March 2027                [Page 59]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3301,7 +3357,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 11 March 2027                [Page 59]
+Toutain                   Expires 11 March 2027                [Page 60]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3357,7 +3413,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 11 March 2027                [Page 60]
+Toutain                   Expires 11 March 2027                [Page 61]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3370,7 +3426,7 @@ Internet-Draft                coreconf-m2m                September 2026
   }
 }
 
-             Figure 27: Complete coreconf-m2m YANG module
+             Figure 28: Complete coreconf-m2m YANG module
 
 Appendix C.  SID File (CSV)
 
@@ -3413,7 +3469,7 @@ SID,Namespace,Identifier
 
 
 
-Toutain                   Expires 11 March 2027                [Page 61]
+Toutain                   Expires 11 March 2027                [Page 62]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3469,7 +3525,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 11 March 2027                [Page 62]
+Toutain                   Expires 11 March 2027                [Page 63]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3486,7 +3542,7 @@ Internet-Draft                coreconf-m2m                September 2026
 62087,data,/coreconf-m2m:transducers/transducer/statistics/stdev
 62088,data,/coreconf-m2m:transducers/transducer/type
 
-       Figure 28: SID assignments for coreconf-m2m (CSV format)
+       Figure 29: SID assignments for coreconf-m2m (CSV format)
 
 Appendix D.  atmos YANG Module
 
@@ -3525,7 +3581,7 @@ module atmos {
 
 
 
-Toutain                   Expires 11 March 2027                [Page 63]
+Toutain                   Expires 11 March 2027                [Page 64]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3581,7 +3637,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 11 March 2027                [Page 64]
+Toutain                   Expires 11 March 2027                [Page 65]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3637,7 +3693,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 11 March 2027                [Page 65]
+Toutain                   Expires 11 March 2027                [Page 66]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3693,7 +3749,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 11 March 2027                [Page 66]
+Toutain                   Expires 11 March 2027                [Page 67]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3718,7 +3774,7 @@ Internet-Draft                coreconf-m2m                September 2026
   }
 }
 
-                     Figure 29: atmos.yang module
+                     Figure 30: atmos.yang module
 
 Appendix E.  atmos SID File (CSV)
 
@@ -3749,7 +3805,7 @@ Appendix E.  atmos SID File (CSV)
 
 
 
-Toutain                   Expires 11 March 2027                [Page 67]
+Toutain                   Expires 11 March 2027                [Page 68]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3775,7 +3831,7 @@ Internet-Draft                coreconf-m2m                September 2026
    10000017,identity,x-orientation
    10000018,identity,y-orientation
 
-      Figure 30: SID assignments for atmos (CSV format, illustrative)
+      Figure 31: SID assignments for atmos (CSV format, illustrative)
 
 Appendix F.  ccm2m Ontology
 
@@ -3805,7 +3861,7 @@ ccm2m:SID
 
 
 
-Toutain                   Expires 11 March 2027                [Page 68]
+Toutain                   Expires 11 March 2027                [Page 69]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3861,7 +3917,7 @@ ccm2m:hasParam
 
 
 
-Toutain                   Expires 11 March 2027                [Page 69]
+Toutain                   Expires 11 March 2027                [Page 70]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3917,7 +3973,7 @@ ccm2m:coapPath
 
 
 
-Toutain                   Expires 11 March 2027                [Page 70]
+Toutain                   Expires 11 March 2027                [Page 71]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3973,7 +4029,7 @@ ccm2m:targetSid
 
 
 
-Toutain                   Expires 11 March 2027                [Page 71]
+Toutain                   Expires 11 March 2027                [Page 72]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4006,7 +4062,7 @@ Declared once on the Sensor; not repeated per Observation.""" ;
     rdfs:domain  sosa:Sensor ;
     rdfs:range   xsd:integer .
 
-      Figure 31: The ccm2m: extension vocabulary, in Turtle/OWL
+      Figure 32: The ccm2m: extension vocabulary, in Turtle/OWL
 
 Acknowledgments
 
@@ -4029,4 +4085,4 @@ Author's Address
 
 
 
-Toutain                   Expires 11 March 2027                [Page 72]
+Toutain                   Expires 11 March 2027                [Page 73]

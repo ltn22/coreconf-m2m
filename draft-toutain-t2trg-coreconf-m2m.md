@@ -1501,6 +1501,64 @@ share one resultTime, since they were delivered together in one history
 notification, while phenomenonTime is reconstructed per sample from
 "step".
 
+For actuation, SensorThings has a separate set of entities (the
+"Tasking Core" profile): Actuator, TaskingCapability, and Task, mirroring
+Sensor, Datastream, and Observation respectively. {{fig-st-actuation}}
+transposes the fictitious pump of {{fig-sosa-actuation}} into these
+entities.
+
+~~~~
+GET /Actuators(1)
+
+{
+  "@iot.id": 1,
+  "name": "rotation-speed",
+  "description": "rotation-speed actuator on pump.example.com",
+  "encodingType": "application/pdf",
+  "metadata": "https://pump.example.com/docs/pump-datasheet.pdf",
+  "properties": {
+    "ccm2m:type": "PPPPPP"
+  }
+}
+
+GET /TaskingCapabilities(1)
+
+{
+  "@iot.id": 1,
+  "name": "pump.example.com/rotation-speed",
+  "description": "Set the pump's rotation speed",
+  "taskingParameters": {
+    "type": "object",
+    "properties": {
+      "rotation-speed": { "type": "integer" }
+    }
+  },
+  "properties": {
+    "ccm2m:targetSid": 62077
+  }
+}
+
+GET /TaskingCapabilities(1)/Tasks
+
+{
+  "value": [{
+    "@iot.id": 1,
+    "creationTime": "2026-09-07T14:22:10Z",
+    "taskingParameters": { "rotation-speed": 1500 }
+  }]
+}
+~~~~
+{: #fig-st-actuation title="Actuator, TaskingCapability, and Task, the SensorThings equivalent of fig-sosa-actuation" artwork-align="left"}
+
+The Actuator plays the same role as the Sensor of {{fig-st-sensor}},
+including the same `application/pdf`/`metadata` pattern for its
+datasheet. `ccm2m:targetSid` on the TaskingCapability plays the role of
+`ccm2m:targetSid` on the SOSA `ccm2m:Control` for "instant-write": both
+name the SID to iPATCH to actually issue the command. A Task's
+`taskingParameters` plays the role of sosa:hasResult, and `creationTime`
+of sosa:resultTime; as with the Sensor's `ccm2m:type`, "PPPPPP" is a
+placeholder, since this pump has no real identity SID.
+
 ## SAREF
 
 To be defined.
