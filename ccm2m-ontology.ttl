@@ -1,0 +1,194 @@
+@prefix ccm2m:  <https://ccm2m.example/ns#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix sosa:   <http://www.w3.org/ns/sosa/> .
+@prefix qudt:   <http://qudt.org/schema/qudt/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+# ── Ontology header ───────────────────────────────────────────────────────────
+
+<https://ccm2m.example/ns>
+    a owl:Ontology ;
+    rdfs:label   "CCM2M — CORECONF-M2M vocabulary for SOSA/SSN" ;
+    rdfs:comment """Complementary vocabulary to SOSA/SSN for exposing
+CORECONF/CoAP semantics (endpoints, applicative controls, bootstrap SIDs,
+sensor identity/id) that have no direct equivalent in SOSA.""" ;
+    dcterms:created  "2026-06-27"^^xsd:date ;
+    owl:versionInfo  "0.2" .
+
+# ── Datatype ──────────────────────────────────────────────────────────────────
+
+ccm2m:SID
+    a rdfs:Datatype ;
+    rdfs:label   "SID" ;
+    rdfs:comment """A CORECONF Schema Identifier (SID) — a non-negative integer
+that uniquely identifies a YANG node, identity, or feature within a SID
+file (RFC 9254). Using this datatype instead of xsd:nonNegativeInteger
+makes the nature of the value self-documenting.""" .
+
+# ── Classes ───────────────────────────────────────────────────────────────────
+
+ccm2m:Control
+    a owl:Class ;
+    rdfs:label   "Control" ;
+    rdfs:comment """An applicative operation exposed by a Platform over
+CORECONF/CoAP: single-value read, history-buffer notification subscription,
+or threshold-alert notification subscription.
+Intentionally outside SOSA/SSN Sampling/Sensing semantics.""" .
+
+ccm2m:SetupNotification
+    a owl:Class ;
+    rdfs:subClassOf ccm2m:Control ;
+    rdfs:label   "SetupNotification" ;
+    rdfs:comment """A Control that configures notification parameters on a
+transducer before subscribing (iPATCH /c). Carries the target SID of the
+notification-parameters container and the list of configurable parameters
+with their individual SIDs.""" .
+
+ccm2m:NotificationParam
+    a owl:Class ;
+    rdfs:label   "NotificationParam" ;
+    rdfs:comment """A single configurable parameter within a
+SetupNotification (e.g. 'step', 'encoding'). Carries the YANG leaf name
+and its SID.""" .
+
+# ── Object properties ─────────────────────────────────────────────────────────
+
+ccm2m:hasControl
+    a owl:ObjectProperty ;
+    rdfs:label   "hasControl" ;
+    rdfs:comment "Links a Platform or Sensor to a Control it exposes." ;
+    rdfs:range   ccm2m:Control .
+
+ccm2m:hasParam
+    a owl:ObjectProperty ;
+    rdfs:label   "hasParam" ;
+    rdfs:comment "Links a SetupNotification to one of its configurable parameters." ;
+    rdfs:domain  ccm2m:SetupNotification ;
+    rdfs:range   ccm2m:NotificationParam .
+
+ccm2m:outputUnit
+    a owl:ObjectProperty ;
+    rdfs:label   "outputUnit" ;
+    rdfs:comment """Fixed output unit of a Sensor, declared once from the
+'units' statement of the corresponding YANG leaf. Never repeated per
+Observation.""" ;
+    rdfs:domain  sosa:Sensor ;
+    rdfs:range   qudt:Unit .
+
+# ── Datatype properties — Platform ────────────────────────────────────────────
+
+ccm2m:coapEndpoint
+    a owl:DatatypeProperty ;
+    rdfs:label   "coapEndpoint" ;
+    rdfs:comment "CoAP access address of the resource (e.g. coap://[::1])." ;
+    rdfs:domain  sosa:Platform ;
+    rdfs:range   xsd:anyURI .
+
+ccm2m:accessProtocol
+    a owl:DatatypeProperty ;
+    rdfs:label   "accessProtocol" ;
+    rdfs:comment "Default applicative protocol on this Platform (e.g. 'coreconf')." ;
+    rdfs:domain  sosa:Platform ;
+    rdfs:range   xsd:string .
+
+ccm2m:bootstrapSid
+    a owl:DatatypeProperty ;
+    rdfs:label   "bootstrapSid" ;
+    rdfs:comment """SID used at bootstrap to discover the YANG model exposed
+by the Platform. Multi-valued (several bootstrap SIDs are possible,
+unordered). Discovered via DNS TXT record.""" ;
+    rdfs:domain  sosa:Platform ;
+    rdfs:range   ccm2m:SID .
+
+# ── Datatype properties — shared (Platform and Control) ───────────────────────
+
+ccm2m:coapMethod
+    a owl:DatatypeProperty ;
+    rdfs:label   "coapMethod" ;
+    rdfs:comment """CoAP method to use (FETCH, FETCH+Observe, GET, iPATCH…).
+Usable on a Platform (default) or on a Control (override).
+Domain intentionally unconstrained.""" ;
+    rdfs:range   xsd:string .
+
+ccm2m:coapPath
+    a owl:DatatypeProperty ;
+    rdfs:label   "coapPath" ;
+    rdfs:comment """CoAP URI path of the resource targeted by this Control
+(e.g. '/c' for datastore, '/s' for stream/notification).""" ;
+    rdfs:range   xsd:string .
+
+ccm2m:contentFormat
+    a owl:DatatypeProperty ;
+    rdfs:label   "contentFormat" ;
+    rdfs:comment """CoAP Content-Format used (e.g.
+application/yang-data+cbor). Usable on a Platform (default) or on a
+Control (override). Domain intentionally unconstrained.""" ;
+    rdfs:range   xsd:string .
+
+# ── Datatype properties — Control ─────────────────────────────────────────────
+
+ccm2m:paramName
+    a owl:DatatypeProperty ;
+    rdfs:label   "paramName" ;
+    rdfs:comment "YANG leaf name of this notification parameter (e.g. 'step', 'encoding')." ;
+    rdfs:domain  ccm2m:NotificationParam ;
+    rdfs:range   xsd:string .
+
+ccm2m:paramSid
+    a owl:DatatypeProperty ;
+    rdfs:label   "paramSid" ;
+    rdfs:comment "SID of this notification parameter's YANG leaf." ;
+    rdfs:domain  ccm2m:NotificationParam ;
+    rdfs:range   ccm2m:SID .
+
+ccm2m:controlType
+    a owl:DatatypeProperty ;
+    rdfs:label   "controlType" ;
+    rdfs:comment """Functional type of the Control. Current controlled values:
+  'instant-write'     — single-value write (iPATCH /c, same SID as read-single),
+  'read-single'       — single-value polling (FETCH /c),
+  'read-stat'         — statistics polling (FETCH /c, statistics container),
+  'reset-stat'        — reset statistics for one sensor (POST /c, per-sensor),
+  'reset-all-stat'    — reset all sensors statistics (POST /c, platform-level),
+  'subscribe-history'    — history-buffer notification subscription (Observe /s),
+  'subscribe-threshold'  — threshold-alert notification subscription (Observe /s).""" ;
+    rdfs:domain  ccm2m:Control ;
+    rdfs:range   xsd:string .
+
+ccm2m:targetSid
+    a owl:DatatypeProperty ;
+    rdfs:label   "targetSid" ;
+    rdfs:comment "SID of the YANG leaf/container targeted by this Control." ;
+    rdfs:domain  ccm2m:Control ;
+    rdfs:range   ccm2m:SID .
+
+# ── Datatype properties — Sensor ──────────────────────────────────────────────
+
+ccm2m:type
+    a owl:DatatypeProperty ;
+    rdfs:label   "type" ;
+    rdfs:comment """SID of the YANG identity describing the sensor type
+(e.g. 100001 for air-temperature). Named 'type' to match the YANG leaf name.
+Looked up from the device's .sid file.""" ;
+    rdfs:domain  sosa:Sensor ;
+    rdfs:range   ccm2m:SID .
+
+ccm2m:id
+    a owl:DatatypeProperty ;
+    rdfs:label   "id" ;
+    rdfs:comment """Instance identifier of the sensor on its Platform.
+Distinguishes multiple sensors of the same type (default 0).""" ;
+    rdfs:domain  sosa:Sensor ;
+    rdfs:range   xsd:nonNegativeInteger .
+
+ccm2m:precision
+    a owl:DatatypeProperty ;
+    rdfs:label   "precision" ;
+    rdfs:comment """Number of decimal places for the raw integer value.
+Real value = raw_value × 10^(-precision).
+Declared once on the Sensor; not repeated per Observation.""" ;
+    rdfs:domain  sosa:Sensor ;
+    rdfs:range   xsd:integer .

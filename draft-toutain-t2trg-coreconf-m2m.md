@@ -924,26 +924,104 @@ needs access to the .sid file and, in some cases, the YANG file, in order
 to recover the transducers' default values. {{I-D.toutain-core-sid-encoding}}
 defines a way to use DNS to locate a SID and a YANG file.
 
+An experimental service running with the "sid.yt" suffix has been
+deployed. It allows finding the SID and YANG files associated with a
+specific SID.
+
 # Interconnection with an Ontology {#interconnection-with-an-ontology}
 
-The goal of coreconf-m2m is to provide a lightweight transport for this
-information and a way to control the information managed by the device;
-it is not itself an ontology. This section discusses how the elements it
+The goal of coreconf-m2m is to discover the resources managed by the
+device and to provide a lightweight transport for information coming
+from a sensor or dedicated to an actuator; it is not itself an
+ontology. This section discusses how the elements it
 carries relate to some existing ontologies and APIs, so that a gateway or
 application can align them with a richer semantic model when needed, once
 translated to textual identifiers as described in
 {{from-cbor-sid-to-textual-identifiers}}.
 
+
+## Extending Ontology to coreconf-m2m {#extending-ontology-to-coreconf-m2m}
+
+Before looking at how YANG information can be included into an existing
+ontology, it may also be important to enrich the ontology with
+coreconf-m2m information concerning the device's CORECONF capabilities;
+this may be helpful for future interactions with the device.
+
+No existing ontology natively carries the coordinates needed to actually
+query a coreconf-m2m device, nor the encoding parameters (SID, precision,
+unit) needed to interpret its data. This document therefore assumes a
+small `ccm2m:` extension vocabulary, applicable regardless of which
+ontology (SOSA, SAREF, SensorThings, ...) a device or transducer is
+otherwise mapped to. {{annex-ccm2m-ontology}} gives its full definition,
+as an OWL ontology in Turtle.
+
+The ccm2m ontology defines a single datatype, `ccm2m:SID`: a non-negative
+integer that uniquely identifies a YANG node, identity, or feature within
+a SID file, used instead of a plain xsd:nonNegativeInteger so that the
+nature of the value is self-documenting.
+
+It defines properties attached to a sosa:Platform, giving the
+coordinates needed to reach and query the device:
+
+* `ccm2m:coapEndpoint` is the CoAP access address of the device (e.g.
+  `coap://[::1]`);
+* `ccm2m:accessProtocol` is the default applicative protocol used on
+  that platform (e.g. `"coreconf"`);
+* `ccm2m:bootstrapSid` is the SID used at bootstrap to discover the YANG
+  model exposed by the platform (see {{resource-discovery}}); it is
+  multi-valued, since several bootstrap SIDs are possible.
+
+It also defines properties attached to a sosa:Sensor, tying it back to
+its YANG identity:
+
+* `ccm2m:type` carries the transducer's identity SID (see
+  {{fig-transducer-list}});
+* `ccm2m:id` is the instance identifier of the sensor on its platform,
+  distinguishing multiple sensors of the same type;
+* `ccm2m:precision` and `ccm2m:outputUnit` carry the default-precision
+  and default-unit declared on that identity, or their overrides (see
+  {{transducer-sub-tree}}), and are declared once rather than repeated
+  on every observation.
+
+Finally, it models the applicative operations that can be performed on a
+device or transducer, i.e. its CORECONF capabilities, deliberately kept
+outside SOSA/SSN's Sampling/Sensing semantics:
+
+* `ccm2m:Control` is an applicative operation exposed over CORECONF/CoAP
+  (a single-value read, a history-buffer notification subscription, or a
+  threshold-alert notification subscription), linked to a Platform or
+  Sensor via `ccm2m:hasControl`. Its `ccm2m:controlType` names the
+  operation (e.g. `"read-single"`, `"subscribe-history"`,
+  `"reset-all-stat"`), `ccm2m:targetSid` gives the SID of the YANG
+  leaf/container it targets, and `ccm2m:coapMethod`, `ccm2m:coapPath`,
+  and `ccm2m:contentFormat` describe how to invoke it over CoAP;
+* `ccm2m:SetupNotification` is a Control that configures notification
+  parameters on a transducer before subscribing (an iPATCH on `/c`); its
+  `ccm2m:hasParam` links to one or more `ccm2m:NotificationParam`, each
+  giving, via `ccm2m:paramName` and `ccm2m:paramSid`, the YANG leaf name
+  and SID of one configurable parameter (e.g. "step", "encoding"; see
+  {{fig-notification-parameters-tree}}).
+
+Without these properties, a graph would describe what a platform
+observes, but not how to obtain the corresponding coreconf-m2m data, nor
+how to act on it. The following subsections use this `ccm2m:` vocabulary
+to bridge the elements of coreconf-m2m to specific ontologies.
+
 ## SOSA
 
 The Sensor, Observation, Sample, and Actuator (SOSA) ontology is
-maintained jointly by the W3C and the OGC, as part of the broader SSN
+maintained jointly by the W3C and the Open Geospatial Consortium (OGC),
+as part of the broader SSN
 (Semantic Sensor Network) ontology {{SOSA}}. It defines a sosa:Platform
 as an entity that hosts other objects,
 such as sensors, actuators, or samplers. The device described by the
 "characteristics" sub-tree ({{characteristics-sub-tree}}) maps to a
 sosa:Platform, and each of its transducers maps to a sosa:Sensor or a
 sosa:Actuator hosted by that platform.
+
+SOSA also defines a sosa:Sampler type, but it corresponds more to
+sample-taking than to measurement, so it may be present in the ontology
+without requiring a link with the coreconf-m2m YANG data model.
 
 {{fig-sosa-platform}} shows a generic, abstract example of such a
 platform, expressed in the Turtle RDF syntax, independently of any
@@ -988,20 +1066,190 @@ transducer-name = tstr
 ~~~~
 {: #fig-object-iri-cddl title="CDDL for a sosa object IRI derived from the platform's DNS name" artwork-align="left"}
 
-"category" is not free text: it is one of the two roles a transducer can
-be given, taken from its default-category (or category-override, see
-{{identities-data-model}}). A transducer whose category is "sensor" or
-"actuator" yields a single object IRI under the matching path segment; a
-transducer whose category is "sensor-actuator" yields two object IRIs,
-one under each segment, since it is instantiated as both a sosa:Sensor
-and a sosa:Actuator. This is unlike a naive instantiation that would
-generate both roles for every property regardless of its category.
+For example, with `platform-name = "station.example.com"`, `category =
+"sensor"`, and `transducer-name = "air-temperature"`, the resulting
+object-iri is `station.example.com/sensor/air-temperature`, matching the
+example already given above. {{fig-sosa-instance}} shows this
+instantiation in Turtle, adapted from `sosa/sosa_graph.ttl`.
 
-`sosa/sosa_graph.ttl` is a fully instantiated example of such a graph for
-the ATMOS41 station; it was generated against an earlier revision of the
-coreconf-m2m model, before default-category was introduced, and
-therefore illustrates every property as both a sosa:Sensor and a
-sosa:Actuator.
+~~~~
+@prefix sosa:  <http://www.w3.org/ns/sosa/> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ccm2m: <https://ccm2m.example/ns#> .
+@prefix unit:  <http://qudt.org/vocab/unit/> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+
+<https://station.example.com> a sosa:Platform ;
+    sosa:hosts <https://station.example.com/sensor/air-temperature> ;
+    ccm2m:accessProtocol "coreconf" ;
+    ccm2m:coapEndpoint "coap://[2001:db8::1]"^^xsd:anyURI ;
+    ccm2m:bootstrapSid "62002"^^ccm2m:SID .
+
+<https://station.example.com/sensor/air-temperature> a sosa:Sensor ;
+    sosa:isHostedBy <https://station.example.com> ;
+    sosa:observes <https://station.example.com/property/air-temperature> ;
+    ccm2m:type "10000001"^^ccm2m:SID ;
+    ccm2m:precision 1 ;
+    ccm2m:outputUnit unit:DEG_C .
+
+<https://station.example.com/property/air-temperature> a sosa:ObservableProperty ;
+    rdfs:label "air-temperature" ;
+    sosa:isObservedBy <https://station.example.com/sensor/air-temperature> .
+~~~~
+{: #fig-sosa-instance title="Concrete instantiation of the sosa:Platform/sosa:Sensor pattern for air-temperature, with ccm2m: properties bridging back to the YANG/SID data" artwork-align="left"}
+
+The `ccm2m:` properties used above are not part of SOSA; see
+{{extending-ontology-to-coreconf-m2m}} for their meaning.
+
+### Control
+
+A sosa:Sensor or sosa:Actuator is not limited to being observed or
+acted upon: the actions actually available on the corresponding
+transducer are attached to it as `ccm2m:Control` instances, via
+`ccm2m:hasControl`. These cover reading the current value
+("read-single"), reading or resetting its statistics ("read-stat",
+"reset-stat", "reset-all-stat"), configuring and subscribing to history
+or threshold-alert notifications ("subscribe-history", "subscribe-threshold"),
+and, for an actuator, writing a new value ("instant-write").
+
+{{fig-ccm2m-instance}} shows the air-temperature sosa:Sensor with its
+`ccm2m:Control` instances attached via `ccm2m:hasControl`, using the
+SIDs introduced in {{querying-a-quantity}} and {{notification}}.
+
+~~~~
+@prefix sosa:  <http://www.w3.org/ns/sosa/> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ccm2m: <https://ccm2m.example/ns#> .
+@prefix unit:  <http://qudt.org/vocab/unit/> .
+@prefix ex:    <https://station.example.com/sensor/air-temperature/> .
+
+ex: a sosa:Sensor ;
+    sosa:isHostedBy <https://station.example.com> ;
+    sosa:observes <https://station.example.com/property/air-temperature> ;
+    ccm2m:type "10000001"^^ccm2m:SID ;
+    ccm2m:precision 1 ;
+    ccm2m:outputUnit unit:DEG_C ;
+    ccm2m:hasControl ex:control/read-single ,
+                      ex:control/reset-stat ,
+                      ex:control/setup-history ,
+                      ex:control/subscribe-history .
+
+ex:control/read-single a ccm2m:Control ;
+    ccm2m:controlType "read-single" ;
+    ccm2m:coapMethod "FETCH" ;
+    ccm2m:coapPath "/c" ;
+    ccm2m:targetSid "62077"^^ccm2m:SID .
+
+ex:control/reset-stat a ccm2m:Control ;
+    rdfs:label "reset statistics" ;
+    ccm2m:controlType "reset-stat" ;
+    ccm2m:coapMethod "POST" ;
+    ccm2m:coapPath "/c" ;
+    ccm2m:targetSid "62078"^^ccm2m:SID .
+
+ex:control/setup-history a ccm2m:SetupNotification ;
+    ccm2m:controlType "setup-history" ;
+    ccm2m:coapMethod "iPATCH" ;
+    ccm2m:coapPath "/c" ;
+    ccm2m:targetSid "62060"^^ccm2m:SID ;
+    ccm2m:hasParam ex:control/setup-history/step ,
+                   ex:control/setup-history/encoding .
+
+ex:control/setup-history/step a ccm2m:NotificationParam ;
+    ccm2m:paramName "step" ;
+    ccm2m:paramSid "62066"^^ccm2m:SID .
+
+ex:control/setup-history/encoding a ccm2m:NotificationParam ;
+    ccm2m:paramName "encoding" ;
+    ccm2m:paramSid "62062"^^ccm2m:SID .
+
+ex:control/subscribe-history a ccm2m:Control ;
+    rdfs:label "start history notifications" ;
+    ccm2m:controlType "subscribe-history" ;
+    ccm2m:coapMethod "FETCH+Observe" ;
+    ccm2m:coapPath "/s" ;
+    ccm2m:targetSid "62048"^^ccm2m:SID .
+~~~~
+{: #fig-ccm2m-instance title="ccm2m:Control instances attached to the air-temperature sosa:Sensor" artwork-align="left"}
+
+`ex:control/read-single` is the same as described in {{fig-query-value}}
+(SID 62077, "/transducers/transducer/quantity/value"). `ex:control/reset-stat`
+is the same as the "reset-stats" action (SID 62078,
+"/transducers/transducer/reset-stats"), invoked with a POST to reset the
+statistics of this single transducer, as opposed to the "reset-all-stat"
+control on the platform which resets every transducer at once via the
+top-level "reset-stats" RPC. `ex:control/setup-history` is the same as
+the iPATCH described in {{fig-notification-config}} (SID 62060,
+"/transducers/transducer/notification-parameters/history"), with its two
+configurable parameters "step" (SID 62066) and "encoding" (SID 62062);
+it only configures the notification and does not itself start it.
+`ex:control/subscribe-history` is the control that actually starts the
+history stream: it is the same as the FETCH+Observe described in
+{{fig-notification-observe}} (SID 62048, "/history/time-series/values").
+A client that already knows this graph can therefore issue the
+corresponding CoAP requests without a
+separate FETCH+parse round trip on the YANG/SID files.
+
+`ccm2m:Control` has no dedicated "stop" instance: as described in
+{{notifications}}, a subscription started by `subscribe-history` ends when
+the client explicitly deregisters (a GET/FETCH with the Observe option
+set to 1, using the same token as `subscribe-history`), or when the server
+stops receiving acknowledgments for its Confirmable notifications. No
+separate SID-targeted control is needed for this, since it operates at
+the CoAP transport level rather than on a specific YANG resource.
+
+
+
+"category" is one of the two roles a transducer can be given, taken from
+its default-category (or category-override, see
+{{identities-data-model}}). A transducer whose category is
+"sensor-actuator" yields two object IRIs, one under each role, since it
+is instantiated as both a sosa:Sensor and a sosa:Actuator.
+
+### Storing Transducer Quantities
+
+Each value received from a transducer, whether from a plain FETCH or
+decoded from a history notification, is stored as a sosa:Observation.
+SOSA distinguishes two timestamps: sosa:phenomenonTime, when the device
+actually took the measurement, and sosa:resultTime, when the result was
+obtained (here,
+stored) by the client. For a single FETCH the two nearly coincide; for a
+history notification, phenomenonTime is reconstructed per sample from
+"step" as described in {{notifications}}, while resultTime is the single
+instant at which the whole batch was received. {{fig-sosa-observations}}
+shows three such observations, taken from the air-temperature values
+already decoded in {{fig-notification-decoded}}: all three share the
+same resultTime, since they were delivered together in one notification.
+
+~~~~
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex:   <https://station.example.com/sensor/air-temperature/> .
+
+ex:observation/1 a sosa:Observation ;
+    sosa:madeBySensor ex: ;
+    sosa:observedProperty <https://station.example.com/property/air-temperature> ;
+    sosa:hasSimpleResult "18.9"^^xsd:decimal ;
+    sosa:phenomenonTime "2026-09-02T09:57:42Z"^^xsd:dateTime ;
+    sosa:resultTime "2026-09-02T10:15:45Z"^^xsd:dateTime .
+
+ex:observation/2 a sosa:Observation ;
+    sosa:madeBySensor ex: ;
+    sosa:observedProperty <https://station.example.com/property/air-temperature> ;
+    sosa:hasSimpleResult "20.3"^^xsd:decimal ;
+    sosa:phenomenonTime "2026-09-02T09:59:42Z"^^xsd:dateTime ;
+    sosa:resultTime "2026-09-02T10:15:45Z"^^xsd:dateTime .
+
+ex:observation/3 a sosa:Observation ;
+    sosa:madeBySensor ex: ;
+    sosa:observedProperty <https://station.example.com/property/air-temperature> ;
+    sosa:hasSimpleResult "20.0"^^xsd:decimal ;
+    sosa:phenomenonTime "2026-09-02T10:01:42Z"^^xsd:dateTime ;
+    sosa:resultTime "2026-09-02T10:15:45Z"^^xsd:dateTime .
+~~~~
+{: #fig-sosa-observations title="Three dated sosa:Observation instances, decoded from a history notification" artwork-align="left"}
+
+
 
 ## SensorThings
 
@@ -1017,7 +1265,7 @@ OSCORE {{?RFC8613}}. In M2M scenarios where a central manager is absent, the
 trust model requires particular attention.
 
 # IANA Considerations
-
+ 
 ## YANG Module Registration
 
 This document registers the following YANG module in the "YANG Module Names"
@@ -2196,6 +2444,206 @@ SID,Namespace,Identifier
 10000018,identity,y-orientation
 ~~~~
 {: #fig-atmos-sid-csv title="SID assignments for atmos (CSV format, illustrative)" artwork-align="left"}
+
+# ccm2m Ontology {#annex-ccm2m-ontology}
+
+~~~~
+@prefix ccm2m:  <https://ccm2m.example/ns#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix sosa:   <http://www.w3.org/ns/sosa/> .
+@prefix qudt:   <http://qudt.org/schema/qudt/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+# ── Ontology header ───────────────────────────────────────────────────────────
+
+<https://ccm2m.example/ns>
+    a owl:Ontology ;
+    rdfs:label   "CCM2M — CORECONF-M2M vocabulary for SOSA/SSN" ;
+    rdfs:comment """Complementary vocabulary to SOSA/SSN for exposing
+CORECONF/CoAP semantics (endpoints, applicative controls, bootstrap SIDs,
+sensor identity/id) that have no direct equivalent in SOSA.""" ;
+    dcterms:created  "2026-06-27"^^xsd:date ;
+    owl:versionInfo  "0.2" .
+
+# ── Datatype ──────────────────────────────────────────────────────────────────
+
+ccm2m:SID
+    a rdfs:Datatype ;
+    rdfs:label   "SID" ;
+    rdfs:comment """A CORECONF Schema Identifier (SID) — a non-negative integer
+that uniquely identifies a YANG node, identity, or feature within a SID
+file (RFC 9254). Using this datatype instead of xsd:nonNegativeInteger
+makes the nature of the value self-documenting.""" .
+
+# ── Classes ───────────────────────────────────────────────────────────────────
+
+ccm2m:Control
+    a owl:Class ;
+    rdfs:label   "Control" ;
+    rdfs:comment """An applicative operation exposed by a Platform over
+CORECONF/CoAP: single-value read, history-buffer notification subscription,
+or threshold-alert notification subscription.
+Intentionally outside SOSA/SSN Sampling/Sensing semantics.""" .
+
+ccm2m:SetupNotification
+    a owl:Class ;
+    rdfs:subClassOf ccm2m:Control ;
+    rdfs:label   "SetupNotification" ;
+    rdfs:comment """A Control that configures notification parameters on a
+transducer before subscribing (iPATCH /c). Carries the target SID of the
+notification-parameters container and the list of configurable parameters
+with their individual SIDs.""" .
+
+ccm2m:NotificationParam
+    a owl:Class ;
+    rdfs:label   "NotificationParam" ;
+    rdfs:comment """A single configurable parameter within a
+SetupNotification (e.g. 'step', 'encoding'). Carries the YANG leaf name
+and its SID.""" .
+
+# ── Object properties ─────────────────────────────────────────────────────────
+
+ccm2m:hasControl
+    a owl:ObjectProperty ;
+    rdfs:label   "hasControl" ;
+    rdfs:comment "Links a Platform or Sensor to a Control it exposes." ;
+    rdfs:range   ccm2m:Control .
+
+ccm2m:hasParam
+    a owl:ObjectProperty ;
+    rdfs:label   "hasParam" ;
+    rdfs:comment "Links a SetupNotification to one of its configurable parameters." ;
+    rdfs:domain  ccm2m:SetupNotification ;
+    rdfs:range   ccm2m:NotificationParam .
+
+ccm2m:outputUnit
+    a owl:ObjectProperty ;
+    rdfs:label   "outputUnit" ;
+    rdfs:comment """Fixed output unit of a Sensor, declared once from the
+'units' statement of the corresponding YANG leaf. Never repeated per
+Observation.""" ;
+    rdfs:domain  sosa:Sensor ;
+    rdfs:range   qudt:Unit .
+
+# ── Datatype properties — Platform ────────────────────────────────────────────
+
+ccm2m:coapEndpoint
+    a owl:DatatypeProperty ;
+    rdfs:label   "coapEndpoint" ;
+    rdfs:comment "CoAP access address of the resource (e.g. coap://[::1])." ;
+    rdfs:domain  sosa:Platform ;
+    rdfs:range   xsd:anyURI .
+
+ccm2m:accessProtocol
+    a owl:DatatypeProperty ;
+    rdfs:label   "accessProtocol" ;
+    rdfs:comment "Default applicative protocol on this Platform (e.g. 'coreconf')." ;
+    rdfs:domain  sosa:Platform ;
+    rdfs:range   xsd:string .
+
+ccm2m:bootstrapSid
+    a owl:DatatypeProperty ;
+    rdfs:label   "bootstrapSid" ;
+    rdfs:comment """SID used at bootstrap to discover the YANG model exposed
+by the Platform. Multi-valued (several bootstrap SIDs are possible,
+unordered). Discovered via DNS TXT record.""" ;
+    rdfs:domain  sosa:Platform ;
+    rdfs:range   ccm2m:SID .
+
+# ── Datatype properties — shared (Platform and Control) ───────────────────────
+
+ccm2m:coapMethod
+    a owl:DatatypeProperty ;
+    rdfs:label   "coapMethod" ;
+    rdfs:comment """CoAP method to use (FETCH, FETCH+Observe, GET, iPATCH…).
+Usable on a Platform (default) or on a Control (override).
+Domain intentionally unconstrained.""" ;
+    rdfs:range   xsd:string .
+
+ccm2m:coapPath
+    a owl:DatatypeProperty ;
+    rdfs:label   "coapPath" ;
+    rdfs:comment """CoAP URI path of the resource targeted by this Control
+(e.g. '/c' for datastore, '/s' for stream/notification).""" ;
+    rdfs:range   xsd:string .
+
+ccm2m:contentFormat
+    a owl:DatatypeProperty ;
+    rdfs:label   "contentFormat" ;
+    rdfs:comment """CoAP Content-Format used (e.g.
+application/yang-data+cbor). Usable on a Platform (default) or on a
+Control (override). Domain intentionally unconstrained.""" ;
+    rdfs:range   xsd:string .
+
+# ── Datatype properties — Control ─────────────────────────────────────────────
+
+ccm2m:paramName
+    a owl:DatatypeProperty ;
+    rdfs:label   "paramName" ;
+    rdfs:comment "YANG leaf name of this notification parameter (e.g. 'step', 'encoding')." ;
+    rdfs:domain  ccm2m:NotificationParam ;
+    rdfs:range   xsd:string .
+
+ccm2m:paramSid
+    a owl:DatatypeProperty ;
+    rdfs:label   "paramSid" ;
+    rdfs:comment "SID of this notification parameter's YANG leaf." ;
+    rdfs:domain  ccm2m:NotificationParam ;
+    rdfs:range   ccm2m:SID .
+
+ccm2m:controlType
+    a owl:DatatypeProperty ;
+    rdfs:label   "controlType" ;
+    rdfs:comment """Functional type of the Control. Current controlled values:
+  'instant-write'     — single-value write (iPATCH /c, same SID as read-single),
+  'read-single'       — single-value polling (FETCH /c),
+  'read-stat'         — statistics polling (FETCH /c, statistics container),
+  'reset-stat'        — reset statistics for one sensor (POST /c, per-sensor),
+  'reset-all-stat'    — reset all sensors statistics (POST /c, platform-level),
+  'subscribe-history'    — history-buffer notification subscription (Observe /s),
+  'subscribe-threshold'  — threshold-alert notification subscription (Observe /s).""" ;
+    rdfs:domain  ccm2m:Control ;
+    rdfs:range   xsd:string .
+
+ccm2m:targetSid
+    a owl:DatatypeProperty ;
+    rdfs:label   "targetSid" ;
+    rdfs:comment "SID of the YANG leaf/container targeted by this Control." ;
+    rdfs:domain  ccm2m:Control ;
+    rdfs:range   ccm2m:SID .
+
+# ── Datatype properties — Sensor ──────────────────────────────────────────────
+
+ccm2m:type
+    a owl:DatatypeProperty ;
+    rdfs:label   "type" ;
+    rdfs:comment """SID of the YANG identity describing the sensor type
+(e.g. 100001 for air-temperature). Named 'type' to match the YANG leaf name.
+Looked up from the device's .sid file.""" ;
+    rdfs:domain  sosa:Sensor ;
+    rdfs:range   ccm2m:SID .
+
+ccm2m:id
+    a owl:DatatypeProperty ;
+    rdfs:label   "id" ;
+    rdfs:comment """Instance identifier of the sensor on its Platform.
+Distinguishes multiple sensors of the same type (default 0).""" ;
+    rdfs:domain  sosa:Sensor ;
+    rdfs:range   xsd:nonNegativeInteger .
+
+ccm2m:precision
+    a owl:DatatypeProperty ;
+    rdfs:label   "precision" ;
+    rdfs:comment """Number of decimal places for the raw integer value.
+Real value = raw_value × 10^(-precision).
+Declared once on the Sensor; not repeated per Observation.""" ;
+    rdfs:domain  sosa:Sensor ;
+    rdfs:range   xsd:integer .
+~~~~
+{: #fig-ccm2m-ontology title="The ccm2m: extension vocabulary, in Turtle/OWL"}
 
 # Acknowledgments
 {:numbered="false"}
