@@ -1078,9 +1078,12 @@ instantiation in Turtle, adapted from `sosa/sosa_graph.ttl`.
 @prefix ccm2m: <https://ccm2m.example/ns#> .
 @prefix unit:  <http://qudt.org/vocab/unit/> .
 @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#> .
 
 <https://station.example.com> a sosa:Platform ;
     sosa:hosts <https://station.example.com/sensor/air-temperature> ;
+    geo:lat "48.1173"^^xsd:decimal ;
+    geo:long "-1.6778"^^xsd:decimal ;
     ccm2m:accessProtocol "coreconf" ;
     ccm2m:coapEndpoint "coap://[2001:db8::1]"^^xsd:anyURI ;
     ccm2m:bootstrapSid "62002"^^ccm2m:SID .
@@ -1099,7 +1102,12 @@ instantiation in Turtle, adapted from `sosa/sosa_graph.ttl`.
 {: #fig-sosa-instance title="Concrete instantiation of the sosa:Platform/sosa:Sensor pattern for air-temperature, with ccm2m: properties bridging back to the YANG/SID data" artwork-align="left"}
 
 The `ccm2m:` properties used above are not part of SOSA; see
-{{extending-ontology-to-coreconf-m2m}} for their meaning.
+{{extending-ontology-to-coreconf-m2m}} for their meaning. SOSA has no
+native geo-location property either; `geo:lat`/`geo:long`, from the
+lightweight W3C Basic Geo (WGS84) vocabulary, are commonly paired with
+SOSA for this purpose, and correspond to
+"characteristics/geo-location" ({{characteristics-sub-tree}}) in the
+YANG model.
 
 ### Control
 
@@ -1212,11 +1220,17 @@ Each value received from a transducer, whether from a plain FETCH or
 decoded from a history notification, is stored as a sosa:Observation.
 SOSA distinguishes two timestamps: sosa:phenomenonTime, when the device
 actually took the measurement, and sosa:resultTime, when the result was
-obtained (here,
-stored) by the client. For a single FETCH the two nearly coincide; for a
-history notification, phenomenonTime is reconstructed per sample from
-"step" as described in {{notifications}}, while resultTime is the single
-instant at which the whole batch was received. {{fig-sosa-observations}}
+obtained (here, stored) by the client. 
+
+For a plain FETCH of "quantity",
+"timestamp-source" indicates which one to use as phenomenonTime: if it
+is "source", the device's own "timestamp" is used; if it is "receiver",
+the device did not supply one, and the receiver's own local time at
+reception is used instead.  For a single FETCH the two nearly coincide.
+
+For a history notification, phenomenonTime is reconstructed per sample
+from "step" as described in {{notifications}}, while resultTime is the
+single instant at which the whole batch was received. {{fig-sosa-observations}}
 shows three such observations, taken from the air-temperature values
 already decoded in {{fig-notification-decoded}}: all three share the
 same resultTime, since they were delivered together in one notification.
@@ -1249,14 +1263,390 @@ ex:observation/3 a sosa:Observation ;
 ~~~~
 {: #fig-sosa-observations title="Three dated sosa:Observation instances, decoded from a history notification" artwork-align="left"}
 
+### Storing Actuator Commands
 
+A value written to a transducer via the "instant-write" control (see
+{{control}}) is not an observation: it is a command sent to the device,
+not a measurement received from it. SOSA models this with sosa:Actuation
+rather than sosa:Observation: sosa:hasResult carries the value that was
+written, sosa:actsOnProperty identifies the actuatable property that was
+acted upon, and sosa:resultTime is when the command was issued by the
+client — there is no phenomenonTime, since nothing was measured.
+
+None of the ATMOS41 transducers used throughout this document is an
+actuator (all declare `default-category: "sensor"`), so
+{{fig-sosa-actuation}} illustrates the pattern with a fictitious
+device instead: a pump whose rotation speed is set through an
+"instant-write" command.
+
+~~~~
+@prefix sosa:  <http://www.w3.org/ns/sosa/> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix ccm2m: <https://ccm2m.example/ns#> .
+@prefix unit:  <http://qudt.org/vocab/unit/> .
+@prefix ex:    <https://pump.example.com/actuator/rotation-speed/> .
+
+ex: a sosa:Actuator ;
+    sosa:isHostedBy <https://pump.example.com> ;
+    sosa:actsOnProperty <https://pump.example.com/property/rotation-speed> ;
+    ccm2m:type "PPPPPP"^^ccm2m:SID ;
+    ccm2m:precision 0 ;
+    ccm2m:outputUnit unit:REV-PER-MIN ;
+    ccm2m:hasControl ex:control/instant-write .
+
+ex:control/instant-write a ccm2m:Control ;
+    ccm2m:controlType "instant-write" ;
+    ccm2m:coapMethod "iPATCH" ;
+    ccm2m:coapPath "/c" ;
+    ccm2m:targetSid "62077"^^ccm2m:SID .
+
+ex:actuation/1 a sosa:Actuation ;
+    sosa:madeByActuator ex: ;
+    sosa:actsOnProperty <https://pump.example.com/property/rotation-speed> ;
+    sosa:hasResult "1500"^^xsd:integer ;
+    sosa:resultTime "2026-09-07T14:22:10Z"^^xsd:dateTime .
+~~~~
+{: #fig-sosa-actuation title="Fictitious sosa:Actuation setting a pump's rotation speed to 1500 rpm, with its ccm2m: data" artwork-align="left"}
+
+"PPPPPP" is a placeholder: this pump does not exist in the atmos module
+used throughout this document, so its identity has no real SID (unlike
+10000001 for air-temperature, defined in atmos). `ccm2m:targetSid`,
+however, is the real SID 62077 for "/transducers/transducer/quantity/value":
+this leaf is defined in coreconf-m2m itself, not in a device-specific
+module, so it is the same structural node used to read air-temperature's
+current value in {{control}} — writing to it with an iPATCH, targeting
+this pump's own instance via its (fictitious) type, is the write
+counterpart of that same "read-single" FETCH.
+
+The pattern is otherwise symmetrical to {{fig-sosa-observations}}:
+sosa:Observation, sosa:observedProperty and sosa:hasSimpleResult become
+sosa:Actuation, sosa:actsOnProperty and sosa:hasResult, and
+sosa:madeBySensor becomes sosa:madeByActuator.
 
 ## SensorThings
 
-SensorThings is closely related to SOSA/SSN, so the mapping largely
-mirrors {{SOSA}}.
+Unlike SOSA/SSN, the OGC SensorThings API {{SensorThings}} is not a
+Semantic Web ontology: it is a structured, relational-like data model,
+exposed through a REST API inspired by OData, using plain JSON rather
+than RDF or JSON-LD. It defines a fixed set of entity types (Thing,
+Location, HistoricalLocation, Datastream, Sensor, ObservedProperty,
+Observation, FeatureOfInterest, and, for actuation, Actuator, Task, and
+TaskingCapability) linked by navigation properties, much like foreign
+keys between tables; most implementations are in fact backed by a
+relational database. Queries use OData-style `$filter`, `$expand`, and
+`$select`, rather than SPARQL. Its data model is nonetheless closely
+related to SOSA/SSN's concepts (Datastream/Sensor/Observation mirror
+sosa:Sensor/sosa:Observation), so the mapping from coreconf-m2m largely
+follows the same pattern as {{SOSA}}, but produces structured, tabular
+entities rather than RDF triples.
+
+### Example
+
+{{fig-st-thing}}, {{fig-st-sensor}}, and {{fig-st-observations}}
+transpose the SOSA example of {{control}} and {{fig-sosa-observations}}
+into SensorThings JSON entities, using the same station.example.com
+platform and air-temperature transducer. SensorThings has no equivalent
+of RDF's open, arbitrary predicates, so the `ccm2m:` extension is added
+as ancillary data instead: each entity's `properties` field is a
+free-form JSON object, into which the same `ccm2m:` keys used in the
+SOSA examples are placed as ordinary object members.
+
+~~~~
+GET /Things(1)
+
+{
+  "@iot.id": 1,
+  "name": "station.example.com",
+  "description": "CORECONF-M2M platform station.example.com",
+  "properties": {
+    "ccm2m:accessProtocol": "coreconf",
+    "ccm2m:bootstrapSid": 62002,
+    "ccm2m:coapEndpoint": "coap://[2001:db8::1]"
+  }
+}
+~~~~
+{: #fig-st-thing title="A coreconf-m2m platform as a SensorThings Thing" artwork-align="left"}
+
+A Thing's `properties` bag is where the `ccm2m:` extension lives: there
+is no dedicated Thing property for a CoAP endpoint or a bootstrap SID, so
+they are carried as ancillary data instead, the same role played by
+ccm2m:coapEndpoint and ccm2m:bootstrapSid on a sosa:Platform.
+
+Unlike sosa:hosts, which links a sosa:Platform directly to the
+sosa:Sensor instances it hosts, SensorThings has no direct
+Thing-to-Sensor navigation link: a Sensor is only reachable through the
+Datastream that uses it. Finding the sensors (and, symmetrically, the
+actuators) associated with a Thing therefore takes an extra hop:
+
+~~~~
+GET /Things(1)/Datastreams
+
+{
+  "value": [
+    { "@iot.id": 1, "name": "station.example.com/air-temperature",
+      "Sensor@iot.navigationLink":
+        "http://.../Datastreams(1)/Sensor" }
+  ]
+}
+~~~~
+{: #fig-st-navigation title="Reaching a Thing's Sensor via its Datastream" artwork-align="left"}
+
+i.e. Thing → Datastream → Sensor, rather than Thing → Sensor directly.
+The symmetric path for actuation is Thing → TaskingCapability →
+Actuator, via `/Things(1)/TaskingCapabilities` and
+`/TaskingCapabilities(x)/Actuator`.
+
+Unlike SOSA, SensorThings has a dedicated entity for geo-location:
+Location, reached via `Thing/Locations` (a Thing can have more than
+one, and a Location can be shared by several Things).
+
+~~~~
+GET /Things(1)/Locations
+
+{
+  "value": [{
+    "@iot.id": 1,
+    "name": "station.example.com location",
+    "encodingType": "application/vnd.geo+json",
+    "location": {
+      "type": "Point",
+      "coordinates": [-1.6778, 48.1173]
+    }
+  }]
+}
+~~~~
+{: #fig-st-location title="A Thing's Location, the SensorThings equivalent of the geo:lat/geo:long pair used with SOSA" artwork-align="left"}
+
+This corresponds to the same "characteristics/geo-location"
+({{characteristics-sub-tree}}) as the geo:lat/geo:long pair used in
+{{fig-sosa-instance}}. HistoricalLocations additionally tracks changes
+of Location over time, for a mobile device.
+
+~~~~
+GET /Sensors(1)
+
+{
+  "@iot.id": 1,
+  "name": "air-temperature",
+  "description": "air-temperature on station.example.com",
+  "encodingType": "application/pdf",
+  "metadata": "https://metergroup.com/documents/ATMOS41-Manual.pdf",
+  "properties": {
+    "ccm2m:type": 10000001,
+    "ccm2m:precision": 1
+  }
+}
+
+GET /Datastreams(1)
+
+{
+  "@iot.id": 1,
+  "name": "station.example.com/air-temperature",
+  "description": "air-temperature measured by station.example.com",
+  "observationType":
+    "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+  "unitOfMeasurement": {
+    "definition": "http://qudt.org/vocab/unit/DEG_C",
+    "name": "http://qudt.org/vocab/unit/DEG_C",
+    "symbol": "Cel"
+  }
+}
+~~~~
+{: #fig-st-sensor title="The air-temperature Sensor and its Datastream" artwork-align="left"}
+
+A Sensor's `encodingType`/`metadata` pair describes its datasheet, not
+its identity: `metadata` is a URL to that document (or the document
+itself, for a text-based encodingType), and `encodingType` says what
+format it is in — `application/pdf` and SensorML are the two most common
+in practice. The Sensor's `ccm2m:type` plays the same role as on a sosa:Sensor.
+Unlike SOSA, where `ccm2m:outputUnit` had to be added because SOSA has no
+native concept of unit, a Datastream already carries `unitOfMeasurement`
+natively (a QUDT IRI, symbol, and name), so no `ccm2m:` property is
+needed for it here. An ObservedProperty entity (not shown), linked from
+the Datastream, plays the role of sosa:ObservableProperty.
+
+~~~~
+GET /Datastreams(1)/Observations?$top=3&$orderby=phenomenonTime desc
+
+{
+  "value": [
+    {
+      "@iot.id": 1,
+      "phenomenonTime": "2026-09-02T09:57:42Z",
+      "resultTime": "2026-09-02T10:15:45Z",
+      "result": 18.9
+    },
+    {
+      "@iot.id": 2,
+      "phenomenonTime": "2026-09-02T09:59:42Z",
+      "resultTime": "2026-09-02T10:15:45Z",
+      "result": 20.3
+    },
+    {
+      "@iot.id": 3,
+      "phenomenonTime": "2026-09-02T10:01:42Z",
+      "resultTime": "2026-09-02T10:15:45Z",
+      "result": 20.0
+    }
+  ]
+}
+~~~~
+{: #fig-st-observations title="Three dated Observations, the SensorThings equivalent of fig-sosa-observations" artwork-align="left"}
+
+These are the same three samples as {{fig-sosa-observations}}: `result`
+plays the role of sosa:hasSimpleResult, already a plain JSON number
+rather than a typed literal, and phenomenonTime/resultTime carry the
+same distinction as sosa:phenomenonTime/sosa:resultTime — all three
+share one resultTime, since they were delivered together in one history
+notification, while phenomenonTime is reconstructed per sample from
+"step".
 
 ## SAREF
+
+To be defined.
+
+# MCP
+
+CORECONF/CoAP and the SensorThings/FROST database are both, in essence,
+REST-style interfaces: a small set of operations (read, write, query,
+subscribe) applied to addressable resources. Each can therefore be
+documented as a set of typed, named operations and exposed to an AI
+agent as an MCP (Model Context Protocol) server, rather than requiring
+the agent to construct raw CoAP/CBOR or FROST query requests itself.
+
+This document's companion implementation uses two such servers, kept
+separate because they act on two different things: one performs live
+CoAP actions against the physical device, the other queries and edits
+the structured historical data already stored in FROST.
+
+The "coreconf-m2m" MCP server wraps live device actions, each tool
+resolving what it needs (the platform's CoAP endpoint, the sensor's
+identity/instance SIDs, the target field SID) from the FROST database
+before issuing the corresponding CoAP request:
+
+* `read_instant(hostname, sensor)` — FETCH the current value, already
+  scaled by the sensor's ccm2m:precision;
+* `read_stat(hostname, sensor)` — FETCH accumulated statistics
+  (min/max/mean/median/stdev/sample-count), scaled;
+* `start_history_notify(hostname, sensor, step_ms, max_samples,
+  check_interval)` — iPATCH to configure, then FETCH+Observe to start, a
+  history-notification subscription; incoming samples are written to
+  FROST as Observations as they arrive;
+* `stop_history_notify(hostname, sensor)` — cancel a running
+  subscription;
+* `list_active_history_subscriptions()` — list every subscription
+  currently running, across clients.
+
+The "frost-sensorthings" MCP server wraps the SensorThings REST API
+itself, generically (not tied to the ccm2m ontology), respecting FROST's
+own query syntax, on any of the entity sets of {{sensorthings}}:
+
+* `list_service_capabilities()` — the entity sets this FROST-Server
+  instance exposes;
+* `query_entities(entity_set, filter, expand, select, orderby, top,
+  skip, count)` — list/filter an entity set, e.g. `query_entities(
+  "Observations", filter="phenomenonTime gt 2026-07-01T00:00:00Z",
+  orderby="phenomenonTime desc", top=20)`;
+* `get_entity(entity_set, entity_id, expand, select)` — get one entity
+  by its @iot.id;
+* `get_related(entity_set, entity_id, relation, ...)` — navigate a
+  relationship, e.g. `get_related("Things", 1, "Datastreams")` (see
+  {{fig-st-navigation}});
+* `create_entity`, `update_entity`, `delete_entity` — write access.
+
+Because both servers resolve identities (SIDs, hostnames, sensor names)
+against the same FROST database, an agent can freely mix tools from
+both — e.g. list a Thing's Datastreams via `get_related`, then call
+`read_instant` for one of them — without separately tracking SID files
+or CoAP endpoints itself.
+
+{{fig-mcp-flow}} illustrates this with a concrete question: "what is the
+temperature right now in Rennes?" The agent first uses FROST to turn
+"Rennes" into a device and a sensor, then uses coreconf-m2m to read that
+sensor live; the result is written back to FROST as it comes in, so a
+later question about the same value would find it already there instead
+of triggering a new CoAP exchange.
+
+~~~~
+Device            MCP CoreCONF        MCP Frost           LLM
+|                 |                   |                   |
+                                        query_entities("Things",
+                                         filter: near Rennes)
+|                 |                   <-------------------|
+|                 |                   |                   |
+                                        Thing, ccm2m:coapEndpoint
+|                 |                   |------------------->
+|                 |                   |                   |
+                                        get_related(Thing,
+                                         "Datastreams")
+|                 |                   <-------------------|
+|                 |                   |                   |
+                                        Sensor SID, precision
+|                 |                   |------------------->
+|                 |                   |                   |
+                    read_instant(hostname, sensor)
+|                 <---------------------------------------|
+|                 |                   |                   |
+                    resolve endpoint/SIDs
+|                 |------------------->                   |
+|                 |                   |                   |
+                    endpoint, type SID
+|                 <-------------------|                   |
+|                 |                   |                   |
+  FETCH quantity/value
+<-----------------|                   |                   |
+|                 |                   |                   |
+  2.05 Content (raw value)
+|----------------->                   |                   |
+|                 |                   |                   |
+                    create Observation
+                     (store result)
+|                 |------------------->                   |
+|                 |                   |                   |
+                    scaled value + unit
+|                 |--------------------------------------->
+|                 |                   |                   |
+~~~~
+{: #fig-mcp-flow title="Answering \"what is the temperature right now in Rennes?\" by combining the frost-sensorthings and coreconf-m2m MCP servers" artwork-align="left"}
+
+The LLM then answers the user directly from the value returned in the
+last step, e.g. "It's 19.6 C in Rennes".
+
+It should be noted that the LLM selects the appropriate sensor from its
+name, "air-temperature": without the mapping between the identityref
+SID and the associated name, the LLM would not have been able to
+retrieve the information. More exhaustively, the LLM may also have
+access to the YANG data model describing the device, and use its
+descriptions to gain a better understanding of the device.
+
+
+# Conclusion
+
+This document has shown that it is possible to seamlessly interconnect
+a YANG data model to the ontologies used by domain professionals.
+
+1. Devices cannot directly use such an ontology representation
+   themselves, since it is too verbose for a constrained device.
+2. RESTCONF and NETCONF, using JSON or XML, are also too verbose, so
+   the benefit of mapping directly from them to an ontology is limited.
+3. CORECONF is constrained, and this constrained representation is what
+   lets a device benefit from the ontology mapping without paying its
+   verbosity cost.
+4. The ontology is used to store all the information concerning the
+   systems.
+5. CORECONF uses the ontology information to form its requests.
+6. Naming is very important, and DNS will play an important role in
+   automatically mapping a SID into a name.
+7. Names are used both to form names in the ontology and to allow an
+   LLM to identify resources.
+8. Interoperability is possible since coreconf-m2m offers a strict data
+   representation of the information, and allows a systematic
+   conversion into the ontology.
+
+Based on the coreconf-m2m model, a device manufacturer only has to
+publish its data model, with its identityref identities, for that
+device to be included into the ontology and be understood by humans or
+by an LLM.
 
 # Security Considerations
 
