@@ -3183,6 +3183,233 @@ Declared once on the Sensor; not repeated per Observation.""" ;
 ]]></artwork></figure>
 
 </section>
+<section anchor="annex-schc-rules" title="SCHC Rule Set">
+
+
+<t>The following SCHC <xref target="RFC8724"/> Rule Set, expressed in the JSON format of
+<xref target="RFC9363"/>, compresses the IPv6/UDP/CoAP traffic
+exchanged with the ATMOS41 weather station used throughout this
+document. It is not the final version of this rule set and is expected
+to change as the model evolves.</t>
+
+<figure title="SCHC Rule Set for the ATMOS41 weather station" anchor="fig-schc-rules"><artwork><![CDATA[
+{
+    "DeviceID" : "udp:10.0.0.20:8888",
+    "SoR" : [{
+        "RuleIDValue" : 0,
+        "RuleIDLength": 5,
+        "Description": "Used a bootstrap to get the transducer list (d=0).",
+        "Compression": [         
+            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
+            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "value-sent"},
+            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "value-sent"},
+            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
+            {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
+            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
+            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
+                                                   "MO": "equal","CDA": "not-sent"},
+            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"},
+            {"FID": "IPV6.APP_PREFIX",             "MO": "ignore","CDA": "value-sent"},
+            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
+
+            {"FID": "UDP.DEV_PORT",  "TV": 5683,"MO": "equal",  "CDA": "not-sent"},
+            {"FID": "UDP.APP_PORT",             "MO": "ignore", "CDA": "value-sent"},
+            {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore", "CDA": "compute-length"},
+            {"FID": "UDP.CKSUM",     "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
+
+            {"FID": "COAP.VER",  "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
+            {"FID": "COAP.TYPE", "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
+            {"FID": "COAP.TKL",  "DI": "BI", "TV": 0,   "MO": "ignore","CDA": "value-sent"},
+            {"FID": "COAP.CODE", "DI": "BI", "TV": [5, 7, 69],   "MO": "match-mapping","CDA": "mapping-sent"},
+            {"FID": "COAP.MID",  "DI": "BI", "TV": 0,   "MO": "ignore", "CDA": "value-sent"},
+            {"FID": "COAP.TOKEN", "FL": "length-byte(16)",     "MO": "ignore","CDA": "value-sent"},
+            
+            {"FID": "COAP.option(11)", "FP": 1, "DI": "DW", "TV": ["c", "s"], 
+                                "MO": "match-mapping","CDA": "mapping-sent"},
+            {"FID": "COAP.option(12)", "DI": "DW", "TV": [141,142], "MO": "match-mapping", "CDA": "mapping-sent"},
+            {"FID": "COAP.option(12)", "DI": "UP", "TV":  142, "MO": "equal", "CDA": "not-sent"},
+            {"FID": "COAP.option(15)", "DI": "DW", "TV": "d=0", "MO": "equal", "CDA": "not-sent"},
+            {"FID": "COAP.option(17)", "DI": "DW", "TV": 142, "MO": "equal", "CDA": "not-sent"}
+        ]},
+        {
+        "RuleIDValue" : 1,
+        "RuleIDLength": 5,
+        "Description": "Used to fetch a single value (bidirect)",
+        "Compression": [
+            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
+            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "value-sent"},
+            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "value-sent"},
+            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
+            {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
+            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
+            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
+                                                   "MO": "equal","CDA": "not-sent"},
+            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"},
+            {"FID": "IPV6.APP_PREFIX",             "MO": "ignore","CDA": "value-sent"},
+            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
+
+            {"FID": "UDP.DEV_PORT",  "TV": 5683,"MO": "equal",  "CDA": "not-sent"},
+            {"FID": "UDP.APP_PORT",             "MO": "ignore", "CDA": "value-sent"},
+            {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore", "CDA": "compute-length"},
+            {"FID": "UDP.CKSUM",     "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
+
+            {"FID": "COAP.VER",  "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
+            {"FID": "COAP.TYPE", "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
+            {"FID": "COAP.TKL",  "DI": "BI", "TV": 0,   "MO": "ignore","CDA": "value-sent"},
+            {"FID": "COAP.CODE", "DI": "BI", "TV": [5, 69],   "MO": "match-mapping","CDA": "mapping-sent"},
+            {"FID": "COAP.MID",  "DI": "BI", "TV": 0,   "MO": "ignore", "CDA": "value-sent"},
+            {"FID": "COAP.TOKEN", "FL": "length-byte(16)",     "MO": "ignore","CDA": "value-sent"},
+
+            {"FID": "COAP.option(11)", "FP": 1, "DI": "DW", "TV": ["c"],
+                                "MO": "match-mapping","CDA": "mapping-sent"},
+            {"FID": "COAP.option(12)", "DI": "DW", "TV": [141,142], "MO": "match-mapping", "CDA": "mapping-sent"},
+            {"FID": "COAP.option(12)", "DI": "UP", "TV":  142, "MO": "equal", "CDA": "not-sent"},
+            {"FID": "COAP.option(17)", "DI": "DW", "TV":  142, "MO": "equal", "CDA": "not-sent"}
+
+        ]},         {
+        "RuleIDValue" : 2,
+        "RuleIDLength": 5,
+        "Description": "Used to iPatch, ack with 7/3. Empty CoAP for notification in UP",
+        "Compression": [
+            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
+            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "value-sent"},
+            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "value-sent"},
+            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
+            {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
+            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
+            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
+                                                   "MO": "equal","CDA": "not-sent"},
+            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"},
+            {"FID": "IPV6.APP_PREFIX",             "MO": "ignore","CDA": "value-sent"},
+            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
+
+            {"FID": "UDP.DEV_PORT",  "TV": 5683,"MO": "equal",  "CDA": "not-sent"},
+            {"FID": "UDP.APP_PORT",             "MO": "ignore", "CDA": "value-sent"},
+            {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore", "CDA": "compute-length"},
+            {"FID": "UDP.CKSUM",     "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
+
+            {"FID": "COAP.VER",  "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
+            {"FID": "COAP.TYPE", "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
+            {"FID": "COAP.TKL",  "DI": "BI", "TV": 0,   "MO": "ignore","CDA": "value-sent"},
+            {"FID": "COAP.CODE", "DI": "DW", "TV": [7],   "MO": "match-mapping","CDA": "mapping-sent"},
+            {"FID": "COAP.CODE", "DI": "UP",              "MO": "ignore","CDA": "value-sent"},
+            {"FID": "COAP.MID",  "DI": "BI", "TV": 0,   "MO": "ignore", "CDA": "value-sent"},
+            {"FID": "COAP.TOKEN", "FL": "length-byte(16)",     "MO": "ignore","CDA": "value-sent"},
+
+            {"FID": "COAP.option(11)", "FP": 1, "DI": "DW", "TV": ["c"],
+                                "MO": "match-mapping","CDA": "mapping-sent"},
+            {"FID": "COAP.option(12)", "DI": "DW", "TV": [141,142], "MO": "match-mapping", "CDA": "mapping-sent"}
+        ]},          {
+        "RuleIDValue" : 3,
+        "RuleIDLength": 5,
+        "Description": "Used for notitifications (observe)",
+        "Compression": [
+            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
+            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "value-sent"},
+            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "value-sent"},
+            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
+            {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
+            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
+            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
+                                                   "MO": "equal","CDA": "not-sent"},
+            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"},
+            {"FID": "IPV6.APP_PREFIX",             "MO": "ignore","CDA": "value-sent"},
+            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
+
+            {"FID": "UDP.DEV_PORT",  "TV": 5683,"MO": "equal",  "CDA": "not-sent"},
+            {"FID": "UDP.APP_PORT",             "MO": "ignore", "CDA": "value-sent"},
+            {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore", "CDA": "compute-length"},
+            {"FID": "UDP.CKSUM",     "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
+
+            {"FID": "COAP.VER",  "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
+            {"FID": "COAP.TYPE", "DI": "BI", "TV": [0,1],   "MO": "match-mapping","CDA": "mapping-sent"},
+            {"FID": "COAP.TKL",  "DI": "BI", "TV": 0,   "MO": "ignore","CDA": "value-sent"},
+            {"FID": "COAP.CODE", "DI": "BI", "TV": [5, 7, 69],   "MO": "match-mapping","CDA": "mapping-sent"},
+            {"FID": "COAP.MID",  "DI": "BI", "TV": 0,   "MO": "ignore", "CDA": "value-sent"},
+            {"FID": "COAP.TOKEN", "FL": "length-byte(16)",     "MO": "ignore","CDA": "value-sent"},
+
+            {"FID": "COAP.option(6)", "FL": "var", "FP": 1, "DI": "BI",     "MO": "ignore", "CDA": "value-sent"},
+            {"FID": "COAP.option(11)", "FP": 1, "DI": "DW", "TV": ["s"],    "MO": "match-mapping","CDA": "mapping-sent"},
+            {"FID": "COAP.option(12)", "DI": "DW", "TV": [141], "MO": "match-mapping", "CDA": "mapping-sent"},
+            {"FID": "COAP.option(12)", "DI": "UP", "TV": [142], "MO": "match-mapping", "CDA": "mapping-sent"},
+            {"FID": "COAP.option(17)", "DI": "DW", "TV": [142], "MO": "match-mapping", "CDA": "mapping-sent"}
+        ]},         {
+        "RuleIDValue" : 4,
+        "RuleIDLength": 5,
+        "Description": "Empty messages (e.g., ACK with empty code, or RST)",
+        "Compression": [
+            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
+            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "value-sent"},
+            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "value-sent"},
+            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
+            {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
+            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
+            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
+                                                   "MO": "equal","CDA": "not-sent"},
+            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"},
+            {"FID": "IPV6.APP_PREFIX",             "MO": "ignore","CDA": "value-sent"},
+            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
+
+            {"FID": "UDP.DEV_PORT",  "TV": 5683,"MO": "equal",  "CDA": "not-sent"},
+            {"FID": "UDP.APP_PORT",             "MO": "ignore", "CDA": "value-sent"},
+            {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore", "CDA": "compute-length"},
+            {"FID": "UDP.CKSUM",     "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
+
+            {"FID": "COAP.VER",  "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
+            {"FID": "COAP.TYPE", "DI": "BI",            "MO": "ignore","CDA": "value-sent"},
+            {"FID": "COAP.TKL",  "DI": "BI",            "MO": "ignore","CDA": "value-sent"},
+            {"FID": "COAP.CODE", "DI": "BI",            "MO": "ignore","CDA": "value-sent"},
+            {"FID": "COAP.MID",  "DI": "BI",            "MO": "ignore", "CDA": "value-sent"},
+            {"FID": "COAP.TOKEN", "FL": "length-byte(16)",     "MO": "ignore","CDA": "value-sent"}
+        ]},   {
+        "RuleIDValue" : 5,
+        "RuleIDLength": 5,
+        "Description": "ICMPv6 port unreachable",
+        "Compression": [
+            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
+            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "not-sent"},
+            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "not-sent"},
+            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
+            {"FID": "IPV6.NXT", "TV": 58, "MO": "equal", "CDA": "not-sent"},
+            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
+            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
+                                                   "MO": "equal","CDA": "not-sent"},
+            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"},
+            {"FID": "IPV6.APP_PREFIX",             "MO": "ignore","CDA": "value-sent"},
+            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
+
+            {"FID": "ICMPV6.TYPE", "TV": 1, "MO": "equal", "CDA": "not-sent"},
+            {"FID": "ICMPV6.CODE", "TV": 4, "MO": "equal", "CDA": "not-sent"},
+            {"FID": "ICMPV6.CKSUM",   "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
+            {"FID": "UNUSED", "FL": 32, "MO": "ignore", "CDA": "not-sent"},
+
+ 
+            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
+            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "not-sent"},
+            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "not-sent"},
+            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
+            {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
+            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
+            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
+                                                   "MO": "equal","CDA": "not-sent"},
+            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"}, 
+            {"FID": "IPV6.APP_PREFIX",
+                                                   "MO": "ignore","CDA": "value-sent"},
+            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
+
+            {"FID": "UDP.DEV_PORT",  "TV": 5683,"MO": "equal",  "CDA": "not-sent"},
+            {"FID": "UDP.APP_PORT",             "MO": "ignore", "CDA": "value-sent"},
+            {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore", "CDA": "compute-length"},
+            {"FID": "UDP.CKSUM",     "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
+
+            {"FID": "PAYLOAD",             "MO": "ignore","CDA": "not-sent"}
+
+        ]} 
+    ]
+}
+]]></artwork></figure>
+
+</section>
 <section numbered="false" anchor="acknowledgments" title="Acknowledgments">
 <t>This work has been supported by the SCHC Chair from IMT Atlantique and Afnic.</t>
 
@@ -3192,7 +3419,7 @@ Declared once on the Sensor; not repeated per Observation.""" ;
   </back>
 
 <!-- ##markdown-source:
-H4sIAMbtn2oAA+y963YbyZkg+D+fIhblHgE2LgSpCwV1Wc2ipCrOiqIsUu3u
+H4sIALUToGoAA+y963YbyZkg+D+fIhblHgE2LgSpCwV1Wc2ipCrOiqIsUu3u
 9biLSSBBppVAwpkJUbTMPXPOnjO/9+yZB+ln6BfYd+gn2e8al8wESKmqerw7
 y1O2SCAyMuKLL777ZTAYRFVaZcnEdA5P3r08PHnzyszzwhzH06t0mQyqfCC/
 msN8sVgv02lcpfmyE8UXF0XyEZ6b5kUyzZfzwWJ30Yng6+QyL24mJl3O8yhd
@@ -3828,120 +4055,150 @@ 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
-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
-SLlBo/F/lAAHDB3tAQA=
+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
+DEDt3E79Ua3APv8HMNBDamwpAgA=
 
 -->
 
