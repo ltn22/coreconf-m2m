@@ -908,8 +908,6 @@ earlier samples are stepped back by 120 s each, oldest first.
 
 
 
-# CORECONF Compression
-
 # From CBOR/SID to Textual Identifiers {#from-cbor-sid-to-textual-identifiers}
 
 The examples throughout this document use CBOR payloads keyed by SIDs
@@ -1677,6 +1675,15 @@ retrieve the information. More exhaustively, the LLM may also have
 access to the YANG data model describing the device, and use its
 descriptions to gain a better understanding of the device.
 
+# Compression
+
+## SCHC
+
+TBD.
+
+## CORECONF Payload
+
+TBD.
 
 # Conclusion
 
@@ -3096,4 +3103,6 @@ Declared once on the Sensor; not repeated per Observation.""" ;
 # Acknowledgments
 {:numbered="false"}
 This work has been supported by the SCHC Chair from IMT Atlantique and Afnic.
+
+
 
