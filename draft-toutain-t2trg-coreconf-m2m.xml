@@ -44,7 +44,7 @@
       </address>
     </author>
 
-    <date year="2026" month="September" day="08"/>
+    <date year="2026" month="September" day="09"/>
 
     <area>IRTF</area>
     <workgroup>Thing-to-Thing Research Group (T2TRG)</workgroup>
@@ -3186,229 +3186,305 @@ Declared once on the Sensor; not repeated per Observation.""" ;
 <section anchor="annex-schc-rules" title="SCHC Rule Set">
 
 
-<t>The following SCHC <xref target="RFC8724"/> Rule Set, expressed in the JSON format of
-<xref target="RFC9363"/>, compresses the IPv6/UDP/CoAP traffic
-exchanged with the ATMOS41 weather station used throughout this
-document. It is not the final version of this rule set and is expected
-to change as the model evolves.</t>
+<t>The following SCHC <xref target="RFC8724"/> Rule Set compresses the IPv6/UDP/CoAP
+traffic exchanged with the ATMOS41 weather station used throughout
+this document. It is not the final version of this rule set and is
+expected to change as the model evolves. Field names (FID), matching
+operators (MO), and compression/decompression actions (CDA) are as
+defined in <xref target="RFC8724"/>; FL is the Field Length, DI the Direction
+Indicator, and TV the Target Value (the Field Position, FP, is omitted
+from the tables below for compactness; it defaults to 1 unless a field
+is repeated, which does not happen in this Rule Set). The bootstrap rule
+(Rule 0 in the source Rule Set) is omitted here, being identical in
+structure to Rule 1.</t>
 
-<figure title="SCHC Rule Set for the ATMOS41 weather station" anchor="fig-schc-rules"><artwork><![CDATA[
-{
-    "DeviceID" : "udp:10.0.0.20:8888",
-    "SoR" : [{
-        "RuleIDValue" : 0,
-        "RuleIDLength": 5,
-        "Description": "Used a bootstrap to get the transducer list (d=0).",
-        "Compression": [         
-            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
-            {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
-                                                   "MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.APP_PREFIX",             "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
+<t>Below each rule, the resulting residue format is given for the Down
+(network to device) and Up (device to network) directions: the ordered
+list of fields that still carry a residue after compression — i.e.
+those whose CDA is not “not-sent”, “compute-length”, or
+“compute-checksum” — together with the number of bits sent for that
+field (“var” when the size is not fixed). A “mapping-sent” field over a
+single-valued TV list contributes no residue bits, since only one value
+is possible and is therefore omitted.</t>
 
-            {"FID": "UDP.DEV_PORT",  "TV": 5683,"MO": "equal",  "CDA": "not-sent"},
-            {"FID": "UDP.APP_PORT",             "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore", "CDA": "compute-length"},
-            {"FID": "UDP.CKSUM",     "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
+<section anchor="rule-1-used-to-fetch-a-single-value-bidirect" title="Rule 1: Used to fetch a single value (bidirect)">
 
-            {"FID": "COAP.VER",  "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TYPE", "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TKL",  "DI": "BI", "TV": 0,   "MO": "ignore","CDA": "value-sent"},
-            {"FID": "COAP.CODE", "DI": "BI", "TV": [5, 7, 69],   "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.MID",  "DI": "BI", "TV": 0,   "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "COAP.TOKEN", "FL": "length-byte(16)",     "MO": "ignore","CDA": "value-sent"},
-            
-            {"FID": "COAP.option(11)", "FP": 1, "DI": "DW", "TV": ["c", "s"], 
-                                "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.option(12)", "DI": "DW", "TV": [141,142], "MO": "match-mapping", "CDA": "mapping-sent"},
-            {"FID": "COAP.option(12)", "DI": "UP", "TV":  142, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "COAP.option(15)", "DI": "DW", "TV": "d=0", "MO": "equal", "CDA": "not-sent"},
-            {"FID": "COAP.option(17)", "DI": "DW", "TV": 142, "MO": "equal", "CDA": "not-sent"}
-        ]},
-        {
-        "RuleIDValue" : 1,
-        "RuleIDLength": 5,
-        "Description": "Used to fetch a single value (bidirect)",
-        "Compression": [
-            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
-            {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
-                                                   "MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.APP_PREFIX",             "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
-
-            {"FID": "UDP.DEV_PORT",  "TV": 5683,"MO": "equal",  "CDA": "not-sent"},
-            {"FID": "UDP.APP_PORT",             "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore", "CDA": "compute-length"},
-            {"FID": "UDP.CKSUM",     "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
-
-            {"FID": "COAP.VER",  "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TYPE", "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TKL",  "DI": "BI", "TV": 0,   "MO": "ignore","CDA": "value-sent"},
-            {"FID": "COAP.CODE", "DI": "BI", "TV": [5, 69],   "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.MID",  "DI": "BI", "TV": 0,   "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "COAP.TOKEN", "FL": "length-byte(16)",     "MO": "ignore","CDA": "value-sent"},
-
-            {"FID": "COAP.option(11)", "FP": 1, "DI": "DW", "TV": ["c"],
-                                "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.option(12)", "DI": "DW", "TV": [141,142], "MO": "match-mapping", "CDA": "mapping-sent"},
-            {"FID": "COAP.option(12)", "DI": "UP", "TV":  142, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "COAP.option(17)", "DI": "DW", "TV":  142, "MO": "equal", "CDA": "not-sent"}
-
-        ]},         {
-        "RuleIDValue" : 2,
-        "RuleIDLength": 5,
-        "Description": "Used to iPatch, ack with 7/3. Empty CoAP for notification in UP",
-        "Compression": [
-            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
-            {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
-                                                   "MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.APP_PREFIX",             "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
-
-            {"FID": "UDP.DEV_PORT",  "TV": 5683,"MO": "equal",  "CDA": "not-sent"},
-            {"FID": "UDP.APP_PORT",             "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore", "CDA": "compute-length"},
-            {"FID": "UDP.CKSUM",     "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
-
-            {"FID": "COAP.VER",  "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TYPE", "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TKL",  "DI": "BI", "TV": 0,   "MO": "ignore","CDA": "value-sent"},
-            {"FID": "COAP.CODE", "DI": "DW", "TV": [7],   "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.CODE", "DI": "UP",              "MO": "ignore","CDA": "value-sent"},
-            {"FID": "COAP.MID",  "DI": "BI", "TV": 0,   "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "COAP.TOKEN", "FL": "length-byte(16)",     "MO": "ignore","CDA": "value-sent"},
-
-            {"FID": "COAP.option(11)", "FP": 1, "DI": "DW", "TV": ["c"],
-                                "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.option(12)", "DI": "DW", "TV": [141,142], "MO": "match-mapping", "CDA": "mapping-sent"}
-        ]},          {
-        "RuleIDValue" : 3,
-        "RuleIDLength": 5,
-        "Description": "Used for notitifications (observe)",
-        "Compression": [
-            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
-            {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
-                                                   "MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.APP_PREFIX",             "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
-
-            {"FID": "UDP.DEV_PORT",  "TV": 5683,"MO": "equal",  "CDA": "not-sent"},
-            {"FID": "UDP.APP_PORT",             "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore", "CDA": "compute-length"},
-            {"FID": "UDP.CKSUM",     "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
-
-            {"FID": "COAP.VER",  "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TYPE", "DI": "BI", "TV": [0,1],   "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.TKL",  "DI": "BI", "TV": 0,   "MO": "ignore","CDA": "value-sent"},
-            {"FID": "COAP.CODE", "DI": "BI", "TV": [5, 7, 69],   "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.MID",  "DI": "BI", "TV": 0,   "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "COAP.TOKEN", "FL": "length-byte(16)",     "MO": "ignore","CDA": "value-sent"},
-
-            {"FID": "COAP.option(6)", "FL": "var", "FP": 1, "DI": "BI",     "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "COAP.option(11)", "FP": 1, "DI": "DW", "TV": ["s"],    "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.option(12)", "DI": "DW", "TV": [141], "MO": "match-mapping", "CDA": "mapping-sent"},
-            {"FID": "COAP.option(12)", "DI": "UP", "TV": [142], "MO": "match-mapping", "CDA": "mapping-sent"},
-            {"FID": "COAP.option(17)", "DI": "DW", "TV": [142], "MO": "match-mapping", "CDA": "mapping-sent"}
-        ]},         {
-        "RuleIDValue" : 4,
-        "RuleIDLength": 5,
-        "Description": "Empty messages (e.g., ACK with empty code, or RST)",
-        "Compression": [
-            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
-            {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
-                                                   "MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.APP_PREFIX",             "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
-
-            {"FID": "UDP.DEV_PORT",  "TV": 5683,"MO": "equal",  "CDA": "not-sent"},
-            {"FID": "UDP.APP_PORT",             "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore", "CDA": "compute-length"},
-            {"FID": "UDP.CKSUM",     "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
-
-            {"FID": "COAP.VER",  "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TYPE", "DI": "BI",            "MO": "ignore","CDA": "value-sent"},
-            {"FID": "COAP.TKL",  "DI": "BI",            "MO": "ignore","CDA": "value-sent"},
-            {"FID": "COAP.CODE", "DI": "BI",            "MO": "ignore","CDA": "value-sent"},
-            {"FID": "COAP.MID",  "DI": "BI",            "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "COAP.TOKEN", "FL": "length-byte(16)",     "MO": "ignore","CDA": "value-sent"}
-        ]},   {
-        "RuleIDValue" : 5,
-        "RuleIDLength": 5,
-        "Description": "ICMPv6 port unreachable",
-        "Compression": [
-            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "not-sent"},
-            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
-            {"FID": "IPV6.NXT", "TV": 58, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
-                                                   "MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.APP_PREFIX",             "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
-
-            {"FID": "ICMPV6.TYPE", "TV": 1, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "ICMPV6.CODE", "TV": 4, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "ICMPV6.CKSUM",   "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
-            {"FID": "UNUSED", "FL": 32, "MO": "ignore", "CDA": "not-sent"},
-
- 
-            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "not-sent"},
-            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
-            {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
-                                                   "MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"}, 
-            {"FID": "IPV6.APP_PREFIX",
-                                                   "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
-
-            {"FID": "UDP.DEV_PORT",  "TV": 5683,"MO": "equal",  "CDA": "not-sent"},
-            {"FID": "UDP.APP_PORT",             "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore", "CDA": "compute-length"},
-            {"FID": "UDP.CKSUM",     "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
-
-            {"FID": "PAYLOAD",             "MO": "ignore","CDA": "not-sent"}
-
-        ]} 
-    ]
-}
+<figure title="SCHC Rule 1 (RuleIDLength=5)" anchor="fig-schc-rule-1"><artwork align="left"><![CDATA[
+/--------------+----------+----+---------------+---------+-----------\
+| FID          | FL       | DI | TV            | MO      | CDA       |
++==============+==========+====+===============+=========+===========+
+| IPV6.VER     | 4        | bi | 6             | equal   | not-sent  |
+| IPV6.TC      | 8        | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| IPV6.FL      | 20       | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| IPV6.LEN     | 16       | bi |               | ignore  | compute-  |
+|              |          |    |               |         | length    |
+| IPV6.NXT     | 8        | bi | 17            | equal   | not-sent  |
+| IPV6.HOP_LMT | 8        | bi | 255           | ignore  | not-sent  |
+| IPV6.DEV_PRE | 64       | bi | dddd::/64     | equal   | not-sent  |
+| FIX          |          |    |               |         |           |
+| IPV6.DEV_IID | 64       | bi | ::6/64        | equal   | not-sent  |
+| IPV6.APP_PRE | 64       | bi | aaaa::/64     | equal   | not-sent  |
+| FIX          |          |    |               |         |           |
+| IPV6.APP_IID | 64       | bi | ::2/64        | equal   | not-sent  |
+| UDP.DEV_PORT | 16       | bi | 5683          | equal   | not-sent  |
+| UDP.APP_PORT | 16       | bi |               | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| UDP.LEN      | 16       | bi | 0             | ignore  | compute-  |
+|              |          |    |               |         | length    |
+| UDP.CKSUM    | 16       | bi | 0             | ignore  | compute-  |
+|              |          |    |               |         | checksum  |
+| COAP.VER     | 2        | bi | 1             | equal   | not-sent  |
+| COAP.TYPE    | 2        | bi | 1             | equal   | not-sent  |
+| COAP.TKL     | 4        | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| COAP.CODE    | 8        | bi | 5,69          | match-  | mapping-  |
+|              |          |    |               | mapping | sent      |
+| COAP.MID     | 16       | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| COAP.TOKEN   | length-  | bi |               | ignore  | value-    |
+|              | byte(16) |    |               |         | sent      |
+| COAP.option( | var      | dw | c             | match-  | mapping-  |
+| 11)          |          |    |               | mapping | sent      |
+| COAP.option( | var      | dw | 141,142       | match-  | mapping-  |
+| 12)          |          |    |               | mapping | sent      |
+| COAP.option( | var      | up | 142           | equal   | not-sent  |
+| 12)          |          |    |               |         |           |
+| COAP.option( | var      | dw | 142           | equal   | not-sent  |
+| 17)          |          |    |               |         |           |
+\--------------+----------+----+---------------+---------+-----------/
 ]]></artwork></figure>
 
+<figure title="Residue format for Rule 1, Down and Up" anchor="fig-schc-residue-1"><artwork align="left"><![CDATA[
+Residue (Down): TC(8b) | FL(20b) | APP_PORT(16b) | TKL(4b) | CODE(1b) |
+                MID(16b) | TOKEN(var) | option(12)(1b)
+Residue (Up):   TC(8b) | FL(20b) | APP_PORT(16b) | TKL(4b) | CODE(1b) |
+                MID(16b) | TOKEN(var)
+]]></artwork></figure>
+
+</section>
+<section anchor="rule-2-used-to-ipatch-ack-with-73-empty-coap-for-notification-in-up" title="Rule 2: Used to iPatch, ack with 7/3. Empty CoAP for notification in UP">
+
+<figure title="SCHC Rule 2 (RuleIDLength=5)" anchor="fig-schc-rule-2"><artwork align="left"><![CDATA[
+/--------------+----------+----+---------------+---------+-----------\
+| FID          | FL       | DI | TV            | MO      | CDA       |
++==============+==========+====+===============+=========+===========+
+| IPV6.VER     | 4        | bi | 6             | equal   | not-sent  |
+| IPV6.TC      | 8        | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| IPV6.FL      | 20       | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| IPV6.LEN     | 16       | bi |               | ignore  | compute-  |
+|              |          |    |               |         | length    |
+| IPV6.NXT     | 8        | bi | 17            | equal   | not-sent  |
+| IPV6.HOP_LMT | 8        | bi | 255           | ignore  | not-sent  |
+| IPV6.DEV_PRE | 64       | bi | dddd::/64     | equal   | not-sent  |
+| FIX          |          |    |               |         |           |
+| IPV6.DEV_IID | 64       | bi | ::6/64        | equal   | not-sent  |
+| IPV6.APP_PRE | 64       | bi | aaaa::/64     | equal   | not-sent  |
+| FIX          |          |    |               |         |           |
+| IPV6.APP_IID | 64       | bi | ::2/64        | equal   | not-sent  |
+| UDP.DEV_PORT | 16       | bi | 5683          | equal   | not-sent  |
+| UDP.APP_PORT | 16       | bi |               | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| UDP.LEN      | 16       | bi | 0             | ignore  | compute-  |
+|              |          |    |               |         | length    |
+| UDP.CKSUM    | 16       | bi | 0             | ignore  | compute-  |
+|              |          |    |               |         | checksum  |
+| COAP.VER     | 2        | bi | 1             | equal   | not-sent  |
+| COAP.TYPE    | 2        | bi | 1             | equal   | not-sent  |
+| COAP.TKL     | 4        | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| COAP.CODE    | 8        | dw | 7             | match-  | mapping-  |
+|              |          |    |               | mapping | sent      |
+| COAP.CODE    | 8        | up |               | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| COAP.MID     | 16       | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| COAP.TOKEN   | length-  | bi |               | ignore  | value-    |
+|              | byte(16) |    |               |         | sent      |
+| COAP.option( | var      | dw | c             | match-  | mapping-  |
+| 11)          |          |    |               | mapping | sent      |
+| COAP.option( | var      | dw | 141,142       | match-  | mapping-  |
+| 12)          |          |    |               | mapping | sent      |
+\--------------+----------+----+---------------+---------+-----------/
+]]></artwork></figure>
+
+<figure title="Residue format for Rule 2, Down and Up" anchor="fig-schc-residue-2"><artwork align="left"><![CDATA[
+Residue (Down): TC(8b) | FL(20b) | APP_PORT(16b) | TKL(4b) | MID(16b) |
+                TOKEN(var) | option(12)(1b)
+Residue (Up):   TC(8b) | FL(20b) | APP_PORT(16b) | TKL(4b) | CODE(8b) |
+                MID(16b) | TOKEN(var)
+]]></artwork></figure>
+
+</section>
+<section anchor="rule-3-used-for-notitifications-observe" title="Rule 3: Used for notitifications (observe)">
+
+<figure title="SCHC Rule 3 (RuleIDLength=5)" anchor="fig-schc-rule-3"><artwork align="left"><![CDATA[
+/--------------+----------+----+---------------+---------+-----------\
+| FID          | FL       | DI | TV            | MO      | CDA       |
++==============+==========+====+===============+=========+===========+
+| IPV6.VER     | 4        | bi | 6             | equal   | not-sent  |
+| IPV6.TC      | 8        | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| IPV6.FL      | 20       | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| IPV6.LEN     | 16       | bi |               | ignore  | compute-  |
+|              |          |    |               |         | length    |
+| IPV6.NXT     | 8        | bi | 17            | equal   | not-sent  |
+| IPV6.HOP_LMT | 8        | bi | 255           | ignore  | not-sent  |
+| IPV6.DEV_PRE | 64       | bi | dddd::/64     | equal   | not-sent  |
+| FIX          |          |    |               |         |           |
+| IPV6.DEV_IID | 64       | bi | ::6/64        | equal   | not-sent  |
+| IPV6.APP_PRE | 64       | bi | aaaa::/64     | equal   | not-sent  |
+| FIX          |          |    |               |         |           |
+| IPV6.APP_IID | 64       | bi | ::2/64        | equal   | not-sent  |
+| UDP.DEV_PORT | 16       | bi | 5683          | equal   | not-sent  |
+| UDP.APP_PORT | 16       | bi |               | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| UDP.LEN      | 16       | bi | 0             | ignore  | compute-  |
+|              |          |    |               |         | length    |
+| UDP.CKSUM    | 16       | bi | 0             | ignore  | compute-  |
+|              |          |    |               |         | checksum  |
+| COAP.VER     | 2        | bi | 1             | equal   | not-sent  |
+| COAP.TYPE    | 2        | bi | 0,1           | match-  | mapping-  |
+|              |          |    |               | mapping | sent      |
+| COAP.TKL     | 4        | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| COAP.CODE    | 8        | bi | 5,7,69        | match-  | mapping-  |
+|              |          |    |               | mapping | sent      |
+| COAP.MID     | 16       | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| COAP.TOKEN   | length-  | bi |               | ignore  | value-    |
+|              | byte(16) |    |               |         | sent      |
+| COAP.option( | var      | bi |               | ignore  | value-    |
+| 6)           |          |    |               |         | sent      |
+| COAP.option( | var      | dw | s             | match-  | mapping-  |
+| 11)          |          |    |               | mapping | sent      |
+| COAP.option( | var      | dw | 141           | match-  | mapping-  |
+| 12)          |          |    |               | mapping | sent      |
+| COAP.option( | var      | up | 142           | match-  | mapping-  |
+| 12)          |          |    |               | mapping | sent      |
+| COAP.option( | var      | dw | 142           | match-  | mapping-  |
+| 17)          |          |    |               | mapping | sent      |
+\--------------+----------+----+---------------+---------+-----------/
+]]></artwork></figure>
+
+<figure title="Residue format for Rule 3, Down and Up" anchor="fig-schc-residue-3"><artwork align="left"><![CDATA[
+Residue (Down): TC(8b) | FL(20b) | APP_PORT(16b) | TYPE(1b) | TKL(4b) |
+                CODE(2b) | MID(16b) | TOKEN(var) |
+                option(6)(varb)
+Residue (Up):   TC(8b) | FL(20b) | APP_PORT(16b) | TYPE(1b) | TKL(4b) |
+                CODE(2b) | MID(16b) | TOKEN(var) |
+                option(6)(varb)
+]]></artwork></figure>
+
+</section>
+<section anchor="rule-4-empty-messages-eg-ack-with-empty-code-or-rst" title="Rule 4: Empty messages (e.g., ACK with empty code, or RST)">
+
+<figure title="SCHC Rule 4 (RuleIDLength=5)" anchor="fig-schc-rule-4"><artwork align="left"><![CDATA[
+/--------------+----------+----+---------------+---------+-----------\
+| FID          | FL       | DI | TV            | MO      | CDA       |
++==============+==========+====+===============+=========+===========+
+| IPV6.VER     | 4        | bi | 6             | equal   | not-sent  |
+| IPV6.TC      | 8        | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| IPV6.FL      | 20       | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| IPV6.LEN     | 16       | bi |               | ignore  | compute-  |
+|              |          |    |               |         | length    |
+| IPV6.NXT     | 8        | bi | 17            | equal   | not-sent  |
+| IPV6.HOP_LMT | 8        | bi | 255           | ignore  | not-sent  |
+| IPV6.DEV_PRE | 64       | bi | dddd::/64     | equal   | not-sent  |
+| FIX          |          |    |               |         |           |
+| IPV6.DEV_IID | 64       | bi | ::6/64        | equal   | not-sent  |
+| IPV6.APP_PRE | 64       | bi | aaaa::/64     | equal   | not-sent  |
+| FIX          |          |    |               |         |           |
+| IPV6.APP_IID | 64       | bi | ::2/64        | equal   | not-sent  |
+| UDP.DEV_PORT | 16       | bi | 5683          | equal   | not-sent  |
+| UDP.APP_PORT | 16       | bi |               | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| UDP.LEN      | 16       | bi | 0             | ignore  | compute-  |
+|              |          |    |               |         | length    |
+| UDP.CKSUM    | 16       | bi | 0             | ignore  | compute-  |
+|              |          |    |               |         | checksum  |
+| COAP.VER     | 2        | bi | 1             | equal   | not-sent  |
+| COAP.TYPE    | 2        | bi |               | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| COAP.TKL     | 4        | bi |               | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| COAP.CODE    | 8        | bi |               | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| COAP.MID     | 16       | bi |               | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| COAP.TOKEN   | length-  | bi |               | ignore  | value-    |
+|              | byte(16) |    |               |         | sent      |
+\--------------+----------+----+---------------+---------+-----------/
+]]></artwork></figure>
+
+<figure title="Residue format for Rule 4, Down and Up" anchor="fig-schc-residue-4"><artwork align="left"><![CDATA[
+Residue (Down): TC(8b) | FL(20b) | APP_PORT(16b) | TYPE(2b) | TKL(4b) |
+                CODE(8b) | MID(16b) | TOKEN(var)
+Residue (Up):   TC(8b) | FL(20b) | APP_PORT(16b) | TYPE(2b) | TKL(4b) |
+                CODE(8b) | MID(16b) | TOKEN(var)
+]]></artwork></figure>
+
+</section>
+<section anchor="rule-5-icmpv6-port-unreachable" title="Rule 5: ICMPv6 port unreachable">
+
+<figure title="SCHC Rule 5 (RuleIDLength=5)" anchor="fig-schc-rule-5"><artwork align="left"><![CDATA[
+/--------------+----------+----+---------------+---------+-----------\
+| FID          | FL       | DI | TV            | MO      | CDA       |
++==============+==========+====+===============+=========+===========+
+| IPV6.VER     | 4        | bi | 6             | equal   | not-sent  |
+| IPV6.TC      | 8        | bi | 0             | ignore  | not-sent  |
+| IPV6.FL      | 20       | bi | 0             | ignore  | not-sent  |
+| IPV6.LEN     | 16       | bi |               | ignore  | compute-  |
+|              |          |    |               |         | length    |
+| IPV6.NXT     | 8        | bi | 58            | equal   | not-sent  |
+| IPV6.HOP_LMT | 8        | bi | 255           | ignore  | not-sent  |
+| IPV6.DEV_PRE | 64       | bi | dddd::/64     | equal   | not-sent  |
+| FIX          |          |    |               |         |           |
+| IPV6.DEV_IID | 64       | bi | ::6/64        | equal   | not-sent  |
+| IPV6.APP_PRE | 64       | bi | aaaa::/64     | equal   | not-sent  |
+| FIX          |          |    |               |         |           |
+| IPV6.APP_IID | 64       | bi | ::2/64        | equal   | not-sent  |
+| ICMPV6.TYPE  | 8        | bi | 1             | equal   | not-sent  |
+| ICMPV6.CODE  | 8        | bi | 4             | equal   | not-sent  |
+| ICMPV6.CKSUM | 16       | bi | 0             | ignore  | compute-  |
+|              |          |    |               |         | checksum  |
+| UNUSED       | 32       | bi |               | ignore  | not-sent  |
+| IPV6.VER     | 4        | bi | 6             | equal   | not-sent  |
+| IPV6.TC      | 8        | bi | 0             | ignore  | not-sent  |
+| IPV6.FL      | 20       | bi | 0             | ignore  | not-sent  |
+| IPV6.LEN     | 16       | bi |               | ignore  | compute-  |
+|              |          |    |               |         | length    |
+| IPV6.NXT     | 8        | bi | 17            | equal   | not-sent  |
+| IPV6.HOP_LMT | 8        | bi | 255           | ignore  | not-sent  |
+| IPV6.DEV_PRE | 64       | bi | dddd::/64     | equal   | not-sent  |
+| FIX          |          |    |               |         |           |
+| IPV6.DEV_IID | 64       | bi | ::6/64        | equal   | not-sent  |
+| IPV6.APP_PRE | 64       | bi | aaaa::/64     | equal   | not-sent  |
+| FIX          |          |    |               |         |           |
+| IPV6.APP_IID | 64       | bi | ::2/64        | equal   | not-sent  |
+| UDP.DEV_PORT | 16       | bi | 5683          | equal   | not-sent  |
+| UDP.APP_PORT | 16       | bi |               | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| UDP.LEN      | 16       | bi | 0             | ignore  | compute-  |
+|              |          |    |               |         | length    |
+| UDP.CKSUM    | 16       | bi | 0             | ignore  | compute-  |
+|              |          |    |               |         | checksum  |
+| PAYLOAD      | var      | bi |               | ignore  | not-sent  |
+\--------------+----------+----+---------------+---------+-----------/
+]]></artwork></figure>
+
+<figure title="Residue format for Rule 5, Down and Up" anchor="fig-schc-residue-5"><artwork align="left"><![CDATA[
+Residue (Down): APP_PORT(16b)
+Residue (Up):   APP_PORT(16b)
+]]></artwork></figure>
+
+</section>
 </section>
 <section numbered="false" anchor="acknowledgments" title="Acknowledgments">
 <t>This work has been supported by the SCHC Chair from IMT Atlantique and Afnic.</t>
@@ -3419,7 +3495,7 @@ to change as the model evolves.</t>
   </back>
 
 <!-- ##markdown-source:
-H4sIALUToGoAA+y963YbyZkg+D+fIhblHgE2LgSpCwV1Wc2ipCrOiqIsUu3u
+H4sIANmloWoAA+y963YbyZkg+D+fIhblHgE2LgSpCwV1Wc2ipCrOiqIsUu3u
 9biLSSBBppVAwpkJUbTMPXPOnjO/9+yZB+ln6BfYd+gn2e8al8wESKmqerw7
 y1O2SCAyMuKLL777ZTAYRFVaZcnEdA5P3r08PHnzyszzwhzH06t0mQyqfCC/
 msN8sVgv02lcpfmyE8UXF0XyEZ6b5kUyzZfzwWJ30Yng6+QyL24mJl3O8yhd
@@ -4055,150 +4131,163 @@ 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
-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
-DEDt3E79Ua3APv8HMNBDamwpAgA=
+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
+AEp2L8fRoO6xz/8DmEnOw0k3AgA=
 
 -->
 

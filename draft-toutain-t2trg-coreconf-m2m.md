@@ -3109,229 +3109,309 @@ the coreconf-m2m model and its examples evolve; keep it in sync with
 that source file across future updates to this annex.
 {:/comment}
 
-The following SCHC {{RFC8724}} Rule Set, expressed in the JSON format of
-{{RFC9363}}, compresses the IPv6/UDP/CoAP traffic
-exchanged with the ATMOS41 weather station used throughout this
-document. It is not the final version of this rule set and is expected
-to change as the model evolves.
+The following SCHC {{RFC8724}} Rule Set compresses the IPv6/UDP/CoAP
+traffic exchanged with the ATMOS41 weather station used throughout
+this document. It is not the final version of this rule set and is
+expected to change as the model evolves. Field names (FID), matching
+operators (MO), and compression/decompression actions (CDA) are as
+defined in {{RFC8724}}; FL is the Field Length, DI the Direction
+Indicator, and TV the Target Value (the Field Position, FP, is omitted
+from the tables below for compactness; it defaults to 1 unless a field
+is repeated, which does not happen in this Rule Set). The bootstrap rule
+(Rule 0 in the source Rule Set) is omitted here, being identical in
+structure to Rule 1.
+
+Below each rule, the resulting residue format is given for the Down
+(network to device) and Up (device to network) directions: the ordered
+list of fields that still carry a residue after compression — i.e.
+those whose CDA is not "not-sent", "compute-length", or
+"compute-checksum" — together with the number of bits sent for that
+field ("var" when the size is not fixed). A "mapping-sent" field over a
+single-valued TV list contributes no residue bits, since only one value
+is possible and is therefore omitted.
+
+## Rule 1: Used to fetch a single value (bidirect)
 
 ~~~~
-{
-    "DeviceID" : "udp:10.0.0.20:8888",
-    "SoR" : [{
-        "RuleIDValue" : 0,
-        "RuleIDLength": 5,
-        "Description": "Used a bootstrap to get the transducer list (d=0).",
-        "Compression": [	 
-            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
-            {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
-                                                   "MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.APP_PREFIX",             "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
-
-            {"FID": "UDP.DEV_PORT",  "TV": 5683,"MO": "equal",  "CDA": "not-sent"},
-            {"FID": "UDP.APP_PORT",             "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore", "CDA": "compute-length"},
-            {"FID": "UDP.CKSUM",     "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
-
-            {"FID": "COAP.VER",  "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TYPE", "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TKL",  "DI": "BI", "TV": 0,   "MO": "ignore","CDA": "value-sent"},
-            {"FID": "COAP.CODE", "DI": "BI", "TV": [5, 7, 69],   "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.MID",  "DI": "BI", "TV": 0,   "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "COAP.TOKEN", "FL": "length-byte(16)",     "MO": "ignore","CDA": "value-sent"},
-            
-            {"FID": "COAP.option(11)", "FP": 1, "DI": "DW", "TV": ["c", "s"], 
-                                "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.option(12)", "DI": "DW", "TV": [141,142], "MO": "match-mapping", "CDA": "mapping-sent"},
-            {"FID": "COAP.option(12)", "DI": "UP", "TV":  142, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "COAP.option(15)", "DI": "DW", "TV": "d=0", "MO": "equal", "CDA": "not-sent"},
-            {"FID": "COAP.option(17)", "DI": "DW", "TV": 142, "MO": "equal", "CDA": "not-sent"}
-        ]},
-        {
-        "RuleIDValue" : 1,
-        "RuleIDLength": 5,
-        "Description": "Used to fetch a single value (bidirect)",
-        "Compression": [
-            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
-            {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
-                                                   "MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.APP_PREFIX",             "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
-
-            {"FID": "UDP.DEV_PORT",  "TV": 5683,"MO": "equal",  "CDA": "not-sent"},
-            {"FID": "UDP.APP_PORT",             "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore", "CDA": "compute-length"},
-            {"FID": "UDP.CKSUM",     "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
-
-            {"FID": "COAP.VER",  "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TYPE", "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TKL",  "DI": "BI", "TV": 0,   "MO": "ignore","CDA": "value-sent"},
-            {"FID": "COAP.CODE", "DI": "BI", "TV": [5, 69],   "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.MID",  "DI": "BI", "TV": 0,   "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "COAP.TOKEN", "FL": "length-byte(16)",     "MO": "ignore","CDA": "value-sent"},
-
-            {"FID": "COAP.option(11)", "FP": 1, "DI": "DW", "TV": ["c"],
-                                "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.option(12)", "DI": "DW", "TV": [141,142], "MO": "match-mapping", "CDA": "mapping-sent"},
-            {"FID": "COAP.option(12)", "DI": "UP", "TV":  142, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "COAP.option(17)", "DI": "DW", "TV":  142, "MO": "equal", "CDA": "not-sent"}
-
-        ]},         {
-        "RuleIDValue" : 2,
-        "RuleIDLength": 5,
-        "Description": "Used to iPatch, ack with 7/3. Empty CoAP for notification in UP",
-        "Compression": [
-            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
-            {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
-                                                   "MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.APP_PREFIX",             "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
-
-            {"FID": "UDP.DEV_PORT",  "TV": 5683,"MO": "equal",  "CDA": "not-sent"},
-            {"FID": "UDP.APP_PORT",             "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore", "CDA": "compute-length"},
-            {"FID": "UDP.CKSUM",     "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
-
-            {"FID": "COAP.VER",  "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TYPE", "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TKL",  "DI": "BI", "TV": 0,   "MO": "ignore","CDA": "value-sent"},
-            {"FID": "COAP.CODE", "DI": "DW", "TV": [7],   "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.CODE", "DI": "UP",              "MO": "ignore","CDA": "value-sent"},
-            {"FID": "COAP.MID",  "DI": "BI", "TV": 0,   "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "COAP.TOKEN", "FL": "length-byte(16)",     "MO": "ignore","CDA": "value-sent"},
-
-            {"FID": "COAP.option(11)", "FP": 1, "DI": "DW", "TV": ["c"],
-                                "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.option(12)", "DI": "DW", "TV": [141,142], "MO": "match-mapping", "CDA": "mapping-sent"}
-        ]},          {
-        "RuleIDValue" : 3,
-        "RuleIDLength": 5,
-        "Description": "Used for notitifications (observe)",
-        "Compression": [
-            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
-            {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
-                                                   "MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.APP_PREFIX",             "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
-
-            {"FID": "UDP.DEV_PORT",  "TV": 5683,"MO": "equal",  "CDA": "not-sent"},
-            {"FID": "UDP.APP_PORT",             "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore", "CDA": "compute-length"},
-            {"FID": "UDP.CKSUM",     "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
-
-            {"FID": "COAP.VER",  "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TYPE", "DI": "BI", "TV": [0,1],   "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.TKL",  "DI": "BI", "TV": 0,   "MO": "ignore","CDA": "value-sent"},
-            {"FID": "COAP.CODE", "DI": "BI", "TV": [5, 7, 69],   "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.MID",  "DI": "BI", "TV": 0,   "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "COAP.TOKEN", "FL": "length-byte(16)",     "MO": "ignore","CDA": "value-sent"},
-
-            {"FID": "COAP.option(6)", "FL": "var", "FP": 1, "DI": "BI",     "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "COAP.option(11)", "FP": 1, "DI": "DW", "TV": ["s"],    "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.option(12)", "DI": "DW", "TV": [141], "MO": "match-mapping", "CDA": "mapping-sent"},
-            {"FID": "COAP.option(12)", "DI": "UP", "TV": [142], "MO": "match-mapping", "CDA": "mapping-sent"},
-            {"FID": "COAP.option(17)", "DI": "DW", "TV": [142], "MO": "match-mapping", "CDA": "mapping-sent"}
-        ]},         {
-        "RuleIDValue" : 4,
-        "RuleIDLength": 5,
-        "Description": "Empty messages (e.g., ACK with empty code, or RST)",
-        "Compression": [
-            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
-            {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
-                                                   "MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.APP_PREFIX",             "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
-
-            {"FID": "UDP.DEV_PORT",  "TV": 5683,"MO": "equal",  "CDA": "not-sent"},
-            {"FID": "UDP.APP_PORT",             "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore", "CDA": "compute-length"},
-            {"FID": "UDP.CKSUM",     "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
-
-            {"FID": "COAP.VER",  "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TYPE", "DI": "BI",            "MO": "ignore","CDA": "value-sent"},
-            {"FID": "COAP.TKL",  "DI": "BI",            "MO": "ignore","CDA": "value-sent"},
-            {"FID": "COAP.CODE", "DI": "BI",            "MO": "ignore","CDA": "value-sent"},
-            {"FID": "COAP.MID",  "DI": "BI",            "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "COAP.TOKEN", "FL": "length-byte(16)",     "MO": "ignore","CDA": "value-sent"}
-        ]},   {
-        "RuleIDValue" : 5,
-        "RuleIDLength": 5,
-        "Description": "ICMPv6 port unreachable",
-        "Compression": [
-            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "not-sent"},
-            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
-            {"FID": "IPV6.NXT", "TV": 58, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
-                                                   "MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.APP_PREFIX",             "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
-
-            {"FID": "ICMPV6.TYPE", "TV": 1, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "ICMPV6.CODE", "TV": 4, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "ICMPV6.CKSUM",   "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
-            {"FID": "UNUSED", "FL": 32, "MO": "ignore", "CDA": "not-sent"},
-
- 
-            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "not-sent"},
-            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
-            {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
-                                                   "MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"}, 
-            {"FID": "IPV6.APP_PREFIX",
-                                                   "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
-
-            {"FID": "UDP.DEV_PORT",  "TV": 5683,"MO": "equal",  "CDA": "not-sent"},
-            {"FID": "UDP.APP_PORT",             "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore", "CDA": "compute-length"},
-            {"FID": "UDP.CKSUM",     "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
-
-            {"FID": "PAYLOAD",             "MO": "ignore","CDA": "not-sent"}
-
-        ]} 
-    ]
-}
+/--------------+----------+----+---------------+---------+-----------\
+| FID          | FL       | DI | TV            | MO      | CDA       |
++==============+==========+====+===============+=========+===========+
+| IPV6.VER     | 4        | bi | 6             | equal   | not-sent  |
+| IPV6.TC      | 8        | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| IPV6.FL      | 20       | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| IPV6.LEN     | 16       | bi |               | ignore  | compute-  |
+|              |          |    |               |         | length    |
+| IPV6.NXT     | 8        | bi | 17            | equal   | not-sent  |
+| IPV6.HOP_LMT | 8        | bi | 255           | ignore  | not-sent  |
+| IPV6.DEV_PRE | 64       | bi | dddd::/64     | equal   | not-sent  |
+| FIX          |          |    |               |         |           |
+| IPV6.DEV_IID | 64       | bi | ::6/64        | equal   | not-sent  |
+| IPV6.APP_PRE | 64       | bi | aaaa::/64     | equal   | not-sent  |
+| FIX          |          |    |               |         |           |
+| IPV6.APP_IID | 64       | bi | ::2/64        | equal   | not-sent  |
+| UDP.DEV_PORT | 16       | bi | 5683          | equal   | not-sent  |
+| UDP.APP_PORT | 16       | bi |               | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| UDP.LEN      | 16       | bi | 0             | ignore  | compute-  |
+|              |          |    |               |         | length    |
+| UDP.CKSUM    | 16       | bi | 0             | ignore  | compute-  |
+|              |          |    |               |         | checksum  |
+| COAP.VER     | 2        | bi | 1             | equal   | not-sent  |
+| COAP.TYPE    | 2        | bi | 1             | equal   | not-sent  |
+| COAP.TKL     | 4        | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| COAP.CODE    | 8        | bi | 5,69          | match-  | mapping-  |
+|              |          |    |               | mapping | sent      |
+| COAP.MID     | 16       | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| COAP.TOKEN   | length-  | bi |               | ignore  | value-    |
+|              | byte(16) |    |               |         | sent      |
+| COAP.option( | var      | dw | c             | match-  | mapping-  |
+| 11)          |          |    |               | mapping | sent      |
+| COAP.option( | var      | dw | 141,142       | match-  | mapping-  |
+| 12)          |          |    |               | mapping | sent      |
+| COAP.option( | var      | up | 142           | equal   | not-sent  |
+| 12)          |          |    |               |         |           |
+| COAP.option( | var      | dw | 142           | equal   | not-sent  |
+| 17)          |          |    |               |         |           |
+\--------------+----------+----+---------------+---------+-----------/
 ~~~~
-{: #fig-schc-rules title="SCHC Rule Set for the ATMOS41 weather station"}
+{: #fig-schc-rule-1 title="SCHC Rule 1 (RuleIDLength=5)" artwork-align="left"}
+
+~~~~
+Residue (Down): TC(8b) | FL(20b) | APP_PORT(16b) | TKL(4b) | CODE(1b) |
+                MID(16b) | TOKEN(var) | option(12)(1b)
+Residue (Up):   TC(8b) | FL(20b) | APP_PORT(16b) | TKL(4b) | CODE(1b) |
+                MID(16b) | TOKEN(var)
+~~~~
+{: #fig-schc-residue-1 title="Residue format for Rule 1, Down and Up" artwork-align="left"}
+
+## Rule 2: Used to iPatch, ack with 7/3. Empty CoAP for notification in UP
+
+~~~~
+/--------------+----------+----+---------------+---------+-----------\
+| FID          | FL       | DI | TV            | MO      | CDA       |
++==============+==========+====+===============+=========+===========+
+| IPV6.VER     | 4        | bi | 6             | equal   | not-sent  |
+| IPV6.TC      | 8        | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| IPV6.FL      | 20       | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| IPV6.LEN     | 16       | bi |               | ignore  | compute-  |
+|              |          |    |               |         | length    |
+| IPV6.NXT     | 8        | bi | 17            | equal   | not-sent  |
+| IPV6.HOP_LMT | 8        | bi | 255           | ignore  | not-sent  |
+| IPV6.DEV_PRE | 64       | bi | dddd::/64     | equal   | not-sent  |
+| FIX          |          |    |               |         |           |
+| IPV6.DEV_IID | 64       | bi | ::6/64        | equal   | not-sent  |
+| IPV6.APP_PRE | 64       | bi | aaaa::/64     | equal   | not-sent  |
+| FIX          |          |    |               |         |           |
+| IPV6.APP_IID | 64       | bi | ::2/64        | equal   | not-sent  |
+| UDP.DEV_PORT | 16       | bi | 5683          | equal   | not-sent  |
+| UDP.APP_PORT | 16       | bi |               | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| UDP.LEN      | 16       | bi | 0             | ignore  | compute-  |
+|              |          |    |               |         | length    |
+| UDP.CKSUM    | 16       | bi | 0             | ignore  | compute-  |
+|              |          |    |               |         | checksum  |
+| COAP.VER     | 2        | bi | 1             | equal   | not-sent  |
+| COAP.TYPE    | 2        | bi | 1             | equal   | not-sent  |
+| COAP.TKL     | 4        | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| COAP.CODE    | 8        | dw | 7             | match-  | mapping-  |
+|              |          |    |               | mapping | sent      |
+| COAP.CODE    | 8        | up |               | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| COAP.MID     | 16       | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| COAP.TOKEN   | length-  | bi |               | ignore  | value-    |
+|              | byte(16) |    |               |         | sent      |
+| COAP.option( | var      | dw | c             | match-  | mapping-  |
+| 11)          |          |    |               | mapping | sent      |
+| COAP.option( | var      | dw | 141,142       | match-  | mapping-  |
+| 12)          |          |    |               | mapping | sent      |
+\--------------+----------+----+---------------+---------+-----------/
+~~~~
+{: #fig-schc-rule-2 title="SCHC Rule 2 (RuleIDLength=5)" artwork-align="left"}
+
+~~~~
+Residue (Down): TC(8b) | FL(20b) | APP_PORT(16b) | TKL(4b) | MID(16b) |
+                TOKEN(var) | option(12)(1b)
+Residue (Up):   TC(8b) | FL(20b) | APP_PORT(16b) | TKL(4b) | CODE(8b) |
+                MID(16b) | TOKEN(var)
+~~~~
+{: #fig-schc-residue-2 title="Residue format for Rule 2, Down and Up" artwork-align="left"}
+
+## Rule 3: Used for notitifications (observe)
+
+~~~~
+/--------------+----------+----+---------------+---------+-----------\
+| FID          | FL       | DI | TV            | MO      | CDA       |
++==============+==========+====+===============+=========+===========+
+| IPV6.VER     | 4        | bi | 6             | equal   | not-sent  |
+| IPV6.TC      | 8        | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| IPV6.FL      | 20       | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| IPV6.LEN     | 16       | bi |               | ignore  | compute-  |
+|              |          |    |               |         | length    |
+| IPV6.NXT     | 8        | bi | 17            | equal   | not-sent  |
+| IPV6.HOP_LMT | 8        | bi | 255           | ignore  | not-sent  |
+| IPV6.DEV_PRE | 64       | bi | dddd::/64     | equal   | not-sent  |
+| FIX          |          |    |               |         |           |
+| IPV6.DEV_IID | 64       | bi | ::6/64        | equal   | not-sent  |
+| IPV6.APP_PRE | 64       | bi | aaaa::/64     | equal   | not-sent  |
+| FIX          |          |    |               |         |           |
+| IPV6.APP_IID | 64       | bi | ::2/64        | equal   | not-sent  |
+| UDP.DEV_PORT | 16       | bi | 5683          | equal   | not-sent  |
+| UDP.APP_PORT | 16       | bi |               | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| UDP.LEN      | 16       | bi | 0             | ignore  | compute-  |
+|              |          |    |               |         | length    |
+| UDP.CKSUM    | 16       | bi | 0             | ignore  | compute-  |
+|              |          |    |               |         | checksum  |
+| COAP.VER     | 2        | bi | 1             | equal   | not-sent  |
+| COAP.TYPE    | 2        | bi | 0,1           | match-  | mapping-  |
+|              |          |    |               | mapping | sent      |
+| COAP.TKL     | 4        | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| COAP.CODE    | 8        | bi | 5,7,69        | match-  | mapping-  |
+|              |          |    |               | mapping | sent      |
+| COAP.MID     | 16       | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| COAP.TOKEN   | length-  | bi |               | ignore  | value-    |
+|              | byte(16) |    |               |         | sent      |
+| COAP.option( | var      | bi |               | ignore  | value-    |
+| 6)           |          |    |               |         | sent      |
+| COAP.option( | var      | dw | s             | match-  | mapping-  |
+| 11)          |          |    |               | mapping | sent      |
+| COAP.option( | var      | dw | 141           | match-  | mapping-  |
+| 12)          |          |    |               | mapping | sent      |
+| COAP.option( | var      | up | 142           | match-  | mapping-  |
+| 12)          |          |    |               | mapping | sent      |
+| COAP.option( | var      | dw | 142           | match-  | mapping-  |
+| 17)          |          |    |               | mapping | sent      |
+\--------------+----------+----+---------------+---------+-----------/
+~~~~
+{: #fig-schc-rule-3 title="SCHC Rule 3 (RuleIDLength=5)" artwork-align="left"}
+
+~~~~
+Residue (Down): TC(8b) | FL(20b) | APP_PORT(16b) | TYPE(1b) | TKL(4b) |
+                CODE(2b) | MID(16b) | TOKEN(var) |
+                option(6)(varb)
+Residue (Up):   TC(8b) | FL(20b) | APP_PORT(16b) | TYPE(1b) | TKL(4b) |
+                CODE(2b) | MID(16b) | TOKEN(var) |
+                option(6)(varb)
+~~~~
+{: #fig-schc-residue-3 title="Residue format for Rule 3, Down and Up" artwork-align="left"}
+
+## Rule 4: Empty messages (e.g., ACK with empty code, or RST)
+
+~~~~
+/--------------+----------+----+---------------+---------+-----------\
+| FID          | FL       | DI | TV            | MO      | CDA       |
++==============+==========+====+===============+=========+===========+
+| IPV6.VER     | 4        | bi | 6             | equal   | not-sent  |
+| IPV6.TC      | 8        | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| IPV6.FL      | 20       | bi | 0             | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| IPV6.LEN     | 16       | bi |               | ignore  | compute-  |
+|              |          |    |               |         | length    |
+| IPV6.NXT     | 8        | bi | 17            | equal   | not-sent  |
+| IPV6.HOP_LMT | 8        | bi | 255           | ignore  | not-sent  |
+| IPV6.DEV_PRE | 64       | bi | dddd::/64     | equal   | not-sent  |
+| FIX          |          |    |               |         |           |
+| IPV6.DEV_IID | 64       | bi | ::6/64        | equal   | not-sent  |
+| IPV6.APP_PRE | 64       | bi | aaaa::/64     | equal   | not-sent  |
+| FIX          |          |    |               |         |           |
+| IPV6.APP_IID | 64       | bi | ::2/64        | equal   | not-sent  |
+| UDP.DEV_PORT | 16       | bi | 5683          | equal   | not-sent  |
+| UDP.APP_PORT | 16       | bi |               | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| UDP.LEN      | 16       | bi | 0             | ignore  | compute-  |
+|              |          |    |               |         | length    |
+| UDP.CKSUM    | 16       | bi | 0             | ignore  | compute-  |
+|              |          |    |               |         | checksum  |
+| COAP.VER     | 2        | bi | 1             | equal   | not-sent  |
+| COAP.TYPE    | 2        | bi |               | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| COAP.TKL     | 4        | bi |               | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| COAP.CODE    | 8        | bi |               | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| COAP.MID     | 16       | bi |               | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| COAP.TOKEN   | length-  | bi |               | ignore  | value-    |
+|              | byte(16) |    |               |         | sent      |
+\--------------+----------+----+---------------+---------+-----------/
+~~~~
+{: #fig-schc-rule-4 title="SCHC Rule 4 (RuleIDLength=5)" artwork-align="left"}
+
+~~~~
+Residue (Down): TC(8b) | FL(20b) | APP_PORT(16b) | TYPE(2b) | TKL(4b) |
+                CODE(8b) | MID(16b) | TOKEN(var)
+Residue (Up):   TC(8b) | FL(20b) | APP_PORT(16b) | TYPE(2b) | TKL(4b) |
+                CODE(8b) | MID(16b) | TOKEN(var)
+~~~~
+{: #fig-schc-residue-4 title="Residue format for Rule 4, Down and Up" artwork-align="left"}
+
+## Rule 5: ICMPv6 port unreachable
+
+~~~~
+/--------------+----------+----+---------------+---------+-----------\
+| FID          | FL       | DI | TV            | MO      | CDA       |
++==============+==========+====+===============+=========+===========+
+| IPV6.VER     | 4        | bi | 6             | equal   | not-sent  |
+| IPV6.TC      | 8        | bi | 0             | ignore  | not-sent  |
+| IPV6.FL      | 20       | bi | 0             | ignore  | not-sent  |
+| IPV6.LEN     | 16       | bi |               | ignore  | compute-  |
+|              |          |    |               |         | length    |
+| IPV6.NXT     | 8        | bi | 58            | equal   | not-sent  |
+| IPV6.HOP_LMT | 8        | bi | 255           | ignore  | not-sent  |
+| IPV6.DEV_PRE | 64       | bi | dddd::/64     | equal   | not-sent  |
+| FIX          |          |    |               |         |           |
+| IPV6.DEV_IID | 64       | bi | ::6/64        | equal   | not-sent  |
+| IPV6.APP_PRE | 64       | bi | aaaa::/64     | equal   | not-sent  |
+| FIX          |          |    |               |         |           |
+| IPV6.APP_IID | 64       | bi | ::2/64        | equal   | not-sent  |
+| ICMPV6.TYPE  | 8        | bi | 1             | equal   | not-sent  |
+| ICMPV6.CODE  | 8        | bi | 4             | equal   | not-sent  |
+| ICMPV6.CKSUM | 16       | bi | 0             | ignore  | compute-  |
+|              |          |    |               |         | checksum  |
+| UNUSED       | 32       | bi |               | ignore  | not-sent  |
+| IPV6.VER     | 4        | bi | 6             | equal   | not-sent  |
+| IPV6.TC      | 8        | bi | 0             | ignore  | not-sent  |
+| IPV6.FL      | 20       | bi | 0             | ignore  | not-sent  |
+| IPV6.LEN     | 16       | bi |               | ignore  | compute-  |
+|              |          |    |               |         | length    |
+| IPV6.NXT     | 8        | bi | 17            | equal   | not-sent  |
+| IPV6.HOP_LMT | 8        | bi | 255           | ignore  | not-sent  |
+| IPV6.DEV_PRE | 64       | bi | dddd::/64     | equal   | not-sent  |
+| FIX          |          |    |               |         |           |
+| IPV6.DEV_IID | 64       | bi | ::6/64        | equal   | not-sent  |
+| IPV6.APP_PRE | 64       | bi | aaaa::/64     | equal   | not-sent  |
+| FIX          |          |    |               |         |           |
+| IPV6.APP_IID | 64       | bi | ::2/64        | equal   | not-sent  |
+| UDP.DEV_PORT | 16       | bi | 5683          | equal   | not-sent  |
+| UDP.APP_PORT | 16       | bi |               | ignore  | value-    |
+|              |          |    |               |         | sent      |
+| UDP.LEN      | 16       | bi | 0             | ignore  | compute-  |
+|              |          |    |               |         | length    |
+| UDP.CKSUM    | 16       | bi | 0             | ignore  | compute-  |
+|              |          |    |               |         | checksum  |
+| PAYLOAD      | var      | bi |               | ignore  | not-sent  |
+\--------------+----------+----+---------------+---------+-----------/
+~~~~
+{: #fig-schc-rule-5 title="SCHC Rule 5 (RuleIDLength=5)" artwork-align="left"}
+
+~~~~
+Residue (Down): APP_PORT(16b)
+Residue (Up):   APP_PORT(16b)
+~~~~
+{: #fig-schc-residue-5 title="Residue format for Rule 5, Down and Up" artwork-align="left"}
 
 # Acknowledgments
 {:numbered="false"}

@@ -4,8 +4,8 @@
 
 Thing-to-Thing Research Group (T2TRG)                         L. Toutain
 Internet-Draft                                            IMT Atlantique
-Intended status: Informational                          8 September 2026
-Expires: 12 March 2027
+Intended status: Informational                          9 September 2026
+Expires: 13 March 2027
 
 
              CORECONF for Machine-to-Machine Communication
@@ -40,7 +40,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 12 March 2027.
+   This Internet-Draft will expire on 13 March 2027.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Toutain                   Expires 12 March 2027                 [Page 1]
+Toutain                   Expires 13 March 2027                 [Page 1]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -71,60 +71,67 @@ Table of Contents
      1.2.  Data Representation . . . . . . . . . . . . . . . . . . .   5
      1.3.  Requirements Language . . . . . . . . . . . . . . . . . .   6
    2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   6
-   3.  YANG Modules needed for coreconf-m2m  . . . . . . . . . . . .   6
+   3.  YANG Modules needed for coreconf-m2m  . . . . . . . . . . . .   7
      3.1.  Identities Data Model . . . . . . . . . . . . . . . . . .   7
-     3.2.  Overview of the coreconf-m2m Module . . . . . . . . . . .   7
+     3.2.  Overview of the coreconf-m2m Module . . . . . . . . . . .   8
        3.2.1.  Bootstrap Sub-Tree  . . . . . . . . . . . . . . . . .   8
        3.2.2.  Characteristics Sub-Tree  . . . . . . . . . . . . . .   9
-       3.2.3.  Transducer Sub-Tree . . . . . . . . . . . . . . . . .  10
-     3.3.  Notifications . . . . . . . . . . . . . . . . . . . . . .  13
+       3.2.3.  Transducer Sub-Tree . . . . . . . . . . . . . . . . .  11
+     3.3.  Notifications . . . . . . . . . . . . . . . . . . . . . .  14
    4.  CORECONF Overview in the M2M Context  . . . . . . . . . . . .  14
-     4.1.  CoAP Methods Mapping  . . . . . . . . . . . . . . . . . .  14
-     4.2.  SID Allocations . . . . . . . . . . . . . . . . . . . . .  15
-   5.  CORECONF Traffic  . . . . . . . . . . . . . . . . . . . . . .  15
-     5.1.  Resource Discovery  . . . . . . . . . . . . . . . . . . .  15
-     5.2.  Querying a quantity . . . . . . . . . . . . . . . . . . .  18
-     5.3.  Notification  . . . . . . . . . . . . . . . . . . . . . .  19
-   6.  From CBOR/SID to Textual Identifiers  . . . . . . . . . . . .  22
-   7.  Interconnection with an Ontology  . . . . . . . . . . . . . .  22
-     7.1.  Extending Ontology to coreconf-m2m  . . . . . . . . . . .  23
-     7.2.  SOSA  . . . . . . . . . . . . . . . . . . . . . . . . . .  24
-       7.2.1.  Instantiating from YANG . . . . . . . . . . . . . . .  25
-       7.2.2.  Control . . . . . . . . . . . . . . . . . . . . . . .  26
-       7.2.3.  Storing Transducer Quantities . . . . . . . . . . . .  29
-       7.2.4.  Storing Actuator Commands . . . . . . . . . . . . . .  30
-     7.3.  SensorThings  . . . . . . . . . . . . . . . . . . . . . .  31
-       7.3.1.  Example . . . . . . . . . . . . . . . . . . . . . . .  31
-     7.4.  SAREF . . . . . . . . . . . . . . . . . . . . . . . . . .  37
-   8.  MCP . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  37
-   9.  Compression . . . . . . . . . . . . . . . . . . . . . . . . .  40
-     9.1.  SCHC  . . . . . . . . . . . . . . . . . . . . . . . . . .  40
-     9.2.  CORECONF Payload  . . . . . . . . . . . . . . . . . . . .  40
-   10. Conclusion  . . . . . . . . . . . . . . . . . . . . . . . . .  40
-   11. Security Considerations . . . . . . . . . . . . . . . . . . .  41
-   12. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  41
-     12.1.  YANG Module Registration . . . . . . . . . . . . . . . .  41
-     12.2.  SID Range Allocation . . . . . . . . . . . . . . . . . .  41
-   13. References  . . . . . . . . . . . . . . . . . . . . . . . . .  41
+     4.1.  CoAP Methods Mapping  . . . . . . . . . . . . . . . . . .  15
+     4.2.  SID Allocations . . . . . . . . . . . . . . . . . . . . .  16
+   5.  CORECONF Traffic  . . . . . . . . . . . . . . . . . . . . . .  16
+     5.1.  Resource Discovery  . . . . . . . . . . . . . . . . . . .  16
+     5.2.  Querying a quantity . . . . . . . . . . . . . . . . . . .  19
+     5.3.  Notification  . . . . . . . . . . . . . . . . . . . . . .  20
+   6.  From CBOR/SID to Textual Identifiers  . . . . . . . . . . . .  23
+   7.  Interconnection with an Ontology  . . . . . . . . . . . . . .  23
+     7.1.  Extending Ontology to coreconf-m2m  . . . . . . . . . . .  24
+     7.2.  SOSA  . . . . . . . . . . . . . . . . . . . . . . . . . .  25
+       7.2.1.  Instantiating from YANG . . . . . . . . . . . . . . .  26
+       7.2.2.  Control . . . . . . . . . . . . . . . . . . . . . . .  27
+       7.2.3.  Storing Transducer Quantities . . . . . . . . . . . .  30
+       7.2.4.  Storing Actuator Commands . . . . . . . . . . . . . .  31
+     7.3.  SensorThings  . . . . . . . . . . . . . . . . . . . . . .  32
+       7.3.1.  Example . . . . . . . . . . . . . . . . . . . . . . .  32
+     7.4.  SAREF . . . . . . . . . . . . . . . . . . . . . . . . . .  38
+   8.  MCP . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  38
+   9.  Compression . . . . . . . . . . . . . . . . . . . . . . . . .  41
+     9.1.  SCHC  . . . . . . . . . . . . . . . . . . . . . . . . . .  41
+     9.2.  CORECONF Payload  . . . . . . . . . . . . . . . . . . . .  41
+   10. Conclusion  . . . . . . . . . . . . . . . . . . . . . . . . .  41
+   11. Security Considerations . . . . . . . . . . . . . . . . . . .  42
+   12. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  42
+     12.1.  YANG Module Registration . . . . . . . . . . . . . . . .  42
+     12.2.  SID Range Allocation . . . . . . . . . . . . . . . . . .  42
+   13. References  . . . . . . . . . . . . . . . . . . . . . . . . .  42
 
 
 
-Toutain                   Expires 12 March 2027                 [Page 2]
+Toutain                   Expires 13 March 2027                 [Page 2]
 
 Internet-Draft                coreconf-m2m                September 2026
 
 
-     13.1.  Normative References . . . . . . . . . . . . . . . . . .  41
-     13.2.  Informative References . . . . . . . . . . . . . . . . .  43
-   Appendix A.  Module Tree  . . . . . . . . . . . . . . . . . . . .  45
-   Appendix B.  Complete YANG Module . . . . . . . . . . . . . . . .  47
-   Appendix C.  SID File (CSV) . . . . . . . . . . . . . . . . . . .  62
-   Appendix D.  atmos YANG Module  . . . . . . . . . . . . . . . . .  64
-   Appendix E.  atmos SID File (CSV) . . . . . . . . . . . . . . . .  68
-   Appendix F.  ccm2m Ontology . . . . . . . . . . . . . . . . . . .  69
-   Appendix G.  SCHC Rule Set  . . . . . . . . . . . . . . . . . . .  73
-   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  78
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  78
+     13.1.  Normative References . . . . . . . . . . . . . . . . . .  42
+     13.2.  Informative References . . . . . . . . . . . . . . . . .  44
+   Appendix A.  Module Tree  . . . . . . . . . . . . . . . . . . . .  46
+   Appendix B.  Complete YANG Module . . . . . . . . . . . . . . . .  48
+   Appendix C.  SID File (CSV) . . . . . . . . . . . . . . . . . . .  63
+   Appendix D.  atmos YANG Module  . . . . . . . . . . . . . . . . .  65
+   Appendix E.  atmos SID File (CSV) . . . . . . . . . . . . . . . .  69
+   Appendix F.  ccm2m Ontology . . . . . . . . . . . . . . . . . . .  70
+   Appendix G.  SCHC Rule Set  . . . . . . . . . . . . . . . . . . .  74
+     G.1.  Rule 1: Used to fetch a single value (bidirect) . . . . .  75
+     G.2.  Rule 2: Used to iPatch, ack with 7/3.  Empty CoAP for
+           notification in UP  . . . . . . . . . . . . . . . . . . .  77
+     G.3.  Rule 3: Used for notitifications (observe)  . . . . . . .  79
+     G.4.  Rule 4: Empty messages (e.g., ACK with empty code, or
+           RST)  . . . . . . . . . . . . . . . . . . . . . . . . . .  81
+     G.5.  Rule 5: ICMPv6 port unreachable . . . . . . . . . . . . .  83
+   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  84
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  84
 
 1.  Introduction
 
@@ -150,6 +157,19 @@ Internet-Draft                coreconf-m2m                September 2026
    structures payloads but does not enforce strong type checking, schema
    validation, or support for configuration and remote operations.
 
+
+
+
+
+
+
+
+
+Toutain                   Expires 13 March 2027                 [Page 3]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
    SenML is also part of the LwM2M framework [OMA-LwM2M], which defines
    a broader device management protocol built on CoAP and SenML for
    operator-to-device interactions.  However, LwM2M relies on periodic
@@ -161,14 +181,6 @@ Internet-Draft                coreconf-m2m                September 2026
    In some ways, SenML may be described by a YANG Data Model
    [I-D.gudi-t2trg-senml-as-coreconf], but the integration in the YANG
    ecosystem remains limited.
-
-
-
-
-Toutain                   Expires 12 March 2027                 [Page 3]
-
-Internet-Draft                coreconf-m2m                September 2026
-
 
    The CORECONF protocol stack using YANG [RFC7950] for Data Modeling,
    CoAP [RFC7252] for data transport, and CBOR [RFC8949] and YANG SID
@@ -206,6 +218,14 @@ Internet-Draft                coreconf-m2m                September 2026
 
    The model covers the following use cases:
 
+
+
+
+Toutain                   Expires 13 March 2027                 [Page 4]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
    *  resource discovery: sensors or actuators, regrouped under the name
       transducers, are discovered with their characteristics (units,
       precision)
@@ -217,14 +237,6 @@ Internet-Draft                coreconf-m2m                September 2026
 
    *  alert notification: when a value reaches a threshold (minimum and
       maximum) a notification message is sent
-
-
-
-
-Toutain                   Expires 12 March 2027                 [Page 4]
-
-Internet-Draft                coreconf-m2m                September 2026
-
 
    *  time series: values are collected by the device and sent when a
       limit is reached (number of samples, duration, message size)
@@ -261,6 +273,15 @@ Internet-Draft                coreconf-m2m                September 2026
    difference from the previous one, which significantly reduces the
    CBOR payload size for slowly-varying measurements.
 
+
+
+
+
+Toutain                   Expires 13 March 2027                 [Page 5]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
    The device can also send an alert when a measured value reaches a
    threshold, allowing the receiver to react promptly without waiting
    for a scheduled report.
@@ -272,15 +293,6 @@ Internet-Draft                coreconf-m2m                September 2026
    equipment was started, rather than as an absolute date and time.  If
    the equipment is able to do so, it can indicate its startup epoch to
    reconstitute an absolute time.
-
-
-
-
-
-Toutain                   Expires 12 March 2027                 [Page 5]
-
-Internet-Draft                coreconf-m2m                September 2026
-
 
 1.3.  Requirements Language
 
@@ -317,6 +329,15 @@ Internet-Draft                coreconf-m2m                September 2026
    Value: : other information stored in the datastore including
    quantities
 
+
+
+
+
+Toutain                   Expires 13 March 2027                 [Page 6]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
 3.  YANG Modules needed for coreconf-m2m
 
    coreconf-m2m YANG module is a framework: it defines the generic
@@ -326,17 +347,6 @@ Internet-Draft                coreconf-m2m                September 2026
    identity, and if several transducers report the same kind of
    measurement, several instances of the same identity have to be
    defined.
-
-
-
-
-
-
-
-Toutain                   Expires 12 March 2027                 [Page 6]
-
-Internet-Draft                coreconf-m2m                September 2026
-
 
    A device manufacturer using coreconf-m2m MUST therefore define, or
    reuse, a YANG module describing the transducers embedded in its
@@ -377,6 +387,13 @@ Internet-Draft                coreconf-m2m                September 2026
    Identity names and descriptions SHOULD be explicit, since this
    information may be used by AI agents to formulate requests.
 
+
+
+Toutain                   Expires 13 March 2027                 [Page 7]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
 3.2.  Overview of the coreconf-m2m Module
 
    The coreconf-m2m module is organized into three sub-modules:
@@ -384,15 +401,6 @@ Internet-Draft                coreconf-m2m                September 2026
    *  "characteristics" contains stable information describing the host.
       This information may be necessary for some ontologies such as
       [SOSA] and [SAREF].  These values may be modified during runtime,
-
-
-
-
-
-Toutain                   Expires 12 March 2027                 [Page 7]
-
-Internet-Draft                coreconf-m2m                September 2026
-
 
    *  "bootstrap" contains the context needed by the client to interact
       with the server and its transducers.  It mainly contains the time
@@ -433,6 +441,15 @@ Internet-Draft                coreconf-m2m                September 2026
       time source (battery-powered clock, GPS, ...) is available on the
       device.  This leaf is absent if no reference time is available.
 
+
+
+
+
+Toutain                   Expires 13 March 2027                 [Page 8]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
    *  uptime: the number of seconds elapsed since bootstrap.  A client
       can combine reference-epoch and uptime to estimate clock drift or
       propagation delay.
@@ -441,14 +458,6 @@ Internet-Draft                coreconf-m2m                September 2026
       transceiver readings.  For instance, if a node updates its reading
       every 2 minutes, querying it more frequently only increases
       battery drain without yielding fresher data.
-
-
-
-
-Toutain                   Expires 12 March 2027                 [Page 8]
-
-Internet-Draft                coreconf-m2m                September 2026
-
 
    *  inventory: the list of transducers known to the device, identified
       by their "type" and their configuration overrides (see
@@ -459,6 +468,43 @@ Internet-Draft                coreconf-m2m                September 2026
    recover the data.
 
 3.2.2.  Characteristics Sub-Tree
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Toutain                   Expires 13 March 2027                 [Page 9]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
      module: coreconf-m2m
        +--rw characteristics
@@ -499,13 +545,6 @@ Internet-Draft                coreconf-m2m                September 2026
    This sub-tree contains stable information about the device that is
    not expected to change across reboots:
 
-
-
-Toutain                   Expires 12 March 2027                 [Page 9]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
    *  geo-location: the fixed geographic position of the device, set
       once at deployment and not expected to change during normal
       operation.  The module reuses the "ietf-geo-location" YANG module
@@ -515,6 +554,13 @@ Internet-Draft                coreconf-m2m                September 2026
       mantissa.  This encoding was not chosen for transducer values, in
       order to avoid repeating the exponent (called "precision" in this
       model) with every quantity.
+
+
+
+Toutain                   Expires 13 March 2027                [Page 10]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
       If the device is mobile, its coordinates should instead be exposed
       through a transducer.
@@ -543,25 +589,6 @@ Internet-Draft                coreconf-m2m                September 2026
 
 3.2.3.  Transducer Sub-Tree
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Toutain                   Expires 12 March 2027                [Page 10]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
            module: coreconf-m2m
              +--rw transducers
                 +--rw transducer* [type]
@@ -579,6 +606,17 @@ Internet-Draft                coreconf-m2m                September 2026
                       +--ro sample-count?   uint64
 
        Figure 4: transducer sub-tree (type, quantity and statistics)
+
+
+
+
+
+
+
+Toutain                   Expires 13 March 2027                [Page 11]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
    The transducers sub-tree contains the list of transducers (i.e.,
    sensors and actuators) maintained by the device, listed in
@@ -606,18 +644,6 @@ Internet-Draft                coreconf-m2m                September 2026
    can be reset for a single transducer via the "reset-stats" action, or
    for all transducers at once via the "reset-stats" RPC.
 
-
-
-
-
-
-
-
-Toutain                   Expires 12 March 2027                [Page 11]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
              module: coreconf-m2m
                +--rw transducers
                   +--rw transducer* [type]
@@ -639,6 +665,14 @@ Internet-Draft                coreconf-m2m                September 2026
                         +--rw check-interval?   uint16
 
                  Figure 5: notification-parameters sub-tree
+
+
+
+
+Toutain                   Expires 13 March 2027                [Page 12]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
    Notification Parameters supports two kinds of notifications:
 
@@ -667,13 +701,6 @@ Internet-Draft                coreconf-m2m                September 2026
       -  "encoding" indicates how information is stored in the time
          series:
 
-
-
-Toutain                   Expires 12 March 2027                [Page 12]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
          o  "direct": all the values are stored with the precision.
 
          o  "delta": the first value is the reference and the following
@@ -693,6 +720,15 @@ Internet-Draft                coreconf-m2m                September 2026
             samples.
 
          o  the "time-period" after which the collection should be sent.
+
+
+
+
+
+Toutain                   Expires 13 March 2027                [Page 13]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
    *  "check-interval" controls how often a CON (confirmable)
       notification is sent instead of NON (non-confirmable), for both
@@ -719,17 +755,6 @@ Internet-Draft                coreconf-m2m                September 2026
    currently active for that transducer, regardless of which client
    configured it.
 
-
-
-
-
-
-
-Toutain                   Expires 12 March 2027                [Page 13]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
    Notification is started by sending a FETCH+Observe request on the
    notification stream resource (/s), with a body identifying the SID of
    the transducer to observe.  Multiple clients may observe the same
@@ -750,6 +775,16 @@ Internet-Draft                coreconf-m2m                September 2026
       token.
 
 4.  CORECONF Overview in the M2M Context
+
+
+
+
+
+
+Toutain                   Expires 13 March 2027                [Page 14]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
 4.1.  CoAP Methods Mapping
 
@@ -777,15 +812,6 @@ Internet-Draft                coreconf-m2m                September 2026
       response bodies and iPATCH payloads, where data nodes are
       identified by their SID.
 
-
-
-
-
-Toutain                   Expires 12 March 2027                [Page 14]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
    Using these two content formats ensures maximum interoperability with
    CORECONF implementations and keeps the payloads as compact as
    possible.  Limiting exchanges to a small number of well-known packet
@@ -805,6 +831,16 @@ Internet-Draft                coreconf-m2m                September 2026
    cancel the Observe subscription accordingly.  A RST response from the
    client is also a valid way to signal that the subscription should be
    terminated.
+
+
+
+
+
+
+Toutain                   Expires 13 March 2027                [Page 15]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
 4.2.  SID Allocations
 
@@ -831,17 +867,6 @@ Internet-Draft                coreconf-m2m                September 2026
    The client does not know the transducers managed by the device.  It
    sends a FETCH on "/bootstrap" (SID 62002) as shown in Figure 6.
 
-
-
-
-
-
-
-Toutain                   Expires 12 March 2027                [Page 15]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
     CoAP Request:
     Non-Confirmable, FETCH, MID:39919
       Token: 2aaf
@@ -864,6 +889,14 @@ Internet-Draft                coreconf-m2m                September 2026
              {3: 10000014}, {3: 10000016}, {3: 10000015}, {3: 10000012},
              {3: 10000001}, {3: 10000013}, {3: 10000003}, {3: 10000009},
              {3: 10000006}, {3: 10000004}]}}
+
+
+
+
+Toutain                   Expires 13 March 2027                [Page 16]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
          Figure 6: Resource discovery: FETCH request and response
 
@@ -893,7 +926,30 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 16]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Toutain                   Expires 13 March 2027                [Page 17]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -949,7 +1005,7 @@ Connected. 14 sensor(s) discovered, minimal step 120 s.
 
 
 
-Toutain                   Expires 12 March 2027                [Page 17]
+Toutain                   Expires 13 March 2027                [Page 18]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1005,7 +1061,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 18]
+Toutain                   Expires 13 March 2027                [Page 19]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1061,7 +1117,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 19]
+Toutain                   Expires 13 March 2027                [Page 20]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1117,7 +1173,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 20]
+Toutain                   Expires 13 March 2027                [Page 21]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1173,7 +1229,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 21]
+Toutain                   Expires 13 March 2027                [Page 22]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1229,7 +1285,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 22]
+Toutain                   Expires 13 March 2027                [Page 23]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1285,7 +1341,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 23]
+Toutain                   Expires 13 March 2027                [Page 24]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1341,7 +1397,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 24]
+Toutain                   Expires 13 March 2027                [Page 25]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1397,7 +1453,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 25]
+Toutain                   Expires 13 March 2027                [Page 26]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1453,7 +1509,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 26]
+Toutain                   Expires 13 March 2027                [Page 27]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1509,7 +1565,7 @@ ex:control/setup-history/encoding a ccm2m:NotificationParam ;
 
 
 
-Toutain                   Expires 12 March 2027                [Page 27]
+Toutain                   Expires 13 March 2027                [Page 28]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1565,7 +1621,7 @@ ex:control/subscribe-history a ccm2m:Control ;
 
 
 
-Toutain                   Expires 12 March 2027                [Page 28]
+Toutain                   Expires 13 March 2027                [Page 29]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1621,7 +1677,7 @@ ex:observation/3 a sosa:Observation ;
 
 
 
-Toutain                   Expires 12 March 2027                [Page 29]
+Toutain                   Expires 13 March 2027                [Page 30]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1677,7 +1733,7 @@ ex:actuation/1 a sosa:Actuation ;
 
 
 
-Toutain                   Expires 12 March 2027                [Page 30]
+Toutain                   Expires 13 March 2027                [Page 31]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1733,7 +1789,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 31]
+Toutain                   Expires 13 March 2027                [Page 32]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1789,7 +1845,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 32]
+Toutain                   Expires 13 March 2027                [Page 33]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1845,7 +1901,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 33]
+Toutain                   Expires 13 March 2027                [Page 34]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1901,7 +1957,7 @@ GET /Datastreams(1)
 
 
 
-Toutain                   Expires 12 March 2027                [Page 34]
+Toutain                   Expires 13 March 2027                [Page 35]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1957,7 +2013,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 35]
+Toutain                   Expires 13 March 2027                [Page 36]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2013,7 +2069,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 36]
+Toutain                   Expires 13 March 2027                [Page 37]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2069,7 +2125,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 37]
+Toutain                   Expires 13 March 2027                [Page 38]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2125,7 +2181,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 38]
+Toutain                   Expires 13 March 2027                [Page 39]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2181,7 +2237,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 39]
+Toutain                   Expires 13 March 2027                [Page 40]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2237,7 +2293,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 40]
+Toutain                   Expires 13 March 2027                [Page 41]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2293,7 +2349,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 41]
+Toutain                   Expires 13 March 2027                [Page 42]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2349,7 +2405,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 42]
+Toutain                   Expires 13 March 2027                [Page 43]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2405,7 +2461,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 43]
+Toutain                   Expires 13 March 2027                [Page 44]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2461,7 +2517,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 44]
+Toutain                   Expires 13 March 2027                [Page 45]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2517,7 +2573,7 @@ Appendix A.  Module Tree
 
 
 
-Toutain                   Expires 12 March 2027                [Page 45]
+Toutain                   Expires 13 March 2027                [Page 46]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2573,7 +2629,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 46]
+Toutain                   Expires 13 March 2027                [Page 47]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2629,7 +2685,7 @@ module coreconf-m2m {
 
 
 
-Toutain                   Expires 12 March 2027                [Page 47]
+Toutain                   Expires 13 March 2027                [Page 48]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2685,7 +2741,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 48]
+Toutain                   Expires 13 March 2027                [Page 49]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2741,7 +2797,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 49]
+Toutain                   Expires 13 March 2027                [Page 50]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2797,7 +2853,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 50]
+Toutain                   Expires 13 March 2027                [Page 51]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2853,7 +2909,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 51]
+Toutain                   Expires 13 March 2027                [Page 52]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2909,7 +2965,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 52]
+Toutain                   Expires 13 March 2027                [Page 53]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2965,7 +3021,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 53]
+Toutain                   Expires 13 March 2027                [Page 54]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3021,7 +3077,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 54]
+Toutain                   Expires 13 March 2027                [Page 55]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3077,7 +3133,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 55]
+Toutain                   Expires 13 March 2027                [Page 56]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3133,7 +3189,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 56]
+Toutain                   Expires 13 March 2027                [Page 57]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3189,7 +3245,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 57]
+Toutain                   Expires 13 March 2027                [Page 58]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3245,7 +3301,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 58]
+Toutain                   Expires 13 March 2027                [Page 59]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3301,7 +3357,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 59]
+Toutain                   Expires 13 March 2027                [Page 60]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3357,7 +3413,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 60]
+Toutain                   Expires 13 March 2027                [Page 61]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3413,7 +3469,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 61]
+Toutain                   Expires 13 March 2027                [Page 62]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3469,7 +3525,7 @@ SID,Namespace,Identifier
 
 
 
-Toutain                   Expires 12 March 2027                [Page 62]
+Toutain                   Expires 13 March 2027                [Page 63]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3525,7 +3581,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 63]
+Toutain                   Expires 13 March 2027                [Page 64]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3581,7 +3637,7 @@ module atmos {
 
 
 
-Toutain                   Expires 12 March 2027                [Page 64]
+Toutain                   Expires 13 March 2027                [Page 65]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3637,7 +3693,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 65]
+Toutain                   Expires 13 March 2027                [Page 66]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3693,7 +3749,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 66]
+Toutain                   Expires 13 March 2027                [Page 67]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3749,7 +3805,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 12 March 2027                [Page 67]
+Toutain                   Expires 13 March 2027                [Page 68]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3805,7 +3861,7 @@ Appendix E.  atmos SID File (CSV)
 
 
 
-Toutain                   Expires 12 March 2027                [Page 68]
+Toutain                   Expires 13 March 2027                [Page 69]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3861,7 +3917,7 @@ ccm2m:SID
 
 
 
-Toutain                   Expires 12 March 2027                [Page 69]
+Toutain                   Expires 13 March 2027                [Page 70]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3917,7 +3973,7 @@ ccm2m:hasParam
 
 
 
-Toutain                   Expires 12 March 2027                [Page 70]
+Toutain                   Expires 13 March 2027                [Page 71]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3973,7 +4029,7 @@ ccm2m:coapPath
 
 
 
-Toutain                   Expires 12 March 2027                [Page 71]
+Toutain                   Expires 13 March 2027                [Page 72]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4029,7 +4085,7 @@ ccm2m:targetSid
 
 
 
-Toutain                   Expires 12 March 2027                [Page 72]
+Toutain                   Expires 13 March 2027                [Page 73]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4066,268 +4122,538 @@ Declared once on the Sensor; not repeated per Observation.""" ;
 
 Appendix G.  SCHC Rule Set
 
-   The following SCHC [RFC8724] Rule Set, expressed in the JSON format
-   of [RFC9363], compresses the IPv6/UDP/CoAP traffic exchanged with the
-   ATMOS41 weather station used throughout this document.  It is not the
-   final version of this rule set and is expected to change as the model
-   evolves.
+   The following SCHC [RFC8724] Rule Set compresses the IPv6/UDP/CoAP
+   traffic exchanged with the ATMOS41 weather station used throughout
+   this document.  It is not the final version of this rule set and is
+   expected to change as the model evolves.  Field names (FID), matching
+   operators (MO), and compression/decompression actions (CDA) are as
+   defined in [RFC8724]; FL is the Field Length, DI the Direction
+   Indicator, and TV the Target Value (the Field Position, FP, is
+   omitted from the tables below for compactness; it defaults to 1
+   unless a field is repeated, which does not happen in this Rule Set).
+   The bootstrap rule (Rule 0 in the source Rule Set) is omitted here,
+   being identical in structure to Rule 1.
 
-{
-    "DeviceID" : "udp:10.0.0.20:8888",
-    "SoR" : [{
-        "RuleIDValue" : 0,
-        "RuleIDLength": 5,
-        "Description": "Used a bootstrap to get the transducer list (d=0).",
-        "Compression": [
-            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "value-sent"},
+   Below each rule, the resulting residue format is given for the Down
+   (network to device) and Up (device to network) directions: the
+   ordered list of fields that still carry a residue after compression
+   -- i.e. those whose CDA is not "not-sent", "compute-length", or
 
 
 
-Toutain                   Expires 12 March 2027                [Page 73]
+Toutain                   Expires 13 March 2027                [Page 74]
 
 Internet-Draft                coreconf-m2m                September 2026
 
 
-            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
-            {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
-                                                   "MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.APP_PREFIX",             "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
+   "compute-checksum" -- together with the number of bits sent for that
+   field ("var" when the size is not fixed).  A "mapping-sent" field
+   over a single-valued TV list contributes no residue bits, since only
+   one value is possible and is therefore omitted.
 
-            {"FID": "UDP.DEV_PORT",  "TV": 5683,"MO": "equal",  "CDA": "not-sent"},
-            {"FID": "UDP.APP_PORT",             "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore", "CDA": "compute-length"},
-            {"FID": "UDP.CKSUM",     "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
-
-            {"FID": "COAP.VER",  "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TYPE", "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TKL",  "DI": "BI", "TV": 0,   "MO": "ignore","CDA": "value-sent"},
-            {"FID": "COAP.CODE", "DI": "BI", "TV": [5, 7, 69],   "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.MID",  "DI": "BI", "TV": 0,   "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "COAP.TOKEN", "FL": "length-byte(16)",     "MO": "ignore","CDA": "value-sent"},
-
-            {"FID": "COAP.option(11)", "FP": 1, "DI": "DW", "TV": ["c", "s"],
-                                "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.option(12)", "DI": "DW", "TV": [141,142], "MO": "match-mapping", "CDA": "mapping-sent"},
-            {"FID": "COAP.option(12)", "DI": "UP", "TV":  142, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "COAP.option(15)", "DI": "DW", "TV": "d=0", "MO": "equal", "CDA": "not-sent"},
-            {"FID": "COAP.option(17)", "DI": "DW", "TV": 142, "MO": "equal", "CDA": "not-sent"}
-        ]},
-        {
-        "RuleIDValue" : 1,
-        "RuleIDLength": 5,
-        "Description": "Used to fetch a single value (bidirect)",
-        "Compression": [
-            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
-            {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
-                                                   "MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.APP_PREFIX",             "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
-
-            {"FID": "UDP.DEV_PORT",  "TV": 5683,"MO": "equal",  "CDA": "not-sent"},
-            {"FID": "UDP.APP_PORT",             "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore", "CDA": "compute-length"},
+G.1.  Rule 1: Used to fetch a single value (bidirect)
 
 
 
-Toutain                   Expires 12 March 2027                [Page 74]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Toutain                   Expires 13 March 2027                [Page 75]
 
 Internet-Draft                coreconf-m2m                September 2026
 
 
-            {"FID": "UDP.CKSUM",     "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
+  /--------------+----------+----+---------------+---------+-----------\
+  | FID          | FL       | DI | TV            | MO      | CDA       |
+  +==============+==========+====+===============+=========+===========+
+  | IPV6.VER     | 4        | bi | 6             | equal   | not-sent  |
+  | IPV6.TC      | 8        | bi | 0             | ignore  | value-    |
+  |              |          |    |               |         | sent      |
+  | IPV6.FL      | 20       | bi | 0             | ignore  | value-    |
+  |              |          |    |               |         | sent      |
+  | IPV6.LEN     | 16       | bi |               | ignore  | compute-  |
+  |              |          |    |               |         | length    |
+  | IPV6.NXT     | 8        | bi | 17            | equal   | not-sent  |
+  | IPV6.HOP_LMT | 8        | bi | 255           | ignore  | not-sent  |
+  | IPV6.DEV_PRE | 64       | bi | dddd::/64     | equal   | not-sent  |
+  | FIX          |          |    |               |         |           |
+  | IPV6.DEV_IID | 64       | bi | ::6/64        | equal   | not-sent  |
+  | IPV6.APP_PRE | 64       | bi | aaaa::/64     | equal   | not-sent  |
+  | FIX          |          |    |               |         |           |
+  | IPV6.APP_IID | 64       | bi | ::2/64        | equal   | not-sent  |
+  | UDP.DEV_PORT | 16       | bi | 5683          | equal   | not-sent  |
+  | UDP.APP_PORT | 16       | bi |               | ignore  | value-    |
+  |              |          |    |               |         | sent      |
+  | UDP.LEN      | 16       | bi | 0             | ignore  | compute-  |
+  |              |          |    |               |         | length    |
+  | UDP.CKSUM    | 16       | bi | 0             | ignore  | compute-  |
+  |              |          |    |               |         | checksum  |
+  | COAP.VER     | 2        | bi | 1             | equal   | not-sent  |
+  | COAP.TYPE    | 2        | bi | 1             | equal   | not-sent  |
+  | COAP.TKL     | 4        | bi | 0             | ignore  | value-    |
+  |              |          |    |               |         | sent      |
+  | COAP.CODE    | 8        | bi | 5,69          | match-  | mapping-  |
+  |              |          |    |               | mapping | sent      |
+  | COAP.MID     | 16       | bi | 0             | ignore  | value-    |
+  |              |          |    |               |         | sent      |
+  | COAP.TOKEN   | length-  | bi |               | ignore  | value-    |
+  |              | byte(16) |    |               |         | sent      |
+  | COAP.option( | var      | dw | c             | match-  | mapping-  |
+  | 11)          |          |    |               | mapping | sent      |
+  | COAP.option( | var      | dw | 141,142       | match-  | mapping-  |
+  | 12)          |          |    |               | mapping | sent      |
+  | COAP.option( | var      | up | 142           | equal   | not-sent  |
+  | 12)          |          |    |               |         |           |
+  | COAP.option( | var      | dw | 142           | equal   | not-sent  |
+  | 17)          |          |    |               |         |           |
+  \--------------+----------+----+---------------+---------+-----------/
 
-            {"FID": "COAP.VER",  "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TYPE", "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TKL",  "DI": "BI", "TV": 0,   "MO": "ignore","CDA": "value-sent"},
-            {"FID": "COAP.CODE", "DI": "BI", "TV": [5, 69],   "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.MID",  "DI": "BI", "TV": 0,   "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "COAP.TOKEN", "FL": "length-byte(16)",     "MO": "ignore","CDA": "value-sent"},
-
-            {"FID": "COAP.option(11)", "FP": 1, "DI": "DW", "TV": ["c"],
-                                "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.option(12)", "DI": "DW", "TV": [141,142], "MO": "match-mapping", "CDA": "mapping-sent"},
-            {"FID": "COAP.option(12)", "DI": "UP", "TV":  142, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "COAP.option(17)", "DI": "DW", "TV":  142, "MO": "equal", "CDA": "not-sent"}
-
-        ]},         {
-        "RuleIDValue" : 2,
-        "RuleIDLength": 5,
-        "Description": "Used to iPatch, ack with 7/3. Empty CoAP for notification in UP",
-        "Compression": [
-            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
-            {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
-                                                   "MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.APP_PREFIX",             "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
-
-            {"FID": "UDP.DEV_PORT",  "TV": 5683,"MO": "equal",  "CDA": "not-sent"},
-            {"FID": "UDP.APP_PORT",             "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore", "CDA": "compute-length"},
-            {"FID": "UDP.CKSUM",     "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
-
-            {"FID": "COAP.VER",  "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TYPE", "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TKL",  "DI": "BI", "TV": 0,   "MO": "ignore","CDA": "value-sent"},
-            {"FID": "COAP.CODE", "DI": "DW", "TV": [7],   "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.CODE", "DI": "UP",              "MO": "ignore","CDA": "value-sent"},
-            {"FID": "COAP.MID",  "DI": "BI", "TV": 0,   "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "COAP.TOKEN", "FL": "length-byte(16)",     "MO": "ignore","CDA": "value-sent"},
-
-            {"FID": "COAP.option(11)", "FP": 1, "DI": "DW", "TV": ["c"],
-                                "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.option(12)", "DI": "DW", "TV": [141,142], "MO": "match-mapping", "CDA": "mapping-sent"}
+                 Figure 33: SCHC Rule 1 (RuleIDLength=5)
 
 
 
-Toutain                   Expires 12 March 2027                [Page 75]
+
+
+Toutain                   Expires 13 March 2027                [Page 76]
 
 Internet-Draft                coreconf-m2m                September 2026
 
 
-        ]},          {
-        "RuleIDValue" : 3,
-        "RuleIDLength": 5,
-        "Description": "Used for notitifications (observe)",
-        "Compression": [
-            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
-            {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
-                                                   "MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.APP_PREFIX",             "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
+ Residue (Down): TC(8b) | FL(20b) | APP_PORT(16b) | TKL(4b) | CODE(1b) |
+                 MID(16b) | TOKEN(var) | option(12)(1b)
+ Residue (Up):   TC(8b) | FL(20b) | APP_PORT(16b) | TKL(4b) | CODE(1b) |
+                 MID(16b) | TOKEN(var)
 
-            {"FID": "UDP.DEV_PORT",  "TV": 5683,"MO": "equal",  "CDA": "not-sent"},
-            {"FID": "UDP.APP_PORT",             "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore", "CDA": "compute-length"},
-            {"FID": "UDP.CKSUM",     "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
+           Figure 34: Residue format for Rule 1, Down and Up
 
-            {"FID": "COAP.VER",  "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TYPE", "DI": "BI", "TV": [0,1],   "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.TKL",  "DI": "BI", "TV": 0,   "MO": "ignore","CDA": "value-sent"},
-            {"FID": "COAP.CODE", "DI": "BI", "TV": [5, 7, 69],   "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.MID",  "DI": "BI", "TV": 0,   "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "COAP.TOKEN", "FL": "length-byte(16)",     "MO": "ignore","CDA": "value-sent"},
-
-            {"FID": "COAP.option(6)", "FL": "var", "FP": 1, "DI": "BI",     "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "COAP.option(11)", "FP": 1, "DI": "DW", "TV": ["s"],    "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.option(12)", "DI": "DW", "TV": [141], "MO": "match-mapping", "CDA": "mapping-sent"},
-            {"FID": "COAP.option(12)", "DI": "UP", "TV": [142], "MO": "match-mapping", "CDA": "mapping-sent"},
-            {"FID": "COAP.option(17)", "DI": "DW", "TV": [142], "MO": "match-mapping", "CDA": "mapping-sent"}
-        ]},         {
-        "RuleIDValue" : 4,
-        "RuleIDLength": 5,
-        "Description": "Empty messages (e.g., ACK with empty code, or RST)",
-        "Compression": [
-            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
-            {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
-                                                   "MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"},
+G.2.  Rule 2: Used to iPatch, ack with 7/3.  Empty CoAP for notification
+      in UP
 
 
 
-Toutain                   Expires 12 March 2027                [Page 76]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Toutain                   Expires 13 March 2027                [Page 77]
 
 Internet-Draft                coreconf-m2m                September 2026
 
 
-            {"FID": "IPV6.APP_PREFIX",             "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
+  /--------------+----------+----+---------------+---------+-----------\
+  | FID          | FL       | DI | TV            | MO      | CDA       |
+  +==============+==========+====+===============+=========+===========+
+  | IPV6.VER     | 4        | bi | 6             | equal   | not-sent  |
+  | IPV6.TC      | 8        | bi | 0             | ignore  | value-    |
+  |              |          |    |               |         | sent      |
+  | IPV6.FL      | 20       | bi | 0             | ignore  | value-    |
+  |              |          |    |               |         | sent      |
+  | IPV6.LEN     | 16       | bi |               | ignore  | compute-  |
+  |              |          |    |               |         | length    |
+  | IPV6.NXT     | 8        | bi | 17            | equal   | not-sent  |
+  | IPV6.HOP_LMT | 8        | bi | 255           | ignore  | not-sent  |
+  | IPV6.DEV_PRE | 64       | bi | dddd::/64     | equal   | not-sent  |
+  | FIX          |          |    |               |         |           |
+  | IPV6.DEV_IID | 64       | bi | ::6/64        | equal   | not-sent  |
+  | IPV6.APP_PRE | 64       | bi | aaaa::/64     | equal   | not-sent  |
+  | FIX          |          |    |               |         |           |
+  | IPV6.APP_IID | 64       | bi | ::2/64        | equal   | not-sent  |
+  | UDP.DEV_PORT | 16       | bi | 5683          | equal   | not-sent  |
+  | UDP.APP_PORT | 16       | bi |               | ignore  | value-    |
+  |              |          |    |               |         | sent      |
+  | UDP.LEN      | 16       | bi | 0             | ignore  | compute-  |
+  |              |          |    |               |         | length    |
+  | UDP.CKSUM    | 16       | bi | 0             | ignore  | compute-  |
+  |              |          |    |               |         | checksum  |
+  | COAP.VER     | 2        | bi | 1             | equal   | not-sent  |
+  | COAP.TYPE    | 2        | bi | 1             | equal   | not-sent  |
+  | COAP.TKL     | 4        | bi | 0             | ignore  | value-    |
+  |              |          |    |               |         | sent      |
+  | COAP.CODE    | 8        | dw | 7             | match-  | mapping-  |
+  |              |          |    |               | mapping | sent      |
+  | COAP.CODE    | 8        | up |               | ignore  | value-    |
+  |              |          |    |               |         | sent      |
+  | COAP.MID     | 16       | bi | 0             | ignore  | value-    |
+  |              |          |    |               |         | sent      |
+  | COAP.TOKEN   | length-  | bi |               | ignore  | value-    |
+  |              | byte(16) |    |               |         | sent      |
+  | COAP.option( | var      | dw | c             | match-  | mapping-  |
+  | 11)          |          |    |               | mapping | sent      |
+  | COAP.option( | var      | dw | 141,142       | match-  | mapping-  |
+  | 12)          |          |    |               | mapping | sent      |
+  \--------------+----------+----+---------------+---------+-----------/
 
-            {"FID": "UDP.DEV_PORT",  "TV": 5683,"MO": "equal",  "CDA": "not-sent"},
-            {"FID": "UDP.APP_PORT",             "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore", "CDA": "compute-length"},
-            {"FID": "UDP.CKSUM",     "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
-
-            {"FID": "COAP.VER",  "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TYPE", "DI": "BI",            "MO": "ignore","CDA": "value-sent"},
-            {"FID": "COAP.TKL",  "DI": "BI",            "MO": "ignore","CDA": "value-sent"},
-            {"FID": "COAP.CODE", "DI": "BI",            "MO": "ignore","CDA": "value-sent"},
-            {"FID": "COAP.MID",  "DI": "BI",            "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "COAP.TOKEN", "FL": "length-byte(16)",     "MO": "ignore","CDA": "value-sent"}
-        ]},   {
-        "RuleIDValue" : 5,
-        "RuleIDLength": 5,
-        "Description": "ICMPv6 port unreachable",
-        "Compression": [
-            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "not-sent"},
-            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
-            {"FID": "IPV6.NXT", "TV": 58, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
-                                                   "MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.APP_PREFIX",             "MO": "ignore","CDA": "value-sent"},
-            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
-
-            {"FID": "ICMPV6.TYPE", "TV": 1, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "ICMPV6.CODE", "TV": 4, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "ICMPV6.CKSUM",   "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
-            {"FID": "UNUSED", "FL": 32, "MO": "ignore", "CDA": "not-sent"},
-
-
-            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "not-sent"},
-            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
-            {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_PREFIX","TV": "2001:660:7301:5C4C::/64",
-                                                   "MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.APP_PREFIX",
-                                                   "MO": "ignore","CDA": "value-sent"},
+                 Figure 35: SCHC Rule 2 (RuleIDLength=5)
 
 
 
-Toutain                   Expires 12 March 2027                [Page 77]
+
+
+
+
+Toutain                   Expires 13 March 2027                [Page 78]
 
 Internet-Draft                coreconf-m2m                September 2026
 
 
-            {"FID": "IPV6.APP_IID",                "MO": "ignore","CDA": "value-sent"},
+ Residue (Down): TC(8b) | FL(20b) | APP_PORT(16b) | TKL(4b) | MID(16b) |
+                 TOKEN(var) | option(12)(1b)
+ Residue (Up):   TC(8b) | FL(20b) | APP_PORT(16b) | TKL(4b) | CODE(8b) |
+                 MID(16b) | TOKEN(var)
 
-            {"FID": "UDP.DEV_PORT",  "TV": 5683,"MO": "equal",  "CDA": "not-sent"},
-            {"FID": "UDP.APP_PORT",             "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore", "CDA": "compute-length"},
-            {"FID": "UDP.CKSUM",     "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
+           Figure 36: Residue format for Rule 2, Down and Up
 
-            {"FID": "PAYLOAD",             "MO": "ignore","CDA": "not-sent"}
+G.3.  Rule 3: Used for notitifications (observe)
 
-        ]}
-    ]
-}
 
-       Figure 33: SCHC Rule Set for the ATMOS41 weather station
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Toutain                   Expires 13 March 2027                [Page 79]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
+  /--------------+----------+----+---------------+---------+-----------\
+  | FID          | FL       | DI | TV            | MO      | CDA       |
+  +==============+==========+====+===============+=========+===========+
+  | IPV6.VER     | 4        | bi | 6             | equal   | not-sent  |
+  | IPV6.TC      | 8        | bi | 0             | ignore  | value-    |
+  |              |          |    |               |         | sent      |
+  | IPV6.FL      | 20       | bi | 0             | ignore  | value-    |
+  |              |          |    |               |         | sent      |
+  | IPV6.LEN     | 16       | bi |               | ignore  | compute-  |
+  |              |          |    |               |         | length    |
+  | IPV6.NXT     | 8        | bi | 17            | equal   | not-sent  |
+  | IPV6.HOP_LMT | 8        | bi | 255           | ignore  | not-sent  |
+  | IPV6.DEV_PRE | 64       | bi | dddd::/64     | equal   | not-sent  |
+  | FIX          |          |    |               |         |           |
+  | IPV6.DEV_IID | 64       | bi | ::6/64        | equal   | not-sent  |
+  | IPV6.APP_PRE | 64       | bi | aaaa::/64     | equal   | not-sent  |
+  | FIX          |          |    |               |         |           |
+  | IPV6.APP_IID | 64       | bi | ::2/64        | equal   | not-sent  |
+  | UDP.DEV_PORT | 16       | bi | 5683          | equal   | not-sent  |
+  | UDP.APP_PORT | 16       | bi |               | ignore  | value-    |
+  |              |          |    |               |         | sent      |
+  | UDP.LEN      | 16       | bi | 0             | ignore  | compute-  |
+  |              |          |    |               |         | length    |
+  | UDP.CKSUM    | 16       | bi | 0             | ignore  | compute-  |
+  |              |          |    |               |         | checksum  |
+  | COAP.VER     | 2        | bi | 1             | equal   | not-sent  |
+  | COAP.TYPE    | 2        | bi | 0,1           | match-  | mapping-  |
+  |              |          |    |               | mapping | sent      |
+  | COAP.TKL     | 4        | bi | 0             | ignore  | value-    |
+  |              |          |    |               |         | sent      |
+  | COAP.CODE    | 8        | bi | 5,7,69        | match-  | mapping-  |
+  |              |          |    |               | mapping | sent      |
+  | COAP.MID     | 16       | bi | 0             | ignore  | value-    |
+  |              |          |    |               |         | sent      |
+  | COAP.TOKEN   | length-  | bi |               | ignore  | value-    |
+  |              | byte(16) |    |               |         | sent      |
+  | COAP.option( | var      | bi |               | ignore  | value-    |
+  | 6)           |          |    |               |         | sent      |
+  | COAP.option( | var      | dw | s             | match-  | mapping-  |
+  | 11)          |          |    |               | mapping | sent      |
+  | COAP.option( | var      | dw | 141           | match-  | mapping-  |
+  | 12)          |          |    |               | mapping | sent      |
+  | COAP.option( | var      | up | 142           | match-  | mapping-  |
+  | 12)          |          |    |               | mapping | sent      |
+  | COAP.option( | var      | dw | 142           | match-  | mapping-  |
+  | 17)          |          |    |               | mapping | sent      |
+  \--------------+----------+----+---------------+---------+-----------/
+
+
+
+
+Toutain                   Expires 13 March 2027                [Page 80]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
+                 Figure 37: SCHC Rule 3 (RuleIDLength=5)
+
+ Residue (Down): TC(8b) | FL(20b) | APP_PORT(16b) | TYPE(1b) | TKL(4b) |
+                 CODE(2b) | MID(16b) | TOKEN(var) |
+                 option(6)(varb)
+ Residue (Up):   TC(8b) | FL(20b) | APP_PORT(16b) | TYPE(1b) | TKL(4b) |
+                 CODE(2b) | MID(16b) | TOKEN(var) |
+                 option(6)(varb)
+
+           Figure 38: Residue format for Rule 3, Down and Up
+
+G.4.  Rule 4: Empty messages (e.g., ACK with empty code, or RST)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Toutain                   Expires 13 March 2027                [Page 81]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
+  /--------------+----------+----+---------------+---------+-----------\
+  | FID          | FL       | DI | TV            | MO      | CDA       |
+  +==============+==========+====+===============+=========+===========+
+  | IPV6.VER     | 4        | bi | 6             | equal   | not-sent  |
+  | IPV6.TC      | 8        | bi | 0             | ignore  | value-    |
+  |              |          |    |               |         | sent      |
+  | IPV6.FL      | 20       | bi | 0             | ignore  | value-    |
+  |              |          |    |               |         | sent      |
+  | IPV6.LEN     | 16       | bi |               | ignore  | compute-  |
+  |              |          |    |               |         | length    |
+  | IPV6.NXT     | 8        | bi | 17            | equal   | not-sent  |
+  | IPV6.HOP_LMT | 8        | bi | 255           | ignore  | not-sent  |
+  | IPV6.DEV_PRE | 64       | bi | dddd::/64     | equal   | not-sent  |
+  | FIX          |          |    |               |         |           |
+  | IPV6.DEV_IID | 64       | bi | ::6/64        | equal   | not-sent  |
+  | IPV6.APP_PRE | 64       | bi | aaaa::/64     | equal   | not-sent  |
+  | FIX          |          |    |               |         |           |
+  | IPV6.APP_IID | 64       | bi | ::2/64        | equal   | not-sent  |
+  | UDP.DEV_PORT | 16       | bi | 5683          | equal   | not-sent  |
+  | UDP.APP_PORT | 16       | bi |               | ignore  | value-    |
+  |              |          |    |               |         | sent      |
+  | UDP.LEN      | 16       | bi | 0             | ignore  | compute-  |
+  |              |          |    |               |         | length    |
+  | UDP.CKSUM    | 16       | bi | 0             | ignore  | compute-  |
+  |              |          |    |               |         | checksum  |
+  | COAP.VER     | 2        | bi | 1             | equal   | not-sent  |
+  | COAP.TYPE    | 2        | bi |               | ignore  | value-    |
+  |              |          |    |               |         | sent      |
+  | COAP.TKL     | 4        | bi |               | ignore  | value-    |
+  |              |          |    |               |         | sent      |
+  | COAP.CODE    | 8        | bi |               | ignore  | value-    |
+  |              |          |    |               |         | sent      |
+  | COAP.MID     | 16       | bi |               | ignore  | value-    |
+  |              |          |    |               |         | sent      |
+  | COAP.TOKEN   | length-  | bi |               | ignore  | value-    |
+  |              | byte(16) |    |               |         | sent      |
+  \--------------+----------+----+---------------+---------+-----------/
+
+                 Figure 39: SCHC Rule 4 (RuleIDLength=5)
+
+ Residue (Down): TC(8b) | FL(20b) | APP_PORT(16b) | TYPE(2b) | TKL(4b) |
+                 CODE(8b) | MID(16b) | TOKEN(var)
+ Residue (Up):   TC(8b) | FL(20b) | APP_PORT(16b) | TYPE(2b) | TKL(4b) |
+                 CODE(8b) | MID(16b) | TOKEN(var)
+
+           Figure 40: Residue format for Rule 4, Down and Up
+
+
+
+
+
+Toutain                   Expires 13 March 2027                [Page 82]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
+G.5.  Rule 5: ICMPv6 port unreachable
+
+  /--------------+----------+----+---------------+---------+-----------\
+  | FID          | FL       | DI | TV            | MO      | CDA       |
+  +==============+==========+====+===============+=========+===========+
+  | IPV6.VER     | 4        | bi | 6             | equal   | not-sent  |
+  | IPV6.TC      | 8        | bi | 0             | ignore  | not-sent  |
+  | IPV6.FL      | 20       | bi | 0             | ignore  | not-sent  |
+  | IPV6.LEN     | 16       | bi |               | ignore  | compute-  |
+  |              |          |    |               |         | length    |
+  | IPV6.NXT     | 8        | bi | 58            | equal   | not-sent  |
+  | IPV6.HOP_LMT | 8        | bi | 255           | ignore  | not-sent  |
+  | IPV6.DEV_PRE | 64       | bi | dddd::/64     | equal   | not-sent  |
+  | FIX          |          |    |               |         |           |
+  | IPV6.DEV_IID | 64       | bi | ::6/64        | equal   | not-sent  |
+  | IPV6.APP_PRE | 64       | bi | aaaa::/64     | equal   | not-sent  |
+  | FIX          |          |    |               |         |           |
+  | IPV6.APP_IID | 64       | bi | ::2/64        | equal   | not-sent  |
+  | ICMPV6.TYPE  | 8        | bi | 1             | equal   | not-sent  |
+  | ICMPV6.CODE  | 8        | bi | 4             | equal   | not-sent  |
+  | ICMPV6.CKSUM | 16       | bi | 0             | ignore  | compute-  |
+  |              |          |    |               |         | checksum  |
+  | UNUSED       | 32       | bi |               | ignore  | not-sent  |
+  | IPV6.VER     | 4        | bi | 6             | equal   | not-sent  |
+  | IPV6.TC      | 8        | bi | 0             | ignore  | not-sent  |
+  | IPV6.FL      | 20       | bi | 0             | ignore  | not-sent  |
+  | IPV6.LEN     | 16       | bi |               | ignore  | compute-  |
+  |              |          |    |               |         | length    |
+  | IPV6.NXT     | 8        | bi | 17            | equal   | not-sent  |
+  | IPV6.HOP_LMT | 8        | bi | 255           | ignore  | not-sent  |
+  | IPV6.DEV_PRE | 64       | bi | dddd::/64     | equal   | not-sent  |
+  | FIX          |          |    |               |         |           |
+  | IPV6.DEV_IID | 64       | bi | ::6/64        | equal   | not-sent  |
+  | IPV6.APP_PRE | 64       | bi | aaaa::/64     | equal   | not-sent  |
+  | FIX          |          |    |               |         |           |
+  | IPV6.APP_IID | 64       | bi | ::2/64        | equal   | not-sent  |
+  | UDP.DEV_PORT | 16       | bi | 5683          | equal   | not-sent  |
+  | UDP.APP_PORT | 16       | bi |               | ignore  | value-    |
+  |              |          |    |               |         | sent      |
+  | UDP.LEN      | 16       | bi | 0             | ignore  | compute-  |
+  |              |          |    |               |         | length    |
+  | UDP.CKSUM    | 16       | bi | 0             | ignore  | compute-  |
+  |              |          |    |               |         | checksum  |
+  | PAYLOAD      | var      | bi |               | ignore  | not-sent  |
+  \--------------+----------+----+---------------+---------+-----------/
+
+                 Figure 41: SCHC Rule 5 (RuleIDLength=5)
+
+
+
+
+Toutain                   Expires 13 March 2027                [Page 83]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
+   Residue (Down): APP_PORT(16b)
+   Residue (Up):   APP_PORT(16b)
+
+             Figure 42: Residue format for Rule 5, Down and Up
 
 Acknowledgments
 
@@ -4365,4 +4691,14 @@ Author's Address
 
 
 
-Toutain                   Expires 12 March 2027                [Page 78]
+
+
+
+
+
+
+
+
+
+
+Toutain                   Expires 13 March 2027                [Page 84]
