@@ -3108,320 +3108,269 @@ Declared once on the Sensor; not repeated per Observation.""" ;
 
 # SCHC Rule Set {#annex-schc-rules}
 
-{::comment}
-Editorial note: this rule set is a work in progress, copied as-is from
-../H-SCHC/meteo.json. It is not final and will need to be revised as
-the coreconf-m2m model and its examples evolve; keep it in sync with
-that source file across future updates to this annex.
-{:/comment}
 
 The following SCHC {{RFC8724}} Rule Set compresses the IPv6/UDP/CoAP
 traffic exchanged with the ATMOS41 weather station used throughout
-this document. It is not the final version of this rule set and is
-expected to change as the model evolves. Field names (FID) are the
-identities defined by the "ietf-schc" YANG module {{RFC9363}}
-{{SCHC-TOWARD-9363BIS}}, without their common "fid-" prefix (e.g.
-"ipv6-version" for "fid-ipv6-version"), rather than the plain-text FID
-names of {{RFC8724}} itself. CoAP options use the Universal Option
-identity "coap-option" {{SCHC-TOWARD-9363BIS}}, common to every option,
-with the actual option number given in parentheses, rather than the
-twenty per-option FIDs deprecated by that identity. Matching operators
-(MO) and compression/decompression actions (CDA) are as defined in
-{{RFC8724}}; FL is the Field Length, DI the Direction Indicator, and TV
-the Target Value (the Field Position, FP, is omitted from the tables
-below for compactness; it defaults to 1 unless a field is repeated,
-which does not happen in this Rule Set). The bootstrap rule (Rule 0 in
-the source Rule Set) is omitted here, being identical in structure to
-Rule 1.
+this document. These rules are just examples that can be adapted to
+other scenarios. It is not the final version of this rule set and is
+expected to change as the model evolves.
 
-Below each rule, the resulting residue format is given for the Down
-(network to device) and Up (device to network) directions: the ordered
-list of fields that still carry a residue after compression — i.e.
-those whose CDA is not "not-sent", "compute-length", or
+The compression of IPv6 and UDP results in the port number being sent
+as residue. Traffic Class and Flow Label are elided, and the
+application and device IPv6 addresses are supposed to be known
+(aaaa::2/64 and dddd::6/64, respectively).
+
+Field names (FID) are the identities defined by the "ietf-schc" YANG
+module {{RFC9363}} {{SCHC-TOWARD-9363BIS}}, without their common
+"fid-" prefix (e.g. "ipv6-version" for "fid-ipv6-version"), rather
+than the plain-text FID names of {{RFC8724}} itself. CoAP options use
+the Universal Option identity "coap-option" {{SCHC-TOWARD-9363BIS}},
+common to every option, with the actual option number given in
+parentheses, rather than the twenty per-option FIDs deprecated by that
+identity. Matching operators (MO) and compression/decompression
+actions (CDA) are as defined in {{RFC8724}}; FL is the Field Length,
+DI the Direction Indicator, and TV the Target Value (the Field
+Position, FP, is omitted from the tables below for compactness; it
+defaults to 1 unless a field is repeated, which does not happen in
+this Rule Set). The bootstrap rule (Rule 0 in the source Rule Set) is
+omitted here, being identical in structure to Rule 1.
+
+Below each rule table, the resulting residue format is given for the
+Down (network to device) and Up (device to network) directions: the
+ordered list of fields that still carry a residue after compression —
+i.e. those whose CDA is not "not-sent", "compute-length", or
 "compute-checksum" — together with the number of bits sent for that
-field ("var" when the size is not fixed). A "mapping-sent" field over a
-single-valued TV list contributes no residue bits, since only one value
-is possible and is therefore omitted.
+field ("var" when the size is not fixed), followed by the total
+residue size for that direction.
 
 ## Rule 1: Used to fetch a single value (bidirect)
 
 ~~~~
-/-----------------------+--------+----+-----------+--------+-----------\
-| FID                   | FL     | DI | TV        | MO     | CDA       |
-+=======================+========+====+===========+========+===========+
-| ipv6-version          | 4      | bi | 6         | equal  | not-sent  |
-| ipv6-trafficclass     | 8      | bi | 0         | ignore | not-sent  |
-| ipv6-flowlabel        | 20     | bi | 0         | ignore | not-sent  |
-| ipv6-payload-length   | 16     | bi |           | ignore | compute-  |
-|                       |        |    |           |        | length    |
-| ipv6-nextheader       | 8      | bi | 17        | equal  | not-sent  |
-| ipv6-hoplimit         | 8      | bi | 255       | ignore | not-sent  |
-| ipv6-devprefix        | 64     | bi | dddd::/64 | equal  | not-sent  |
-| ipv6-deviid           | 64     | bi | ::6/64    | equal  | not-sent  |
-| ipv6-appprefix        | 64     | bi | aaaa::/64 | equal  | not-sent  |
-| ipv6-appiid           | 64     | bi | ::2/64    | equal  | not-sent  |
-| udp-dev-port          | 16     | bi | 5683      | equal  | not-sent  |
-| udp-app-port          | 16     | bi |           | ignore | value-    |
-|                       |        |    |           |        | sent      |
-| udp-length            | 16     | bi | 0         | ignore | compute-  |
-|                       |        |    |           |        | length    |
-| udp-checksum          | 16     | bi | 0         | ignore | compute-  |
-|                       |        |    |           |        | checksum  |
-| coap-version          | 2      | bi | 1         | equal  | not-sent  |
-| coap-type             | 2      | bi | 1         | equal  | not-sent  |
-| coap-tkl              | 4      | bi | 0         | ignore | value-    |
-|                       |        |    |           |        | sent      |
-| coap-code             | 8      | bi | 5,69      | match- | mapping-  |
-|                       |        |    |           | mappin | sent      |
-|                       |        |    |           | g      |           |
-| coap-mid              | 16     | bi | 0         | ignore | value-    |
-|                       |        |    |           |        | sent      |
-| coap-token            | length | bi |           | ignore | value-    |
-|                       | -byte( |    |           |        | sent      |
-|                       | 16)    |    |           |        |           |
-| coap-option(11)       | var    | dw | c         | match- | mapping-  |
-|                       |        |    |           | mappin | sent      |
-|                       |        |    |           | g      |           |
-| coap-option(12)       | var    | dw | 141,142   | match- | mapping-  |
-|                       |        |    |           | mappin | sent      |
-|                       |        |    |           | g      |           |
-| coap-option(12)       | var    | up | 142       | equal  | not-sent  |
-| coap-option(17)       | var    | dw | 142       | equal  | not-sent  |
-\-----------------------+--------+----+-----------+--------+-----------/
-~~~~
-{: #fig-schc-rule-1 title="SCHC Rule 1 (RuleIDLength=5)" artwork-align="left"}
+/---------------------+--------+----+-----------+---------+------------\
+| FID                 | FL     | DI | TV        | MO      | CDA        |
++=====================+========+====+===========+=========+============+
+| ipv6-version        | 4      | bi | 6         | equal   | not-sent   |
+| ipv6-trafficclass   | 8      | bi | 0         | ignore  | not-sent   |
+| ipv6-flowlabel      | 20     | bi | 0         | ignore  | not-sent   |
+| ipv6-payload-length | 16     | bi |           | ignore  | compute    |
+| ipv6-nextheader     | 8      | bi | 17        | equal   | not-sent   |
+| ipv6-hoplimit       | 8      | bi | 255       | ignore  | not-sent   |
+| ipv6-devprefix      | 64     | bi | dddd::/64 | equal   | not-sent   |
+| ipv6-deviid         | 64     | bi | ::6/64    | equal   | not-sent   |
+| ipv6-appprefix      | 64     | bi | aaaa::/64 | equal   | not-sent   |
+| ipv6-appiid         | 64     | bi | ::2/64    | equal   | not-sent   |
+| udp-dev-port        | 16     | bi | 5683      | equal   | not-sent   |
+| udp-app-port        | 16     | bi |           | ignore  | value-sent |
+| udp-length          | 16     | bi | 0         | ignore  | compute    |
+| udp-checksum        | 16     | bi | 0         | ignore  | compute    |
+| coap-version        | 2      | bi | 1         | equal   | not-sent   |
+| coap-type           | 2      | bi | 1         | equal   | not-sent   |
+| coap-tkl            | 4      | bi | 0         | ignore  | value-sent |
+| coap-code           | 8      | bi | 5,69      | match-  | mapping-   |
+|                     |        |    |           | mapping | sent       |
+| coap-mid            | 16     | bi | 0         | ignore  | value-sent |
+| coap-token          | length | bi |           | ignore  | value-sent |
+|                     | -byte( |    |           |         |            |
+|                     | 16)    |    |           |         |            |
+| coap-option(11)     | var    | dw | "c"       | equal   | not-sent   |
+| coap-option(12)     | var    | dw | 141,142   | match-  | mapping-   |
+|                     |        |    |           | mapping | sent       |
+| coap-option(12)     | var    | up | 142       | equal   | not-sent   |
+| coap-option(17)     | var    | dw | 142       | equal   | not-sent   |
+\---------------------+--------+----+-----------+---------+------------/
 
-~~~~
 Residue (Down): udp-app-port(16b) | coap-tkl(4b) | coap-code(1b) |
                 coap-mid(16b) | coap-token(var) |
                 coap-option(12)(1b)
+  Total: 38b+var
 Residue (Up):   udp-app-port(16b) | coap-tkl(4b) | coap-code(1b) |
                 coap-mid(16b) | coap-token(var)
+  Total: 37b+var
 ~~~~
-{: #fig-schc-residue-1 title="Residue format for Rule 1, Down and Up" artwork-align="left"}
+{: #fig-schc-rule-1 title="SCHC Rule 1 (RuleIDLength=5), with residue format" artwork-align="left"}
 
 ## Rule 2: Used to iPatch, ack with 7/3. Empty CoAP for notification in UP
 
 ~~~~
-/-----------------------+--------+----+-----------+--------+-----------\
-| FID                   | FL     | DI | TV        | MO     | CDA       |
-+=======================+========+====+===========+========+===========+
-| ipv6-version          | 4      | bi | 6         | equal  | not-sent  |
-| ipv6-trafficclass     | 8      | bi | 0         | ignore | not-sent  |
-| ipv6-flowlabel        | 20     | bi | 0         | ignore | not-sent  |
-| ipv6-payload-length   | 16     | bi |           | ignore | compute-  |
-|                       |        |    |           |        | length    |
-| ipv6-nextheader       | 8      | bi | 17        | equal  | not-sent  |
-| ipv6-hoplimit         | 8      | bi | 255       | ignore | not-sent  |
-| ipv6-devprefix        | 64     | bi | dddd::/64 | equal  | not-sent  |
-| ipv6-deviid           | 64     | bi | ::6/64    | equal  | not-sent  |
-| ipv6-appprefix        | 64     | bi | aaaa::/64 | equal  | not-sent  |
-| ipv6-appiid           | 64     | bi | ::2/64    | equal  | not-sent  |
-| udp-dev-port          | 16     | bi | 5683      | equal  | not-sent  |
-| udp-app-port          | 16     | bi |           | ignore | value-    |
-|                       |        |    |           |        | sent      |
-| udp-length            | 16     | bi | 0         | ignore | compute-  |
-|                       |        |    |           |        | length    |
-| udp-checksum          | 16     | bi | 0         | ignore | compute-  |
-|                       |        |    |           |        | checksum  |
-| coap-version          | 2      | bi | 1         | equal  | not-sent  |
-| coap-type             | 2      | bi | 1         | equal  | not-sent  |
-| coap-tkl              | 4      | bi | 0         | ignore | value-    |
-|                       |        |    |           |        | sent      |
-| coap-code             | 8      | dw | 7         | match- | mapping-  |
-|                       |        |    |           | mappin | sent      |
-|                       |        |    |           | g      |           |
-| coap-code             | 8      | up |           | ignore | value-    |
-|                       |        |    |           |        | sent      |
-| coap-mid              | 16     | bi | 0         | ignore | value-    |
-|                       |        |    |           |        | sent      |
-| coap-token            | length | bi |           | ignore | value-    |
-|                       | -byte( |    |           |        | sent      |
-|                       | 16)    |    |           |        |           |
-| coap-option(11)       | var    | dw | c         | match- | mapping-  |
-|                       |        |    |           | mappin | sent      |
-|                       |        |    |           | g      |           |
-| coap-option(12)       | var    | dw | 141,142   | match- | mapping-  |
-|                       |        |    |           | mappin | sent      |
-|                       |        |    |           | g      |           |
-\-----------------------+--------+----+-----------+--------+-----------/
-~~~~
-{: #fig-schc-rule-2 title="SCHC Rule 2 (RuleIDLength=5)" artwork-align="left"}
+/---------------------+--------+----+-----------+---------+------------\
+| FID                 | FL     | DI | TV        | MO      | CDA        |
++=====================+========+====+===========+=========+============+
+| ipv6-version        | 4      | bi | 6         | equal   | not-sent   |
+| ipv6-trafficclass   | 8      | bi | 0         | ignore  | not-sent   |
+| ipv6-flowlabel      | 20     | bi | 0         | ignore  | not-sent   |
+| ipv6-payload-length | 16     | bi |           | ignore  | compute    |
+| ipv6-nextheader     | 8      | bi | 17        | equal   | not-sent   |
+| ipv6-hoplimit       | 8      | bi | 255       | ignore  | not-sent   |
+| ipv6-devprefix      | 64     | bi | dddd::/64 | equal   | not-sent   |
+| ipv6-deviid         | 64     | bi | ::6/64    | equal   | not-sent   |
+| ipv6-appprefix      | 64     | bi | aaaa::/64 | equal   | not-sent   |
+| ipv6-appiid         | 64     | bi | ::2/64    | equal   | not-sent   |
+| udp-dev-port        | 16     | bi | 5683      | equal   | not-sent   |
+| udp-app-port        | 16     | bi |           | ignore  | value-sent |
+| udp-length          | 16     | bi | 0         | ignore  | compute    |
+| udp-checksum        | 16     | bi | 0         | ignore  | compute    |
+| coap-version        | 2      | bi | 1         | equal   | not-sent   |
+| coap-type           | 2      | bi | 1         | equal   | not-sent   |
+| coap-tkl            | 4      | bi | 0         | ignore  | value-sent |
+| coap-code           | 8      | dw | 7         | equal   | not-sent   |
+| coap-code           | 8      | up |           | ignore  | value-sent |
+| coap-mid            | 16     | bi | 0         | ignore  | value-sent |
+| coap-token          | length | bi |           | ignore  | value-sent |
+|                     | -byte( |    |           |         |            |
+|                     | 16)    |    |           |         |            |
+| coap-option(11)     | var    | dw | "c"       | equal   | not-sent   |
+| coap-option(12)     | var    | dw | 141,142   | match-  | mapping-   |
+|                     |        |    |           | mapping | sent       |
+\---------------------+--------+----+-----------+---------+------------/
 
-~~~~
 Residue (Down): udp-app-port(16b) | coap-tkl(4b) | coap-mid(16b) |
                 coap-token(var) | coap-option(12)(1b)
+  Total: 37b+var
 Residue (Up):   udp-app-port(16b) | coap-tkl(4b) | coap-code(8b) |
                 coap-mid(16b) | coap-token(var)
+  Total: 44b+var
 ~~~~
-{: #fig-schc-residue-2 title="Residue format for Rule 2, Down and Up" artwork-align="left"}
+{: #fig-schc-rule-2 title="SCHC Rule 2 (RuleIDLength=5), with residue format" artwork-align="left"}
 
 ## Rule 3: Used for notitifications (observe)
 
 ~~~~
-/-----------------------+--------+----+-----------+--------+-----------\
-| FID                   | FL     | DI | TV        | MO     | CDA       |
-+=======================+========+====+===========+========+===========+
-| ipv6-version          | 4      | bi | 6         | equal  | not-sent  |
-| ipv6-trafficclass     | 8      | bi | 0         | ignore | not-sent  |
-| ipv6-flowlabel        | 20     | bi | 0         | ignore | not-sent  |
-| ipv6-payload-length   | 16     | bi |           | ignore | compute-  |
-|                       |        |    |           |        | length    |
-| ipv6-nextheader       | 8      | bi | 17        | equal  | not-sent  |
-| ipv6-hoplimit         | 8      | bi | 255       | ignore | not-sent  |
-| ipv6-devprefix        | 64     | bi | dddd::/64 | equal  | not-sent  |
-| ipv6-deviid           | 64     | bi | ::6/64    | equal  | not-sent  |
-| ipv6-appprefix        | 64     | bi | aaaa::/64 | equal  | not-sent  |
-| ipv6-appiid           | 64     | bi | ::2/64    | equal  | not-sent  |
-| udp-dev-port          | 16     | bi | 5683      | equal  | not-sent  |
-| udp-app-port          | 16     | bi |           | ignore | value-    |
-|                       |        |    |           |        | sent      |
-| udp-length            | 16     | bi | 0         | ignore | compute-  |
-|                       |        |    |           |        | length    |
-| udp-checksum          | 16     | bi | 0         | ignore | compute-  |
-|                       |        |    |           |        | checksum  |
-| coap-version          | 2      | bi | 1         | equal  | not-sent  |
-| coap-type             | 2      | bi | 0,1       | match- | mapping-  |
-|                       |        |    |           | mappin | sent      |
-|                       |        |    |           | g      |           |
-| coap-tkl              | 4      | bi | 0         | ignore | value-    |
-|                       |        |    |           |        | sent      |
-| coap-code             | 8      | bi | 5,7,69    | match- | mapping-  |
-|                       |        |    |           | mappin | sent      |
-|                       |        |    |           | g      |           |
-| coap-mid              | 16     | bi | 0         | ignore | value-    |
-|                       |        |    |           |        | sent      |
-| coap-token            | length | bi |           | ignore | value-    |
-|                       | -byte( |    |           |        | sent      |
-|                       | 16)    |    |           |        |           |
-| coap-option(6)        | var    | bi |           | ignore | value-    |
-|                       |        |    |           |        | sent      |
-| coap-option(11)       | var    | dw | s         | match- | mapping-  |
-|                       |        |    |           | mappin | sent      |
-|                       |        |    |           | g      |           |
-| coap-option(12)       | var    | dw | 141       | match- | mapping-  |
-|                       |        |    |           | mappin | sent      |
-|                       |        |    |           | g      |           |
-| coap-option(12)       | var    | up | 142       | match- | mapping-  |
-|                       |        |    |           | mappin | sent      |
-|                       |        |    |           | g      |           |
-| coap-option(17)       | var    | dw | 142       | match- | mapping-  |
-|                       |        |    |           | mappin | sent      |
-|                       |        |    |           | g      |           |
-\-----------------------+--------+----+-----------+--------+-----------/
-~~~~
-{: #fig-schc-rule-3 title="SCHC Rule 3 (RuleIDLength=5)" artwork-align="left"}
+/---------------------+--------+----+-----------+---------+------------\
+| FID                 | FL     | DI | TV        | MO      | CDA        |
++=====================+========+====+===========+=========+============+
+| ipv6-version        | 4      | bi | 6         | equal   | not-sent   |
+| ipv6-trafficclass   | 8      | bi | 0         | ignore  | not-sent   |
+| ipv6-flowlabel      | 20     | bi | 0         | ignore  | not-sent   |
+| ipv6-payload-length | 16     | bi |           | ignore  | compute    |
+| ipv6-nextheader     | 8      | bi | 17        | equal   | not-sent   |
+| ipv6-hoplimit       | 8      | bi | 255       | ignore  | not-sent   |
+| ipv6-devprefix      | 64     | bi | dddd::/64 | equal   | not-sent   |
+| ipv6-deviid         | 64     | bi | ::6/64    | equal   | not-sent   |
+| ipv6-appprefix      | 64     | bi | aaaa::/64 | equal   | not-sent   |
+| ipv6-appiid         | 64     | bi | ::2/64    | equal   | not-sent   |
+| udp-dev-port        | 16     | bi | 5683      | equal   | not-sent   |
+| udp-app-port        | 16     | bi |           | ignore  | value-sent |
+| udp-length          | 16     | bi | 0         | ignore  | compute    |
+| udp-checksum        | 16     | bi | 0         | ignore  | compute    |
+| coap-version        | 2      | bi | 1         | equal   | not-sent   |
+| coap-type           | 2      | bi | 0,1       | match-  | mapping-   |
+|                     |        |    |           | mapping | sent       |
+| coap-tkl            | 4      | bi | 0         | ignore  | value-sent |
+| coap-code           | 8      | bi | 5,7,69    | match-  | mapping-   |
+|                     |        |    |           | mapping | sent       |
+| coap-mid            | 16     | bi | 0         | ignore  | value-sent |
+| coap-token          | length | bi |           | ignore  | value-sent |
+|                     | -byte( |    |           |         |            |
+|                     | 16)    |    |           |         |            |
+| coap-option(6)      | var    | bi |           | ignore  | value-sent |
+| coap-option(11)     | var    | dw | "s"       | equal   | not-sent   |
+| coap-option(12)     | var    | dw | 141       | equal   | not-sent   |
+| coap-option(12)     | var    | up | 142       | equal   | not-sent   |
+| coap-option(17)     | var    | dw | 142       | equal   | not-sent   |
+\---------------------+--------+----+-----------+---------+------------/
 
-~~~~
 Residue (Down): udp-app-port(16b) | coap-type(1b) | coap-tkl(4b) |
                 coap-code(2b) | coap-mid(16b) |
-                coap-token(var) | coap-option(6)(varb)
+                coap-token(var) | coap-option(6)(var)
+  Total: 39b+var
 Residue (Up):   udp-app-port(16b) | coap-type(1b) | coap-tkl(4b) |
                 coap-code(2b) | coap-mid(16b) |
-                coap-token(var) | coap-option(6)(varb)
+                coap-token(var) | coap-option(6)(var)
+  Total: 39b+var
 ~~~~
-{: #fig-schc-residue-3 title="Residue format for Rule 3, Down and Up" artwork-align="left"}
+{: #fig-schc-rule-3 title="SCHC Rule 3 (RuleIDLength=5), with residue format" artwork-align="left"}
 
 ## Rule 4: Empty messages (e.g., ACK with empty code, or RST)
 
 ~~~~
-/-----------------------+--------+----+-----------+--------+-----------\
-| FID                   | FL     | DI | TV        | MO     | CDA       |
-+=======================+========+====+===========+========+===========+
-| ipv6-version          | 4      | bi | 6         | equal  | not-sent  |
-| ipv6-trafficclass     | 8      | bi | 0         | ignore | not-sent  |
-| ipv6-flowlabel        | 20     | bi | 0         | ignore | not-sent  |
-| ipv6-payload-length   | 16     | bi |           | ignore | compute-  |
-|                       |        |    |           |        | length    |
-| ipv6-nextheader       | 8      | bi | 17        | equal  | not-sent  |
-| ipv6-hoplimit         | 8      | bi | 255       | ignore | not-sent  |
-| ipv6-devprefix        | 64     | bi | dddd::/64 | equal  | not-sent  |
-| ipv6-deviid           | 64     | bi | ::6/64    | equal  | not-sent  |
-| ipv6-appprefix        | 64     | bi | aaaa::/64 | equal  | not-sent  |
-| ipv6-appiid           | 64     | bi | ::2/64    | equal  | not-sent  |
-| udp-dev-port          | 16     | bi | 5683      | equal  | not-sent  |
-| udp-app-port          | 16     | bi |           | ignore | value-    |
-|                       |        |    |           |        | sent      |
-| udp-length            | 16     | bi | 0         | ignore | compute-  |
-|                       |        |    |           |        | length    |
-| udp-checksum          | 16     | bi | 0         | ignore | compute-  |
-|                       |        |    |           |        | checksum  |
-| coap-version          | 2      | bi | 1         | equal  | not-sent  |
-| coap-type             | 2      | bi |           | ignore | value-    |
-|                       |        |    |           |        | sent      |
-| coap-tkl              | 4      | bi |           | ignore | value-    |
-|                       |        |    |           |        | sent      |
-| coap-code             | 8      | bi |           | ignore | value-    |
-|                       |        |    |           |        | sent      |
-| coap-mid              | 16     | bi |           | ignore | value-    |
-|                       |        |    |           |        | sent      |
-| coap-token            | length | bi |           | ignore | value-    |
-|                       | -byte( |    |           |        | sent      |
-|                       | 16)    |    |           |        |           |
-\-----------------------+--------+----+-----------+--------+-----------/
-~~~~
-{: #fig-schc-rule-4 title="SCHC Rule 4 (RuleIDLength=5)" artwork-align="left"}
+/---------------------+--------+----+-----------+---------+------------\
+| FID                 | FL     | DI | TV        | MO      | CDA        |
++=====================+========+====+===========+=========+============+
+| ipv6-version        | 4      | bi | 6         | equal   | not-sent   |
+| ipv6-trafficclass   | 8      | bi | 0         | ignore  | not-sent   |
+| ipv6-flowlabel      | 20     | bi | 0         | ignore  | not-sent   |
+| ipv6-payload-length | 16     | bi |           | ignore  | compute    |
+| ipv6-nextheader     | 8      | bi | 17        | equal   | not-sent   |
+| ipv6-hoplimit       | 8      | bi | 255       | ignore  | not-sent   |
+| ipv6-devprefix      | 64     | bi | dddd::/64 | equal   | not-sent   |
+| ipv6-deviid         | 64     | bi | ::6/64    | equal   | not-sent   |
+| ipv6-appprefix      | 64     | bi | aaaa::/64 | equal   | not-sent   |
+| ipv6-appiid         | 64     | bi | ::2/64    | equal   | not-sent   |
+| udp-dev-port        | 16     | bi | 5683      | equal   | not-sent   |
+| udp-app-port        | 16     | bi |           | ignore  | value-sent |
+| udp-length          | 16     | bi | 0         | ignore  | compute    |
+| udp-checksum        | 16     | bi | 0         | ignore  | compute    |
+| coap-version        | 2      | bi | 1         | equal   | not-sent   |
+| coap-type           | 2      | bi |           | ignore  | value-sent |
+| coap-tkl            | 4      | bi |           | ignore  | value-sent |
+| coap-code           | 8      | bi |           | ignore  | value-sent |
+| coap-mid            | 16     | bi |           | ignore  | value-sent |
+| coap-token          | length | bi |           | ignore  | value-sent |
+|                     | -byte( |    |           |         |            |
+|                     | 16)    |    |           |         |            |
+\---------------------+--------+----+-----------+---------+------------/
 
-~~~~
 Residue (Down): udp-app-port(16b) | coap-type(2b) | coap-tkl(4b) |
                 coap-code(8b) | coap-mid(16b) |
                 coap-token(var)
+  Total: 46b+var
 Residue (Up):   udp-app-port(16b) | coap-type(2b) | coap-tkl(4b) |
                 coap-code(8b) | coap-mid(16b) |
                 coap-token(var)
+  Total: 46b+var
 ~~~~
-{: #fig-schc-residue-4 title="Residue format for Rule 4, Down and Up" artwork-align="left"}
+{: #fig-schc-rule-4 title="SCHC Rule 4 (RuleIDLength=5), with residue format" artwork-align="left"}
 
 ## Rule 5: ICMPv6 port unreachable
 
 ~~~~
-/-----------------------+--------+----+-----------+--------+-----------\
-| FID                   | FL     | DI | TV        | MO     | CDA       |
-+=======================+========+====+===========+========+===========+
-| ipv6-version          | 4      | bi | 6         | equal  | not-sent  |
-| ipv6-trafficclass     | 8      | bi | 0         | ignore | not-sent  |
-| ipv6-flowlabel        | 20     | bi | 0         | ignore | not-sent  |
-| ipv6-payload-length   | 16     | bi |           | ignore | compute-  |
-|                       |        |    |           |        | length    |
-| ipv6-nextheader       | 8      | bi | 58        | equal  | not-sent  |
-| ipv6-hoplimit         | 8      | bi | 255       | ignore | not-sent  |
-| ipv6-devprefix        | 64     | bi | dddd::/64 | equal  | not-sent  |
-| ipv6-deviid           | 64     | bi | ::6/64    | equal  | not-sent  |
-| ipv6-appprefix        | 64     | bi | aaaa::/64 | equal  | not-sent  |
-| ipv6-appiid           | 64     | bi | ::2/64    | equal  | not-sent  |
-| icmpv6-type           | 8      | bi | 1         | equal  | not-sent  |
-| icmpv6-code           | 8      | bi | 4         | equal  | not-sent  |
-| icmpv6-checksum       | 16     | bi | 0         | ignore | compute-  |
-|                       |        |    |           |        | checksum  |
-| unused                | 32     | bi |           | ignore | not-sent  |
-| ipv6-version          | 4      | bi | 6         | equal  | not-sent  |
-| ipv6-trafficclass     | 8      | bi | 0         | ignore | not-sent  |
-| ipv6-flowlabel        | 20     | bi | 0         | ignore | not-sent  |
-| ipv6-payload-length   | 16     | bi |           | ignore | compute-  |
-|                       |        |    |           |        | length    |
-| ipv6-nextheader       | 8      | bi | 17        | equal  | not-sent  |
-| ipv6-hoplimit         | 8      | bi | 255       | ignore | not-sent  |
-| ipv6-devprefix        | 64     | bi | dddd::/64 | equal  | not-sent  |
-| ipv6-deviid           | 64     | bi | ::6/64    | equal  | not-sent  |
-| ipv6-appprefix        | 64     | bi | aaaa::/64 | equal  | not-sent  |
-| ipv6-appiid           | 64     | bi | ::2/64    | equal  | not-sent  |
-| udp-dev-port          | 16     | bi | 5683      | equal  | not-sent  |
-| udp-app-port          | 16     | bi |           | ignore | value-    |
-|                       |        |    |           |        | sent      |
-| udp-length            | 16     | bi | 0         | ignore | compute-  |
-|                       |        |    |           |        | length    |
-| udp-checksum          | 16     | bi | 0         | ignore | compute-  |
-|                       |        |    |           |        | checksum  |
-| payload               | var    | bi |           | ignore | not-sent  |
-\-----------------------+--------+----+-----------+--------+-----------/
-~~~~
-{: #fig-schc-rule-5 title="SCHC Rule 5 (RuleIDLength=5)" artwork-align="left"}
+/---------------------+--------+----+-----------+---------+------------\
+| FID                 | FL     | DI | TV        | MO      | CDA        |
++=====================+========+====+===========+=========+============+
+| ipv6-version        | 4      | bi | 6         | equal   | not-sent   |
+| ipv6-trafficclass   | 8      | bi | 0         | ignore  | not-sent   |
+| ipv6-flowlabel      | 20     | bi | 0         | ignore  | not-sent   |
+| ipv6-payload-length | 16     | bi |           | ignore  | compute    |
+| ipv6-nextheader     | 8      | bi | 58        | equal   | not-sent   |
+| ipv6-hoplimit       | 8      | bi | 255       | ignore  | not-sent   |
+| ipv6-devprefix      | 64     | bi | dddd::/64 | equal   | not-sent   |
+| ipv6-deviid         | 64     | bi | ::6/64    | equal   | not-sent   |
+| ipv6-appprefix      | 64     | bi | aaaa::/64 | equal   | not-sent   |
+| ipv6-appiid         | 64     | bi | ::2/64    | equal   | not-sent   |
+| icmpv6-type         | 8      | bi | 1         | equal   | not-sent   |
+| icmpv6-code         | 8      | bi | 4         | equal   | not-sent   |
+| icmpv6-checksum     | 16     | bi | 0         | ignore  | compute    |
+| unused              | 32     | bi |           | ignore  | not-sent   |
+| ipv6-version        | 4      | bi | 6         | equal   | not-sent   |
+| ipv6-trafficclass   | 8      | bi | 0         | ignore  | not-sent   |
+| ipv6-flowlabel      | 20     | bi | 0         | ignore  | not-sent   |
+| ipv6-payload-length | 16     | bi |           | ignore  | compute    |
+| ipv6-nextheader     | 8      | bi | 17        | equal   | not-sent   |
+| ipv6-hoplimit       | 8      | bi | 255       | ignore  | not-sent   |
+| ipv6-devprefix      | 64     | bi | dddd::/64 | equal   | not-sent   |
+| ipv6-deviid         | 64     | bi | ::6/64    | equal   | not-sent   |
+| ipv6-appprefix      | 64     | bi | aaaa::/64 | equal   | not-sent   |
+| ipv6-appiid         | 64     | bi | ::2/64    | equal   | not-sent   |
+| udp-dev-port        | 16     | bi | 5683      | equal   | not-sent   |
+| udp-app-port        | 16     | bi |           | ignore  | value-sent |
+| udp-length          | 16     | bi | 0         | ignore  | compute    |
+| udp-checksum        | 16     | bi | 0         | ignore  | compute    |
+| payload             | var    | bi |           | ignore  | not-sent   |
+\---------------------+--------+----+-----------+---------+------------/
 
-~~~~
 Residue (Down): udp-app-port(16b)
+  Total: 16b
 Residue (Up):   udp-app-port(16b)
+  Total: 16b
 ~~~~
-{: #fig-schc-residue-5 title="Residue format for Rule 5, Down and Up" artwork-align="left"}
+{: #fig-schc-rule-5 title="SCHC Rule 5 (RuleIDLength=5), with residue format" artwork-align="left"}
+
+
+
+
+
+
+
 
 
 

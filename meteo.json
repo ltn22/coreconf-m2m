@@ -65,8 +65,8 @@
             {"FID": "COAP.MID",  "DI": "BI", "TV": 0,   "MO": "ignore", "CDA": "value-sent"},
             {"FID": "COAP.TOKEN", "FL": "length-byte(16)",     "MO": "ignore","CDA": "value-sent"},
 
-            {"FID": "COAP.option(11)", "FP": 1, "DI": "DW", "TV": ["c"],
-                                "MO": "match-mapping","CDA": "mapping-sent"},
+            {"FID": "COAP.option(11)", "FP": 1, "DI": "DW", "TV": "c",
+                                "MO": "equal","CDA": "not-sent"},
             {"FID": "COAP.option(12)", "DI": "DW", "TV": [141,142], "MO": "match-mapping", "CDA": "mapping-sent"},
             {"FID": "COAP.option(12)", "DI": "UP", "TV":  142, "MO": "equal", "CDA": "not-sent"},
             {"FID": "COAP.option(17)", "DI": "DW", "TV":  142, "MO": "equal", "CDA": "not-sent"}
@@ -96,13 +96,13 @@
             {"FID": "COAP.VER",  "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
             {"FID": "COAP.TYPE", "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
             {"FID": "COAP.TKL",  "DI": "BI", "TV": 0,   "MO": "ignore","CDA": "value-sent"},
-            {"FID": "COAP.CODE", "DI": "DW", "TV": [7],   "MO": "match-mapping","CDA": "mapping-sent"},
+            {"FID": "COAP.CODE", "DI": "DW", "TV": 7,   "MO": "equal","CDA": "not-sent"},
             {"FID": "COAP.CODE", "DI": "UP",              "MO": "ignore","CDA": "value-sent"},
             {"FID": "COAP.MID",  "DI": "BI", "TV": 0,   "MO": "ignore", "CDA": "value-sent"},
             {"FID": "COAP.TOKEN", "FL": "length-byte(16)",     "MO": "ignore","CDA": "value-sent"},
 
-            {"FID": "COAP.option(11)", "FP": 1, "DI": "DW", "TV": ["c"],
-                                "MO": "match-mapping","CDA": "mapping-sent"},
+            {"FID": "COAP.option(11)", "FP": 1, "DI": "DW", "TV": "c",
+                                "MO": "equal","CDA": "not-sent"},
             {"FID": "COAP.option(12)", "DI": "DW", "TV": [141,142], "MO": "match-mapping", "CDA": "mapping-sent"}
         ]},          {
         "RuleIDValue" : 3,
@@ -134,10 +134,10 @@
             {"FID": "COAP.TOKEN", "FL": "length-byte(16)",     "MO": "ignore","CDA": "value-sent"},
 
             {"FID": "COAP.option(6)", "FL": "var", "FP": 1, "DI": "BI",     "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "COAP.option(11)", "FP": 1, "DI": "DW", "TV": ["s"],    "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.option(12)", "DI": "DW", "TV": [141], "MO": "match-mapping", "CDA": "mapping-sent"},
-            {"FID": "COAP.option(12)", "DI": "UP", "TV": [142], "MO": "match-mapping", "CDA": "mapping-sent"},
-            {"FID": "COAP.option(17)", "DI": "DW", "TV": [142], "MO": "match-mapping", "CDA": "mapping-sent"}
+            {"FID": "COAP.option(11)", "FP": 1, "DI": "DW", "TV": "s",    "MO": "equal","CDA": "not-sent"},
+            {"FID": "COAP.option(12)", "DI": "DW", "TV": 141, "MO": "equal", "CDA": "not-sent"},
+            {"FID": "COAP.option(12)", "DI": "UP", "TV": 142, "MO": "equal", "CDA": "not-sent"},
+            {"FID": "COAP.option(17)", "DI": "DW", "TV": 142, "MO": "equal", "CDA": "not-sent"}
         ]},         {
         "RuleIDValue" : 4,
         "RuleIDLength": 5,
