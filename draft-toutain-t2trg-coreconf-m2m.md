@@ -57,7 +57,6 @@ informative:
   RFC9232:   # Network Telemetry
   RFC8639:   # YANG Subscribed Notifications
   I-D.ietf-core-sid:
-  I-D.ietf-core-yang-cbor:
   I-D.gudi-t2trg-senml-as-coreconf:
   I-D.birkholz-yang-core-telemetry:
   I-D.toutain-core-sid-encoding:
@@ -590,9 +589,10 @@ CORECONF defines mappings for all CoAP methods, but this document uses only two:
 
 * iPATCH is used instead of PUT or POST to modify quantities and notification
   parameters. It supports partial updates: only the specified nodes are
-  modified, leaving others unchanged. Setting a node to an empty value with
-  iPATCH is the preferred way to clear a parameter, making DELETE unnecessary
-  for datastore modifications.
+  modified, leaving others unchanged, following the merge semantics of
+  {{RFC7396}}. Setting a node to an empty value with iPATCH is the preferred
+  way to clear a parameter, making DELETE unnecessary for datastore
+  modifications.
 
 The recommended CoAP Content-Format for all exchanges is Content-Format
 140 (`application/yang-data+cbor;id=sid` {{RFC9254}}), used uniformly
@@ -1874,6 +1874,7 @@ module: coreconf-m2m
 # Complete YANG Module {#annex-yang}
 
 ~~~~
+<CODE BEGINS> file "coreconf-m2m@2026-09-01.yang"
 module coreconf-m2m {
   yang-version 1.1;
   namespace "urn:ietf:params:xml:ns:yang:coreconf-m2m";
@@ -2597,6 +2598,7 @@ module coreconf-m2m {
     }
   }
 }
+<CODE ENDS>
 ~~~~
 {: #fig-yang-module title="Complete coreconf-m2m YANG module" artwork-align="left"}
 
@@ -2704,6 +2706,7 @@ SID,Namespace,Identifier
 # atmos YANG Module {#annex-atmos-yang}
 
 ~~~~
+<CODE BEGINS> file "atmos@2026-08-24.yang"
 module atmos {
   yang-version 1.1;
   namespace "urn:ietf:params:xml:ns:yang:atmos";
@@ -2899,6 +2902,7 @@ module atmos {
     description "Internal temperature of the humidity sensor (°C).";
   }
 }
+<CODE ENDS>
 ~~~~
 {: #fig-atmos-yang title="atmos.yang module"}
 
@@ -3147,6 +3151,28 @@ The compression of IPv6 and UDP results in the port number being sent
 as residue. Traffic Class and Flow Label are elided, and the
 application and device IPv6 addresses are supposed to be known
 (aaaa::2/64 and dddd::6/64, respectively).
+
+Field names (FID) are the identities defined by the "ietf-schc" YANG
+module {{RFC9363}} {{SCHC-TOWARD-9363BIS}}, without their common
+"fid-" prefix (e.g. "ipv6-version" for "fid-ipv6-version"), rather
+than the plain-text FID names of {{RFC8724}} itself. CoAP options use
+the Universal Option identity "coap-option" {{SCHC-TOWARD-9363BIS}},
+common to every option, with the actual option number given in
+parentheses, rather than the twenty per-option FIDs deprecated by that
+identity. Matching operators (MO) and compression/decompression
+actions (CDA) are as defined in {{RFC8724}}; FL is the Field Length,
+DI the Direction Indicator, and TV the Target Value (the Field
+Position, FP, is omitted from the tables below for compactness; it
+defaults to 1 unless a field is repeated, which does not happen in
+this Rule Set).
+
+Below each rule table, the resulting residue format is given for the
+Down (network to device) and Up (device to network) directions: the
+ordered list of fields that still carry a residue after compression —
+i.e. those whose CDA is not "not-sent", "compute-length", or
+"compute-checksum" — together with the number of bits sent for that
+field ("var" when the size is not fixed), followed by the total
+residue size for that direction.
 
 ## Rule 0: Used to fetch a single value (bidirect)
 
@@ -3656,6 +3682,8 @@ that triggers when the CORECONF UDP endpoint itself is down.
 # Acknowledgments
 {:numbered="false"}
 This work has been supported by the SCHC Chair from IMT Atlantique and Afnic.
+
+Claude (Anthropic) assisted with editing this document.
 
 
 

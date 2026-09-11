@@ -80,7 +80,7 @@ Table of Contents
      3.3.  Notifications . . . . . . . . . . . . . . . . . . . . . .  14
    4.  CORECONF Overview in the M2M Context  . . . . . . . . . . . .  14
      4.1.  CoAP Methods Mapping  . . . . . . . . . . . . . . . . . .  15
-     4.2.  SID Allocations . . . . . . . . . . . . . . . . . . . . .  15
+     4.2.  SID Allocations . . . . . . . . . . . . . . . . . . . . .  16
    5.  CORECONF Traffic  . . . . . . . . . . . . . . . . . . . . . .  16
      5.1.  Resource Discovery  . . . . . . . . . . . . . . . . . . .  16
      5.2.  Querying a quantity . . . . . . . . . . . . . . . . . . .  19
@@ -123,15 +123,15 @@ Internet-Draft                coreconf-m2m                September 2026
    Appendix E.  atmos SID File (CSV) . . . . . . . . . . . . . . . .  69
    Appendix F.  ccm2m Ontology . . . . . . . . . . . . . . . . . . .  70
    Appendix G.  SCHC Rule Set  . . . . . . . . . . . . . . . . . . .  74
-     G.1.  Rule 0: Used to fetch a single value (bidirect) . . . . .  74
+     G.1.  Rule 0: Used to fetch a single value (bidirect) . . . . .  75
      G.2.  Rule 1: Used to iPatch, ack with 7/3.  Empty CoAP for
-           notification in UP  . . . . . . . . . . . . . . . . . . .  78
-     G.3.  Rule 2: Used for notitifications (observe)  . . . . . . .  80
+           notification in UP  . . . . . . . . . . . . . . . . . . .  79
+     G.3.  Rule 2: Used for notitifications (observe)  . . . . . . .  81
      G.4.  Rule 3: Empty messages (e.g., ACK with empty code, or
-           RST)  . . . . . . . . . . . . . . . . . . . . . . . . . .  83
-     G.5.  Rule 4: ICMPv6 destination unreachable (any code) . . . .  84
-   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  86
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  86
+           RST)  . . . . . . . . . . . . . . . . . . . . . . . . . .  84
+     G.5.  Rule 4: ICMPv6 destination unreachable (any code) . . . .  85
+   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  87
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  87
 
 1.  Introduction
 
@@ -799,9 +799,10 @@ Internet-Draft                coreconf-m2m                September 2026
 
    *  iPATCH is used instead of PUT or POST to modify quantities and
       notification parameters.  It supports partial updates: only the
-      specified nodes are modified, leaving others unchanged.  Setting a
-      node to an empty value with iPATCH is the preferred way to clear a
-      parameter, making DELETE unnecessary for datastore modifications.
+      specified nodes are modified, leaving others unchanged, following
+      the merge semantics of [RFC7396].  Setting a node to an empty
+      value with iPATCH is the preferred way to clear a parameter,
+      making DELETE unnecessary for datastore modifications.
 
    The recommended CoAP Content-Format for all exchanges is Content-
    Format 140 (application/yang-data+cbor;id=sid [RFC9254]), used
@@ -829,11 +830,10 @@ Internet-Draft                coreconf-m2m                September 2026
    client is also a valid way to signal that the subscription should be
    terminated.
 
-4.2.  SID Allocations
 
-   The coreconf-m2m model is intended to be assigned in the IETF
-   experimental SID space, with a model entry point of 62000.
-   Appendix C gives the complete SID mapping for this model.
+
+
+
 
 
 
@@ -841,6 +841,12 @@ Toutain                   Expires 15 March 2027                [Page 15]
 
 Internet-Draft                coreconf-m2m                September 2026
 
+
+4.2.  SID Allocations
+
+   The coreconf-m2m model is intended to be assigned in the IETF
+   experimental SID space, with a model entry point of 62000.
+   Appendix C gives the complete SID mapping for this model.
 
    The atmos module, however, cannot be assigned SIDs in the IETF or
    another SDO space, unless this commercial module is itself
@@ -884,12 +890,6 @@ Internet-Draft                coreconf-m2m                September 2026
              {3: 10000001}, {3: 10000013}, {3: 10000003}, {3: 10000009},
              {3: 10000006}, {3: 10000004}]}}
 
-      Figure 6: Resource discovery: FETCH request and response (SCHC
-                                 Rule 0)
-
-   In the request, the payload 19 F2 32 is the CBOR encoding of the
-   unsigned integer 62002, which is the SID of "/bootstrap".  In the
-   response, the outer key 62002 identifies the bootstrap branch, and
 
 
 
@@ -898,6 +898,12 @@ Toutain                   Expires 15 March 2027                [Page 16]
 Internet-Draft                coreconf-m2m                September 2026
 
 
+      Figure 6: Resource discovery: FETCH request and response (SCHC
+                                 Rule 0)
+
+   In the request, the payload 19 F2 32 is the CBOR encoding of the
+   unsigned integer 62002, which is the SID of "/bootstrap".  In the
+   response, the outer key 62002 identifies the bootstrap branch, and
    the inner keys are delta SIDs relative to 62002, as defined in
    [RFC9254]: 7 (reference-epoch), 8 (uptime), 6 (minimal-step), and 1
    (the "inventory" list).  Each entry in the inventory list is itself a
@@ -910,12 +916,6 @@ Internet-Draft                coreconf-m2m                September 2026
    The client MUST have access to the corresponding YANG file to
    discover the transducers' default parameters, indicating the unit,
    the precision and the nature of the transducer.
-
-
-
-
-
-
 
 
 
@@ -2455,9 +2455,9 @@ Internet-Draft                coreconf-m2m                September 2026
               December 2023, <https://datatracker.ietf.org/doc/html/
               draft-ietf-core-sid-24>.
 
-   [I-D.ietf-core-yang-cbor]
-              Veillette, M., Petrov, I., Pelov, A., Bormann, C., and M.
-              Richardson, "Encoding of Data Modeled with YANG in the
+   [I-D.gudi-t2trg-senml-as-coreconf]
+              G, M., Toutain, L., Fernandez, A., and J. BONNIN, "SenML
+              is CORECONF (almost)", Work in Progress, Internet-Draft,
 
 
 
@@ -2466,14 +2466,6 @@ Toutain                   Expires 15 March 2027                [Page 44]
 Internet-Draft                coreconf-m2m                September 2026
 
 
-              Concise Binary Object Representation (CBOR)", Work in
-              Progress, Internet-Draft, draft-ietf-core-yang-cbor-20, 11
-              April 2022, <https://datatracker.ietf.org/doc/html/draft-
-              ietf-core-yang-cbor-20>.
-
-   [I-D.gudi-t2trg-senml-as-coreconf]
-              G, M., Toutain, L., Fernandez, A., and J. BONNIN, "SenML
-              is CORECONF (almost)", Work in Progress, Internet-Draft,
               draft-gudi-t2trg-senml-as-coreconf-00, 7 October 2024,
               <https://datatracker.ietf.org/doc/html/draft-gudi-t2trg-
               senml-as-coreconf-00>.
@@ -2512,6 +2504,14 @@ Internet-Draft                coreconf-m2m                September 2026
    [SAREF]    "SAREF: the Smart Applications REFerence ontology", 2020,
               <https://saref.etsi.org/>.
 
+   [RFC7228]  Bormann, C., Ersue, M., and A. Keranen, "Terminology for
+              Constrained-Node Networks", RFC 7228,
+              DOI 10.17487/RFC7228, May 2014,
+              <https://www.rfc-editor.org/info/rfc7228>.
+
+   [RFC6347]  Rescorla, E. and N. Modadugu, "Datagram Transport Layer
+              Security Version 1.2", RFC 6347, DOI 10.17487/RFC6347,
+              January 2012, <https://www.rfc-editor.org/info/rfc6347>.
 
 
 
@@ -2521,15 +2521,6 @@ Toutain                   Expires 15 March 2027                [Page 45]
 
 Internet-Draft                coreconf-m2m                September 2026
 
-
-   [RFC7228]  Bormann, C., Ersue, M., and A. Keranen, "Terminology for
-              Constrained-Node Networks", RFC 7228,
-              DOI 10.17487/RFC7228, May 2014,
-              <https://www.rfc-editor.org/info/rfc7228>.
-
-   [RFC6347]  Rescorla, E. and N. Modadugu, "Datagram Transport Layer
-              Security Version 1.2", RFC 6347, DOI 10.17487/RFC6347,
-              January 2012, <https://www.rfc-editor.org/info/rfc6347>.
 
    [RFC8613]  Selander, G., Mattsson, J., Palombini, F., and L. Seitz,
               "Object Security for Constrained RESTful Environments
@@ -2570,14 +2561,6 @@ Appendix A.  Module Tree
        |  |  |  +--rw v-north?   decimal64
        |  |  |  +--rw v-east?    decimal64
        |  |  |  +--rw v-up?      decimal64
-
-
-
-Toutain                   Expires 15 March 2027                [Page 46]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
        |  |  +--rw timestamp?         yang:date-and-time
        |  |  +--rw valid-until?       yang:date-and-time
        |  +--rw name?                string
@@ -2587,6 +2570,14 @@ Internet-Draft                coreconf-m2m                September 2026
        |  +--rw manufacturer?        string
        |  +--rw model?               string
        |  +--rw hosted-by?           string
+
+
+
+Toutain                   Expires 15 March 2027                [Page 46]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
        |  +--rw installation-time?   uint64
        +--rw transducers
           +--rw transducer* [type]
@@ -2626,14 +2617,6 @@ Internet-Draft                coreconf-m2m                September 2026
        notifications:
          +---n history
          |  +--ro last?          boolean
-
-
-
-Toutain                   Expires 15 March 2027                [Page 47]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
          |  +--ro time-series* [type]
          |     +--ro type        identityref
          |     +--ro values*     int64
@@ -2643,6 +2626,14 @@ Internet-Draft                coreconf-m2m                September 2026
          |        +--ro messages-sent?   uint64
          +---n sensor-alert
             +--ro target* [type]
+
+
+
+Toutain                   Expires 15 March 2027                [Page 47]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
                +--ro type     identityref
                +--ro value?   int64
 
@@ -2650,38 +2641,47 @@ Internet-Draft                coreconf-m2m                September 2026
 
 Appendix B.  Complete YANG Module
 
-module coreconf-m2m {
-  yang-version 1.1;
-  namespace "urn:ietf:params:xml:ns:yang:coreconf-m2m";
-  prefix ccm2m;
+   <CODE BEGINS> file "coreconf-m2m@2026-09-01.yang"
+   module coreconf-m2m {
+     yang-version 1.1;
+     namespace "urn:ietf:params:xml:ns:yang:coreconf-m2m";
+     prefix ccm2m;
 
-  import ietf-geo-location {
-    prefix geo;
-    reference "RFC 9179";
-  }
+     import ietf-geo-location {
+       prefix geo;
+       reference "RFC 9179";
+     }
 
-  organization "IETF";
-  contact
-    "Internet Engineering Task Force (IETF)
-     https://www.ietf.org/";
+     organization "IETF";
+     contact
+       "Internet Engineering Task Force (IETF)
+        https://www.ietf.org/";
 
-  description
-    "YANG data model for a generic M2M CoMI weather station.
-     This model defines the operational state data for sensor readings.";
+     description
+       "YANG data model for a generic M2M CoMI weather station.
+        This model defines the operational state data for sensor readings.";
 
-  revision 2026-09-01 {
-    description
-      "Move container statistics out of container quantity, making it a
-       sibling of quantity under list transducer. Statistics accumulate
-       over a window and are not part of the current measurement, so
-       nesting them under quantity conflated two different lifetimes and
-       cost one extra level of delta encoding on every statistics access.
-       This reverts the nesting introduced in revision 2026-03-29.";
-  }
+     revision 2026-09-01 {
+       description
+         "Move container statistics out of container quantity, making it a
+          sibling of quantity under list transducer. Statistics accumulate
+          over a window and are not part of the current measurement, so
+          nesting them under quantity conflated two different lifetimes and
+          cost one extra level of delta encoding on every statistics access.
+          This reverts the nesting introduced in revision 2026-03-29.";
+     }
 
-  revision 2026-08-28 {
-    description
-      "Rename the 'states' container to 'bootstrap', since it holds
+     revision 2026-08-28 {
+       description
+         "Rename the 'states' container to 'bootstrap', since it holds
+          operational data determined once at bootstrap time.
+          Split the transducer list: unit-override, precision-override and
+          category-override are moved out of /transducers/transducer into a
+          new /bootstrap/inventory list (also keyed by type). This list
+          describes the fixed configuration of each transducer instance,
+          determined at bootstrap and not expected to change afterwards,
+          separately from the transducer's runtime data (quantity,
+          statistics, notification parameters) which stays in
 
 
 
@@ -2690,54 +2690,54 @@ Toutain                   Expires 15 March 2027                [Page 48]
 Internet-Draft                coreconf-m2m                September 2026
 
 
-       operational data determined once at bootstrap time.
-       Split the transducer list: unit-override, precision-override and
-       category-override are moved out of /transducers/transducer into a
-       new /bootstrap/inventory list (also keyed by type). This list
-       describes the fixed configuration of each transducer instance,
-       determined at bootstrap and not expected to change afterwards,
-       separately from the transducer's runtime data (quantity,
-       statistics, notification parameters) which stays in
-       /transducers/transducer.
-       Hoist check-interval from notification-parameters/history and
-       notification-parameters/sensor-alert to notification-parameters:
-       it was defined identically in both containers, and a single
-       CON/NON cadence now applies to both notification streams.";
-  }
+          /transducers/transducer.
+          Hoist check-interval from notification-parameters/history and
+          notification-parameters/sensor-alert to notification-parameters:
+          it was defined identically in both containers, and a single
+          CON/NON cadence now applies to both notification streams.";
+     }
 
-  revision 2026-08-24 {
-    description
-      "Remove type from list keys; id alone now identifies a transducer
-       instance, distinguishing multiple actuators of the same type. This
-       reduces the key size.
-       Add a reference-epoch leaf in the state container; other epochs in
-       the model are relative to this one.
-       Move all concrete transducer-type identities (solar-radiation,
-       precipitation, air-temperature, relative-humidity,
-       barometric-pressure, vapor-pressure, wind-speed, wind-direction,
-       wind-gust, north-wind-speed, east-wind-speed, strike-count,
-       average-distance, tilt, x-orientation, y-orientation,
-       humidity-sensor-temperature, compass-heading) out of coreconf-m2m and
-       into the new atmos module; coreconf-m2m now only defines the base
-       transducer-type identity, which product-specific modules extend.
-       Rename transducer/unit and transducer/precision to unit-override and
-       precision-override (both now optional, no default): they only need
-       to be set when they differ from the default-unit/default-precision
-       extension declared on the transducer's type identity.
-       Add default-unit and default-precision extensions, for use by
-       product-specific modules (e.g. atmos) annotating the transducer-type
-       identities they define.
-       Add SOSA/SAREF-aligned leafs to the characteristics container
-       (description, manufacturer, model, hosted-by, installation-time);
-       move uptime back into states, as bootstrap operational data.
-       Add default-category extension, for product-specific modules to mark
-       each transducer-type identity as 'sensor', 'actuator' or
-       'sensor-actuator', and a matching category-override leaf on the
-       transducer list for per-instance overrides.
-       Remove u-timestamp: all timestamps are now second-resolution only;
-       sub-second precision would require a model update.
-       Change history/step units from milliseconds to seconds, for the
-       same reason.
+     revision 2026-08-24 {
+       description
+         "Remove type from list keys; id alone now identifies a transducer
+          instance, distinguishing multiple actuators of the same type. This
+          reduces the key size.
+          Add a reference-epoch leaf in the state container; other epochs in
+          the model are relative to this one.
+          Move all concrete transducer-type identities (solar-radiation,
+          precipitation, air-temperature, relative-humidity,
+          barometric-pressure, vapor-pressure, wind-speed, wind-direction,
+          wind-gust, north-wind-speed, east-wind-speed, strike-count,
+          average-distance, tilt, x-orientation, y-orientation,
+          humidity-sensor-temperature, compass-heading) out of coreconf-m2m and
+          into the new atmos module; coreconf-m2m now only defines the base
+          transducer-type identity, which product-specific modules extend.
+          Rename transducer/unit and transducer/precision to unit-override and
+          precision-override (both now optional, no default): they only need
+          to be set when they differ from the default-unit/default-precision
+          extension declared on the transducer's type identity.
+          Add default-unit and default-precision extensions, for use by
+          product-specific modules (e.g. atmos) annotating the transducer-type
+          identities they define.
+          Add SOSA/SAREF-aligned leafs to the characteristics container
+          (description, manufacturer, model, hosted-by, installation-time);
+          move uptime back into states, as bootstrap operational data.
+          Add default-category extension, for product-specific modules to mark
+          each transducer-type identity as 'sensor', 'actuator' or
+          'sensor-actuator', and a matching category-override leaf on the
+          transducer list for per-instance overrides.
+          Remove u-timestamp: all timestamps are now second-resolution only;
+          sub-second precision would require a model update.
+          Change history/step units from milliseconds to seconds, for the
+          same reason.
+          Add minimal-step leaf in states and a must constraint requiring
+          history/step >= states/minimal-step.
+          Move geo-location from states into characteristics: it is
+          configuration data set once at deployment, not runtime state.
+          Make states/uptime mandatory.
+          Revert the id-based key: transducer, transducers-list/time-series
+          and sensor-alert/target are again keyed on type alone, and the id
+          leaf is removed from all three lists (only one transducer per
 
 
 
@@ -2746,54 +2746,54 @@ Toutain                   Expires 15 March 2027                [Page 49]
 Internet-Draft                coreconf-m2m                September 2026
 
 
-       Add minimal-step leaf in states and a must constraint requiring
-       history/step >= states/minimal-step.
-       Move geo-location from states into characteristics: it is
-       configuration data set once at deployment, not runtime state.
-       Make states/uptime mandatory.
-       Revert the id-based key: transducer, transducers-list/time-series
-       and sensor-alert/target are again keyed on type alone, and the id
-       leaf is removed from all three lists (only one transducer per
-       type is supported).";
-  }
+          type is supported).";
+     }
 
-  revision 2026-06-07 {
-    description
-      "Add humidity-sensor-temperature and compass-heading transducer-type identities.";
-  }
+     revision 2026-06-07 {
+       description
+         "Add humidity-sensor-temperature and compass-heading transducer-type identities.";
+     }
 
-  revision 2026-05-26 {
-    description
-      "Add check-interval leaf to history and sensor-alert notification parameters.";
-  }
+     revision 2026-05-26 {
+       description
+         "Add check-interval leaf to history and sensor-alert notification parameters.";
+     }
 
-  revision 2026-03-29 {
-    description
-      "Move container statistics inside container quantity.";
-  }
+     revision 2026-03-29 {
+       description
+         "Move container statistics inside container quantity.";
+     }
 
-  revision 2026-03-25 {
-    description
-      "Add dampening leaf to sensor-alert notification parameters.";
-  }
+     revision 2026-03-25 {
+       description
+         "Add dampening leaf to sensor-alert notification parameters.";
+     }
 
-  revision 2026-03-23 {
-    description
-      "Make active leaf config false (reflects observe subscription state).
-       Add must constraint t-min < t-max on sensor-alert.
-       Add timestamp-source enum in quantity to indicate timestamp origin
-       (source = timestamped by the sensor, receiver = timestamped on receipt).";
-  }
+     revision 2026-03-23 {
+       description
+         "Make active leaf config false (reflects observe subscription state).
+          Add must constraint t-min < t-max on sensor-alert.
+          Add timestamp-source enum in quantity to indicate timestamp origin
+          (source = timestamped by the sensor, receiver = timestamped on receipt).";
+     }
 
-  revision 2026-03-22 {
-    description
-      "Rename branch measurement to transducer
-       (container, list, identity, notification).";
-  }
+     revision 2026-03-22 {
+       description
+         "Rename branch measurement to transducer
+          (container, list, identity, notification).";
+     }
 
-  revision 2026-03-08 {
-    description
-      "Module renamed to coreconf-m2m for generic M2M CoMI use.";
+     revision 2026-03-08 {
+       description
+         "Module renamed to coreconf-m2m for generic M2M CoMI use.";
+     }
+
+     revision 2026-03-02 {
+       description
+         "Major update for CoMI compliance:
+          - Added multi-sensor support (id key).
+          - Measurements are now configurable (writable).
+          - Added standard deviation (stdev).
 
 
 
@@ -2802,54 +2802,54 @@ Toutain                   Expires 15 March 2027                [Page 50]
 Internet-Draft                coreconf-m2m                September 2026
 
 
-  }
+          - Added uptime to state.
+          - Removed tilt from fixed state (now a measurement type).
+          - Removed legacy RPCs (subscribe, get-stats) in favor of CoMI/Observe.
+          - Cleaned up measurement lists and notifications.";
+     }
 
-  revision 2026-03-02 {
-    description
-      "Major update for CoMI compliance:
-       - Added multi-sensor support (id key).
-       - Measurements are now configurable (writable).
-       - Added standard deviation (stdev).
-       - Added uptime to state.
-       - Removed tilt from fixed state (now a measurement type).
-       - Removed legacy RPCs (subscribe, get-stats) in favor of CoMI/Observe.
-       - Cleaned up measurement lists and notifications.";
-  }
+     revision 2026-02-27 {
+       description
+         "Initial revision for testing.";
+     }
 
-  revision 2026-02-27 {
-    description
-      "Initial revision for testing.";
-  }
+     /* ------------------------------------------------------------------ */
+     /* Extensions                                                           */
+     /* ------------------------------------------------------------------ */
 
-  /* ------------------------------------------------------------------ */
-  /* Extensions                                                           */
-  /* ------------------------------------------------------------------ */
+     extension default-unit {
+       argument "senml-unit";
+       description
+         "Recommended default value for a transducer's unit-override leaf,
+          expressed as a SenML (RFC 8428) unit string. Applied by
+          product-specific modules to the transducer-type identities they
+          define. Intended as guidance for clients populating
+          /transducers/transducer/unit-override; not enforced by the schema.";
+     }
 
-  extension default-unit {
-    argument "senml-unit";
-    description
-      "Recommended default value for a transducer's unit-override leaf,
-       expressed as a SenML (RFC 8428) unit string. Applied by
-       product-specific modules to the transducer-type identities they
-       define. Intended as guidance for clients populating
-       /transducers/transducer/unit-override; not enforced by the schema.";
-  }
+     extension default-precision {
+       argument "decimal-places";
+       description
+         "Recommended default value for a transducer's precision-override leaf
+          (number of decimal places, i.e. real value = raw_value * 10^-precision)
+          when using the default-unit. Applied by product-specific modules to
+          the transducer-type identities they define. Intended as guidance for
+          clients populating /transducers/transducer/precision-override; not
+          enforced by the schema.";
+     }
 
-  extension default-precision {
-    argument "decimal-places";
-    description
-      "Recommended default value for a transducer's precision-override leaf
-       (number of decimal places, i.e. real value = raw_value * 10^-precision)
-       when using the default-unit. Applied by product-specific modules to
-       the transducer-type identities they define. Intended as guidance for
-       clients populating /transducers/transducer/precision-override; not
-       enforced by the schema.";
-  }
-
-  extension default-category {
-    argument "category";
-    description
-      "Recommended default value for a transducer's category-override leaf.
+     extension default-category {
+       argument "category";
+       description
+         "Recommended default value for a transducer's category-override leaf.
+          Extension arguments are plain strings and cannot be constrained to
+          an enumeration by the YANG language itself; the value SHOULD be one
+          of the category-override enums: 'sensor' (the transducer-type
+          identity represents an observed property), 'actuator' (it
+          represents a property acted upon), or 'sensor-actuator' (both).
+          Applied by
+          product-specific modules to the transducer-type identities they
+          define, since this role is a property of the measurement type, not
 
 
 
@@ -2858,54 +2858,54 @@ Toutain                   Expires 15 March 2027                [Page 51]
 Internet-Draft                coreconf-m2m                September 2026
 
 
-       Extension arguments are plain strings and cannot be constrained to
-       an enumeration by the YANG language itself; the value SHOULD be one
-       of the category-override enums: 'sensor' (the transducer-type
-       identity represents an observed property), 'actuator' (it
-       represents a property acted upon), or 'sensor-actuator' (both).
-       Applied by
-       product-specific modules to the transducer-type identities they
-       define, since this role is a property of the measurement type, not
-       of the device as a whole (a device can carry a mix of sensor- and
-       actuator-typed transducers).
-       For example, in the SOSA/SSN ontology 'sensor' corresponds to
-       sosa:Sensor/sosa:ObservableProperty and 'actuator' to
-       sosa:Actuator; in SAREF they correspond to the SensingFunction and
-       ActuatingFunction classes respectively.";
-  }
+          of the device as a whole (a device can carry a mix of sensor- and
+          actuator-typed transducers).
+          For example, in the SOSA/SSN ontology 'sensor' corresponds to
+          sosa:Sensor/sosa:ObservableProperty and 'actuator' to
+          sosa:Actuator; in SAREF they correspond to the SensingFunction and
+          ActuatingFunction classes respectively.";
+     }
 
-  /* ------------------------------------------------------------------ */
-  /* Measurement-type identity hierarchy                                  */
-  /* ------------------------------------------------------------------ */
+     /* ------------------------------------------------------------------ */
+     /* Measurement-type identity hierarchy                                  */
+     /* ------------------------------------------------------------------ */
 
-  identity transducer-type {
-    description
-      "Base identity for all measurement types. Concrete transducer types
-       are defined by product-specific modules, e.g. atmos.";
-  }
+     identity transducer-type {
+       description
+         "Base identity for all measurement types. Concrete transducer types
+          are defined by product-specific modules, e.g. atmos.";
+     }
 
-  /* ------------------------------------------------------------------ */
-  /* Typedefs                                                             */
-  /* ------------------------------------------------------------------ */
+     /* ------------------------------------------------------------------ */
+     /* Typedefs                                                             */
+     /* ------------------------------------------------------------------ */
 
-  typedef encoding-type {
-    type enumeration {
-      enum direct {
-        value 0;
-        description "Value is encoded directly as an integer.";
-      }
-      enum delta {
-        value 1;
-        description "Value is encoded as a delta from the previous value.";
-      }
-    }
-    description "Encoding used for the measurement values.";
-  }
+     typedef encoding-type {
+       type enumeration {
+         enum direct {
+           value 0;
+           description "Value is encoded directly as an integer.";
+         }
+         enum delta {
+           value 1;
+           description "Value is encoded as a delta from the previous value.";
+         }
+       }
+       description "Encoding used for the measurement values.";
+     }
 
-  /* ------------------------------------------------------------------ */
-  /* Shared grouping used by notifications                                */
-  /* ------------------------------------------------------------------ */
+     /* ------------------------------------------------------------------ */
+     /* Shared grouping used by notifications                                */
+     /* ------------------------------------------------------------------ */
 
+     grouping transducers-list {
+       list time-series {
+         key "type";
+         description
+           "List of measurements included in this notification.";
+
+         leaf type {
+           type identityref {
 
 
 
@@ -2914,54 +2914,54 @@ Toutain                   Expires 15 March 2027                [Page 52]
 Internet-Draft                coreconf-m2m                September 2026
 
 
-  grouping transducers-list {
-    list time-series {
-      key "type";
-      description
-        "List of measurements included in this notification.";
+             base transducer-type;
+           }
+           description "The type of measurement (e.g., air-temperature).";
+         }
 
-      leaf type {
-        type identityref {
-          base transducer-type;
-        }
-        description "The type of measurement (e.g., air-temperature).";
-      }
+         leaf-list values {
+           type int64;
+           ordered-by user;
+           description
+             "List of encoded measurement values.";
+         }
+       }
+     }
 
-      leaf-list values {
-        type int64;
-        ordered-by user;
-        description
-          "List of encoded measurement values.";
-      }
-    }
-  }
+     /* ------------------------------------------------------------------ */
+     /* State data                                                           */
+     /* ------------------------------------------------------------------ */
 
-  /* ------------------------------------------------------------------ */
-  /* State data                                                           */
-  /* ------------------------------------------------------------------ */
+     container bootstrap {
+       config false;
+       description
+         "Operational data determined once at bootstrap time.";
 
-  container bootstrap {
-    config false;
-    description
-      "Operational data determined once at bootstrap time.";
+       leaf reference-epoch {
+         type uint64;
+         units "seconds";
+         description
+           "Epoch timestamp used as the reference point for the device's
+            internal clock. Other epoch/timestamp values in this model are
+            relative to this reference epoch.";
+       }
 
-    leaf reference-epoch {
-      type uint64;
-      units "seconds";
-      description
-        "Epoch timestamp used as the reference point for the device's
-         internal clock. Other epoch/timestamp values in this model are
-         relative to this reference epoch.";
-    }
+       leaf uptime {
+         type uint64;
+         units "seconds";
+         mandatory true;
+         description "Time elapsed since the last boot.";
+       }
 
-    leaf uptime {
-      type uint64;
-      units "seconds";
-      mandatory true;
-      description "Time elapsed since the last boot.";
-    }
-
-    leaf minimal-step {
+       leaf minimal-step {
+         type uint32;
+         units "seconds";
+         description
+           "Minimum interval at which the underlying system refreshes
+            transducer values, i.e. the smallest meaningful value for
+            history/step. Determined by the hardware/firmware and not
+            configurable (e.g. an atmospheric station may have a
+            minimal-step of 120 seconds).";
 
 
 
@@ -2970,54 +2970,54 @@ Toutain                   Expires 15 March 2027                [Page 53]
 Internet-Draft                coreconf-m2m                September 2026
 
 
-      type uint32;
-      units "seconds";
-      description
-        "Minimum interval at which the underlying system refreshes
-         transducer values, i.e. the smallest meaningful value for
-         history/step. Determined by the hardware/firmware and not
-         configurable (e.g. an atmospheric station may have a
-         minimal-step of 120 seconds).";
-    }
+       }
 
-    list inventory {
-      key "type";
-      description
-        "List of transducers known to the device, with their
-         per-instance configuration overrides. Determined once at
-         bootstrap and not expected to change afterwards.";
+       list inventory {
+         key "type";
+         description
+           "List of transducers known to the device, with their
+            per-instance configuration overrides. Determined once at
+            bootstrap and not expected to change afterwards.";
 
-      leaf type {
-        type identityref {
-          base transducer-type;
-        }
-        description "The type of measurement.";
-      }
+         leaf type {
+           type identityref {
+             base transducer-type;
+           }
+           description "The type of measurement.";
+         }
 
-      leaf unit-override {
-        type string;
-        description
-          "Unit of measurement (e.g., 'Cel', 'm/s', '%'), overriding the
-           default-unit extension declared on the transducer's type identity
-           (if any). When absent, clients should use that identity's
-           default-unit; if the identity declares no default-unit, the unit
-           is undefined.";
-      }
+         leaf unit-override {
+           type string;
+           description
+             "Unit of measurement (e.g., 'Cel', 'm/s', '%'), overriding the
+              default-unit extension declared on the transducer's type identity
+              (if any). When absent, clients should use that identity's
+              default-unit; if the identity declares no default-unit, the unit
+              is undefined.";
+         }
 
-      leaf precision-override {
-        type uint8;
-        description
-          "Number of decimal places for the measurement value
-           (real value = raw_value * 10^-precision), overriding the
-           default-precision extension declared on the transducer's type
-           identity (if any). Applies to the current measurement value
-           (polling/iPATCH), not to the time-series encoding in
-           notifications. When absent, clients should use that identity's
-           default-precision; if the identity declares no default-precision,
-           the precision is undefined.";
-      }
+         leaf precision-override {
+           type uint8;
+           description
+             "Number of decimal places for the measurement value
+              (real value = raw_value * 10^-precision), overriding the
+              default-precision extension declared on the transducer's type
+              identity (if any). Applies to the current measurement value
+              (polling/iPATCH), not to the time-series encoding in
+              notifications. When absent, clients should use that identity's
+              default-precision; if the identity declares no default-precision,
+              the precision is undefined.";
+         }
 
-      leaf category-override {
+         leaf category-override {
+           type enumeration {
+             enum sensor {
+               description "The transducer represents an observed property.";
+             }
+             enum actuator {
+               description "The transducer represents a property acted upon.";
+             }
+             enum sensor-actuator {
 
 
 
@@ -3026,54 +3026,54 @@ Toutain                   Expires 15 March 2027                [Page 54]
 Internet-Draft                coreconf-m2m                September 2026
 
 
-        type enumeration {
-          enum sensor {
-            description "The transducer represents an observed property.";
-          }
-          enum actuator {
-            description "The transducer represents a property acted upon.";
-          }
-          enum sensor-actuator {
-            description
-              "The transducer both observes and can be acted upon
-               (e.g. a setpoint that also reports the measured value).";
-          }
-        }
-        description
-          "Role of this transducer instance, overriding the
-           default-category extension declared on the transducer's type
-           identity (if any). When absent, clients should use that
-           identity's default-category; if the identity declares no
-           default-category, the role is undefined.";
-      }
-    }
-  }
+               description
+                 "The transducer both observes and can be acted upon
+                  (e.g. a setpoint that also reports the measured value).";
+             }
+           }
+           description
+             "Role of this transducer instance, overriding the
+              default-category extension declared on the transducer's type
+              identity (if any). When absent, clients should use that
+              identity's default-category; if the identity declares no
+              default-category, the role is undefined.";
+         }
+       }
+     }
 
-  /* ------------------------------------------------------------------ */
-  /* Device Characteristics                                               */
-  /* ------------------------------------------------------------------ */
+     /* ------------------------------------------------------------------ */
+     /* Device Characteristics                                               */
+     /* ------------------------------------------------------------------ */
 
-  container characteristics {
-    description
-      "Static descriptive information about the device.";
+     container characteristics {
+       description
+         "Static descriptive information about the device.";
 
-    uses geo:geo-location {
-      description
-        "Fixed geographic position of the weather station.
-         Populated once at deployment; not expected to change
-         during normal operation.";
-      refine "geo-location/reference-frame/geodetic-system/geodetic-datum" {
-        default "wgs-84";
-      }
-    }
+       uses geo:geo-location {
+         description
+           "Fixed geographic position of the weather station.
+            Populated once at deployment; not expected to change
+            during normal operation.";
+         refine "geo-location/reference-frame/geodetic-system/geodetic-datum" {
+           default "wgs-84";
+         }
+       }
 
-    leaf name {
-      type string;
-      description "Human-readable name of the device.";
-    }
+       leaf name {
+         type string;
+         description "Human-readable name of the device.";
+       }
 
-    leaf version {
-      type string;
+       leaf version {
+         type string;
+         description "Firmware or software version of the device.";
+       }
+
+       leaf identifier {
+         type string;
+         description "Unique identifier of the device (e.g., serial number or EUI).";
+       }
+
 
 
 
@@ -3082,54 +3082,54 @@ Toutain                   Expires 15 March 2027                [Page 55]
 Internet-Draft                coreconf-m2m                September 2026
 
 
-      description "Firmware or software version of the device.";
-    }
+       leaf description {
+         type string;
+         description
+           "Free-text description of the device, its purpose or its
+            deployment context. For example, in SOSA/SSN this corresponds to
+            rdfs:comment on the sosa:Sensor/sosa:Platform individual, and in
+            SAREF to saref:hasDescription.";
+       }
 
-    leaf identifier {
-      type string;
-      description "Unique identifier of the device (e.g., serial number or EUI).";
-    }
+       leaf manufacturer {
+         type string;
+         description
+           "Name of the device manufacturer. For example, in SAREF this
+            corresponds to saref:hasManufacturer.";
+       }
 
-    leaf description {
-      type string;
-      description
-        "Free-text description of the device, its purpose or its
-         deployment context. For example, in SOSA/SSN this corresponds to
-         rdfs:comment on the sosa:Sensor/sosa:Platform individual, and in
-         SAREF to saref:hasDescription.";
-    }
+       leaf model {
+         type string;
+         description
+           "Commercial model name/number of the device. For example, in
+            SAREF this corresponds to saref:hasModel.";
+       }
 
-    leaf manufacturer {
-      type string;
-      description
-        "Name of the device manufacturer. For example, in SAREF this
-         corresponds to saref:hasManufacturer.";
-    }
+       leaf hosted-by {
+         type string;
+         description
+           "Identifier of the platform hosting this device, when applicable.
+            Left as an opaque string here; resolution to an actual platform
+            resource is deployment-specific. For example, in SOSA this
+            corresponds to the sosa:isHostedBy relation
+            (device -> sosa:Platform).";
+       }
 
-    leaf model {
-      type string;
-      description
-        "Commercial model name/number of the device. For example, in
-         SAREF this corresponds to saref:hasModel.";
-    }
+       leaf installation-time {
+         type uint64;
+         units "seconds";
+         description
+           "Absolute Unix epoch timestamp (UTC) at which the device was
+            installed/commissioned. Unlike bootstrap/reference-epoch, this is
+            an absolute epoch value, not a relative reference point for the
+            device's internal clock.";
+       }
+     }
 
-    leaf hosted-by {
-      type string;
-      description
-        "Identifier of the platform hosting this device, when applicable.
-         Left as an opaque string here; resolution to an actual platform
-         resource is deployment-specific. For example, in SOSA this
-         corresponds to the sosa:isHostedBy relation
-         (device -> sosa:Platform).";
-    }
+     /* ------------------------------------------------------------------ */
+     /* Measurements Configuration & Data                                    */
+     /* ------------------------------------------------------------------ */
 
-    leaf installation-time {
-      type uint64;
-      units "seconds";
-      description
-        "Absolute Unix epoch timestamp (UTC) at which the device was
-         installed/commissioned. Unlike bootstrap/reference-epoch, this is
-         an absolute epoch value, not a relative reference point for the
 
 
 
@@ -3138,54 +3138,54 @@ Toutain                   Expires 15 March 2027                [Page 56]
 Internet-Draft                coreconf-m2m                September 2026
 
 
-         device's internal clock.";
-    }
-  }
+     container transducers {
+       // config true (default);
+       description
+         "Current measurement values accessible via polling or configuration.";
 
-  /* ------------------------------------------------------------------ */
-  /* Measurements Configuration & Data                                    */
-  /* ------------------------------------------------------------------ */
+       list transducer {
+         key "type";
+         description
+           "List of available measurements.";
 
-  container transducers {
-    // config true (default);
-    description
-      "Current measurement values accessible via polling or configuration.";
+         leaf type {
+           type identityref {
+             base transducer-type;
+           }
+           description "The type of measurement.";
+         }
 
-    list transducer {
-      key "type";
-      description
-        "List of available measurements.";
+         container quantity {
+           config false;
+           description "Operational state for this transducer.";
 
-      leaf type {
-        type identityref {
-          base transducer-type;
-        }
-        description "The type of measurement.";
-      }
+           leaf value {
+             type int64;
+             description
+               "The current raw integer value of the transducer.";
+           }
 
-      container quantity {
-        config false;
-        description "Operational state for this transducer.";
+           leaf timestamp {
+             type uint64;
+             units "seconds";
+             description "Epoch timestamp (seconds) of the last transducer update.";
+           }
 
-        leaf value {
-          type int64;
-          description
-            "The current raw integer value of the transducer.";
-        }
-
-        leaf timestamp {
-          type uint64;
-          units "seconds";
-          description "Epoch timestamp (seconds) of the last transducer update.";
-        }
-
-        leaf timestamp-source {
-          type enumeration {
-            enum source {
-              value 0;
-              description
-                "The timestamp was generated by the sensor itself.";
-            }
+           leaf timestamp-source {
+             type enumeration {
+               enum source {
+                 value 0;
+                 description
+                   "The timestamp was generated by the sensor itself.";
+               }
+               enum receiver {
+                 value 1;
+                 description
+                   "The timestamp was applied by the receiver upon message arrival.";
+               }
+             }
+             description
+               "Indicates the origin of the timestamp associated with this measurement.";
 
 
 
@@ -3194,54 +3194,54 @@ Toutain                   Expires 15 March 2027                [Page 57]
 Internet-Draft                coreconf-m2m                September 2026
 
 
-            enum receiver {
-              value 1;
-              description
-                "The timestamp was applied by the receiver upon message arrival.";
-            }
-          }
-          description
-            "Indicates the origin of the timestamp associated with this measurement.";
-        }
-      }
+           }
+         }
 
-      container statistics {
-        config false;
-        description "Read-only accumulated statistics for this measurement.";
+         container statistics {
+           config false;
+           description "Read-only accumulated statistics for this measurement.";
 
-        leaf min {
-          type int64;
-          description "Minimum value observed since last reset.";
-        }
+           leaf min {
+             type int64;
+             description "Minimum value observed since last reset.";
+           }
 
-        leaf max {
-          type int64;
-          description "Maximum value observed since last reset.";
-        }
+           leaf max {
+             type int64;
+             description "Maximum value observed since last reset.";
+           }
 
-        leaf mean {
-          type int64;
-          description "Mean value observed since last reset.";
-        }
+           leaf mean {
+             type int64;
+             description "Mean value observed since last reset.";
+           }
 
-        leaf median {
-          type int64;
-          description
-            "Estimated median value observed since last reset.
-             This median is computed incrementally from the current stored
-             statistics and the newest sample, without keeping full history.";
-        }
+           leaf median {
+             type int64;
+             description
+               "Estimated median value observed since last reset.
+                This median is computed incrementally from the current stored
+                statistics and the newest sample, without keeping full history.";
+           }
 
-        leaf stdev {
-          type uint64;
-          description
-            "Standard deviation of values observed since last reset.
-             Scaled by same precision as value.";
-        }
+           leaf stdev {
+             type uint64;
+             description
+               "Standard deviation of values observed since last reset.
+                Scaled by same precision as value.";
+           }
 
-        leaf sample-count {
-          type uint64;
-          description "Number of samples used for statistics calculation.";
+           leaf sample-count {
+             type uint64;
+             description "Number of samples used for statistics calculation.";
+           }
+         }
+
+         container notification-parameters {
+           description
+             "Configuration parameters controlling how this transducer
+              is reported in CoMI notification streams.";
+
 
 
 
@@ -3250,54 +3250,54 @@ Toutain                   Expires 15 March 2027                [Page 58]
 Internet-Draft                coreconf-m2m                September 2026
 
 
-        }
-      }
+           container history {
+             description "Parameters for the history time-series stream.";
 
-      container notification-parameters {
-        description
-          "Configuration parameters controlling how this transducer
-           is reported in CoMI notification streams.";
+             leaf active {
+               type boolean;
+               config false;
+               description
+                 "Read-only. True when a FETCH+Observe subscription is active on /s
+                  for this transducer history stream. False when no observer is registered.";
+             }
 
-        container history {
-          description "Parameters for the history time-series stream.";
+             leaf step {
+               type uint32;
+               units "seconds";
+               must ". >= /bootstrap/minimal-step or not(/bootstrap/minimal-step)" {
+                 error-message
+                   "step must be greater than or equal to bootstrap/minimal-step.";
+               }
+               description
+                 "Time interval between samples in the notification stream.
+                  Must be at least bootstrap/minimal-step, the system's minimum
+                  refresh interval.";
+             }
 
-          leaf active {
-            type boolean;
-            config false;
-            description
-              "Read-only. True when a FETCH+Observe subscription is active on /s
-               for this transducer history stream. False when no observer is registered.";
-          }
+             leaf precision {
+               type uint8;
+               default 1;
+               description
+                 "Number of decimal places for values encoded in time-series notifications.
+                  Real value = raw_value * 10^-precision.";
+             }
 
-          leaf step {
-            type uint32;
-            units "seconds";
-            must ". >= /bootstrap/minimal-step or not(/bootstrap/minimal-step)" {
-              error-message
-                "step must be greater than or equal to bootstrap/minimal-step.";
-            }
-            description
-              "Time interval between samples in the notification stream.
-               Must be at least bootstrap/minimal-step, the system's minimum
-               refresh interval.";
-          }
+             leaf max-samples {
+               type uint32;
+               description "Maximum number of samples kept in the time-series buffer.";
+             }
 
-          leaf precision {
-            type uint8;
-            default 1;
-            description
-              "Number of decimal places for values encoded in time-series notifications.
-               Real value = raw_value * 10^-precision.";
-          }
+             leaf time-period {
+               type uint32;
+               units "seconds";
+               description "Duration of the time window covered by the history buffer.";
+             }
 
-          leaf max-samples {
-            type uint32;
-            description "Maximum number of samples kept in the time-series buffer.";
-          }
-
-          leaf time-period {
-            type uint32;
-            units "seconds";
+             leaf encoding {
+               type encoding-type;
+               default "delta";
+               description "Encoding used for the values list in notifications.";
+             }
 
 
 
@@ -3306,54 +3306,54 @@ Toutain                   Expires 15 March 2027                [Page 59]
 Internet-Draft                coreconf-m2m                September 2026
 
 
-            description "Duration of the time window covered by the history buffer.";
-          }
+             leaf max-payload {
+               type uint32;
+               units "bytes";
+               description
+                 "Maximum size in bytes of the encoded time-series payload in
+                  a single history notification.  When the encoded buffer would
+                  exceed this limit, the notification is sent early (before
+                  max-samples or time-period is reached).  0 means no size limit.";
+             }
 
-          leaf encoding {
-            type encoding-type;
-            default "delta";
-            description "Encoding used for the values list in notifications.";
-          }
+           }
 
-          leaf max-payload {
-            type uint32;
-            units "bytes";
-            description
-              "Maximum size in bytes of the encoded time-series payload in
-               a single history notification.  When the encoded buffer would
-               exceed this limit, the notification is sent early (before
-               max-samples or time-period is reached).  0 means no size limit.";
-          }
+           container sensor-alert {
+             description "Parameters for threshold-based sensor-alert notifications.";
 
-        }
+             must "not(t-min and t-max) or t-min < t-max" {
+               error-message "t-min must be strictly less than t-max.";
+             }
 
-        container sensor-alert {
-          description "Parameters for threshold-based sensor-alert notifications.";
+             leaf active {
+               type boolean;
+               config false;
+               description
+                 "Read-only. True when a FETCH+Observe subscription is active on /s
+                  for this transducer sensor-alert stream. False when no observer is registered.";
+             }
 
-          must "not(t-min and t-max) or t-min < t-max" {
-            error-message "t-min must be strictly less than t-max.";
-          }
+             leaf t-min {
+               type int32;
+               description
+                 "Minimum threshold value. A sensor-alert is raised when the
+                  transducer value falls below this value.";
+             }
 
-          leaf active {
-            type boolean;
-            config false;
-            description
-              "Read-only. True when a FETCH+Observe subscription is active on /s
-               for this transducer sensor-alert stream. False when no observer is registered.";
-          }
+             leaf t-max {
+               type int32;
+               description
+                 "Maximum threshold value. A sensor-alert is raised when the
+                  transducer value exceeds this value.";
+             }
 
-          leaf t-min {
-            type int32;
-            description
-              "Minimum threshold value. A sensor-alert is raised when the
-               transducer value falls below this value.";
-          }
-
-          leaf t-max {
-            type int32;
-            description
-              "Maximum threshold value. A sensor-alert is raised when the
-               transducer value exceeds this value.";
+             leaf hysteresis {
+               type uint8 {
+                 range "0..100";
+               }
+               default 5;
+               units "percent";
+               description
 
 
 
@@ -3362,54 +3362,54 @@ Toutain                   Expires 15 March 2027                [Page 60]
 Internet-Draft                coreconf-m2m                September 2026
 
 
-          }
+                 "Hysteresis applied to threshold crossings, expressed as a
+                  percentage of the threshold value.";
+             }
 
-          leaf hysteresis {
-            type uint8 {
-              range "0..100";
-            }
-            default 5;
-            units "percent";
-            description
-              "Hysteresis applied to threshold crossings, expressed as a
-               percentage of the threshold value.";
-          }
+             leaf dampening {
+               type uint32;
+               default 0;
+               units "milliseconds";
+               description
+                 "Minimum time that must elapse between two consecutive sensor-alert
+                  notifications for the same transducer.  A new alert is suppressed
+                  until the dampening period has expired since the last sent alert.
+                  0 (default) means no dampening.";
+             }
+           }
 
-          leaf dampening {
-            type uint32;
-            default 0;
-            units "milliseconds";
-            description
-              "Minimum time that must elapse between two consecutive sensor-alert
-               notifications for the same transducer.  A new alert is suppressed
-               until the dampening period has expired since the last sent alert.
-               0 (default) means no dampening.";
-          }
-        }
+           leaf check-interval {
+             type uint16;
+             default 0;
+             description
+               "Controls how often a CON (confirmable) notification is sent
+                instead of NON (non-confirmable), for both the history and
+                sensor-alert streams of this transducer.
+                0 = disabled, all notifications are NON.
+                1 = every notification is CON.
+                N = one CON every N notifications, all others are NON.";
+           }
+         }
 
-        leaf check-interval {
-          type uint16;
-          default 0;
-          description
-            "Controls how often a CON (confirmable) notification is sent
-             instead of NON (non-confirmable), for both the history and
-             sensor-alert streams of this transducer.
-             0 = disabled, all notifications are NON.
-             1 = every notification is CON.
-             N = one CON every N notifications, all others are NON.";
-        }
-      }
+         action reset-stats {
+           description
+             "Reset the accumulated statistics (min, max, mean, median, stdev)
+              for this measurement. Counters restart from the next sample received.";
+         }
+       }
+     }
 
-      action reset-stats {
-        description
-          "Reset the accumulated statistics (min, max, mean, median, stdev)
-           for this measurement. Counters restart from the next sample received.";
-      }
-    }
-  }
+     /* ------------------------------------------------------------------ */
+     /* RPCs                                                                 */
+     /* ------------------------------------------------------------------ */
 
-  /* ------------------------------------------------------------------ */
-  /* RPCs                                                                 */
+     rpc reset-stats {
+       description
+         "Reset the accumulated statistics for all measurements.
+          The counters restart from the next sample received after the call.";
+     }
+
+     /* ------------------------------------------------------------------ */
 
 
 
@@ -3418,54 +3418,54 @@ Toutain                   Expires 15 March 2027                [Page 61]
 Internet-Draft                coreconf-m2m                September 2026
 
 
-  /* ------------------------------------------------------------------ */
+     /* Notifications                                                        */
+     /* ------------------------------------------------------------------ */
 
-  rpc reset-stats {
-    description
-      "Reset the accumulated statistics for all measurements.
-       The counters restart from the next sample received after the call.";
-  }
+     notification history {
+       description
+         "Measurement event sent to observers of the notification stream.
+          To receive this, a CoLA/CoMI client must Observe the stream resource.";
 
-  /* ------------------------------------------------------------------ */
-  /* Notifications                                                        */
-  /* ------------------------------------------------------------------ */
+       leaf last {
+         type boolean;
+         default "false";
+         description "True if this is the last notification for the current series.";
+       }
 
-  notification history {
-    description
-      "Measurement event sent to observers of the notification stream.
-       To receive this, a CoLA/CoMI client must Observe the stream resource.";
+       uses transducers-list {
+         augment "time-series" {
+           container internal {
+             description "Internal operational state for this time-series entry.";
+             leaf last-update {
+               type uint64;
+               units "seconds";
+               description "Epoch timestamp of the last sample appended to this time-series.";
+             }
+             leaf start-time {
+               type uint64;
+               units "seconds";
+               description "Epoch timestamp of the first sample; set when the Observe subscription is created.";
+             }
+             leaf messages-sent {
+               type uint64;
+               description "Number of notification messages sent for this time-series since the Observe subscription was created.";
+             }
+           }
+         }
+       }
+     }
 
-    leaf last {
-      type boolean;
-      default "false";
-      description "True if this is the last notification for the current series.";
-    }
+     notification sensor-alert {
+       description
+         "Alert notification when a value exceeds a threshold.";
 
-    uses transducers-list {
-      augment "time-series" {
-        container internal {
-          description "Internal operational state for this time-series entry.";
-          leaf last-update {
-            type uint64;
-            units "seconds";
-            description "Epoch timestamp of the last sample appended to this time-series.";
-          }
-          leaf start-time {
-            type uint64;
-            units "seconds";
-            description "Epoch timestamp of the first sample; set when the Observe subscription is created.";
-          }
-          leaf messages-sent {
-            type uint64;
-            description "Number of notification messages sent for this time-series since the Observe subscription was created.";
-          }
-        }
-      }
-    }
-  }
+       list target {
+         key "type";
+         description "Measurement instances that triggered this alert.";
 
-  notification sensor-alert {
-    description
+         leaf type {
+           type identityref {
+             base transducer-type;
 
 
 
@@ -3474,27 +3474,19 @@ Toutain                   Expires 15 March 2027                [Page 62]
 Internet-Draft                coreconf-m2m                September 2026
 
 
-      "Alert notification when a value exceeds a threshold.";
+           }
+         }
 
-    list target {
-      key "type";
-      description "Measurement instances that triggered this alert.";
+         leaf value {
+           type int64;
+           description "The measurement value that triggered this alert.";
+         }
+       }
+     }
+   }
+   <CODE ENDS>
 
-      leaf type {
-        type identityref {
-          base transducer-type;
-        }
-      }
-
-      leaf value {
-        type int64;
-        description "The measurement value that triggered this alert.";
-      }
-    }
-  }
-}
-
-             Figure 29: Complete coreconf-m2m YANG module
+                Figure 29: Complete coreconf-m2m YANG module
 
 Appendix C.  SID File (CSV)
 
@@ -3522,14 +3514,6 @@ SID,Namespace,Identifier
 62015,data,/coreconf-m2m:characteristics/geo-location/latitude
 62016,data,/coreconf-m2m:characteristics/geo-location/longitude
 62017,data,/coreconf-m2m:characteristics/geo-location/reference-frame
-
-
-
-Toutain                   Expires 15 March 2027                [Page 63]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
 62018,data,/coreconf-m2m:characteristics/geo-location/reference-frame/alternate-system
 62019,data,/coreconf-m2m:characteristics/geo-location/reference-frame/astronomical-body
 62020,data,/coreconf-m2m:characteristics/geo-location/reference-frame/geodetic-system
@@ -3538,6 +3522,14 @@ Internet-Draft                coreconf-m2m                September 2026
 62023,data,/coreconf-m2m:characteristics/geo-location/reference-frame/geodetic-system/height-accuracy
 62024,data,/coreconf-m2m:characteristics/geo-location/timestamp
 62025,data,/coreconf-m2m:characteristics/geo-location/valid-until
+
+
+
+Toutain                   Expires 15 March 2027                [Page 63]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
 62026,data,/coreconf-m2m:characteristics/geo-location/velocity
 62027,data,/coreconf-m2m:characteristics/geo-location/velocity/v-east
 62028,data,/coreconf-m2m:characteristics/geo-location/velocity/v-north
@@ -3578,14 +3570,6 @@ Internet-Draft                coreconf-m2m                September 2026
 62063,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/max-payload
 62064,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/max-samples
 62065,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/precision
-
-
-
-Toutain                   Expires 15 March 2027                [Page 64]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
 62066,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/step
 62067,data,/coreconf-m2m:transducers/transducer/notification-parameters/history/time-period
 62068,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert
@@ -3594,6 +3578,14 @@ Internet-Draft                coreconf-m2m                September 2026
 62071,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/hysteresis
 62072,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/t-max
 62073,data,/coreconf-m2m:transducers/transducer/notification-parameters/sensor-alert/t-min
+
+
+
+Toutain                   Expires 15 March 2027                [Page 64]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
 62074,data,/coreconf-m2m:transducers/transducer/quantity
 62075,data,/coreconf-m2m:transducers/transducer/quantity/timestamp
 62076,data,/coreconf-m2m:transducers/transducer/quantity/timestamp-source
@@ -3614,26 +3606,34 @@ Internet-Draft                coreconf-m2m                September 2026
 
 Appendix D.  atmos YANG Module
 
-module atmos {
-  yang-version 1.1;
-  namespace "urn:ietf:params:xml:ns:yang:atmos";
-  prefix atmos;
+   <CODE BEGINS> file "atmos@2026-08-24.yang"
+   module atmos {
+     yang-version 1.1;
+     namespace "urn:ietf:params:xml:ns:yang:atmos";
+     prefix atmos;
 
-  import coreconf-m2m {
-    prefix ccm2m;
-  }
+     import coreconf-m2m {
+       prefix ccm2m;
+     }
 
-  organization "METER Group, Inc.";
-  contact
-    "Technical Support
-     https://www.metergroup.com/";
+     organization "METER Group, Inc.";
+     contact
+       "Technical Support
+        https://www.metergroup.com/";
 
-  description
-    "Atmospheric/weather transducer-type identities for use with the
-     coreconf-m2m generic M2M CoMI data model.";
+     description
+       "Atmospheric/weather transducer-type identities for use with the
+        coreconf-m2m generic M2M CoMI data model.";
 
-  revision 2026-08-24 {
-    description
+     revision 2026-08-24 {
+       description
+         "Initial revision. Extracted all concrete transducer-type identities
+          from coreconf-m2m: atmospheric/weather (solar-radiation,
+          precipitation, air-temperature, relative-humidity,
+          barometric-pressure, vapor-pressure, wind-speed, wind-direction,
+          wind-gust, north-wind-speed, east-wind-speed), lightning
+          (strike-count, average-distance), orientation (tilt, x-orientation,
+          y-orientation, compass-heading), and humidity-sensor-temperature.
 
 
 
@@ -3642,54 +3642,54 @@ Toutain                   Expires 15 March 2027                [Page 65]
 Internet-Draft                coreconf-m2m                September 2026
 
 
-      "Initial revision. Extracted all concrete transducer-type identities
-       from coreconf-m2m: atmospheric/weather (solar-radiation,
-       precipitation, air-temperature, relative-humidity,
-       barometric-pressure, vapor-pressure, wind-speed, wind-direction,
-       wind-gust, north-wind-speed, east-wind-speed), lightning
-       (strike-count, average-distance), orientation (tilt, x-orientation,
-       y-orientation, compass-heading), and humidity-sensor-temperature.
-       coreconf-m2m now only defines the base transducer-type identity;
-       atmos is the product-specific module extending it.
-       Applied the ccm2m:default-unit and ccm2m:default-precision
-       extensions (defined in coreconf-m2m) to each identity, to advertise
-       the recommended SenML (RFC 8428) unit and decimal precision for a
-       transducer of that type.";
-  }
+          coreconf-m2m now only defines the base transducer-type identity;
+          atmos is the product-specific module extending it.
+          Applied the ccm2m:default-unit and ccm2m:default-precision
+          extensions (defined in coreconf-m2m) to each identity, to advertise
+          the recommended SenML (RFC 8428) unit and decimal precision for a
+          transducer of that type.";
+     }
 
-  /* ------------------------------------------------------------------ */
-  /* Environmental                                                        */
-  /* ------------------------------------------------------------------ */
+     /* ------------------------------------------------------------------ */
+     /* Environmental                                                        */
+     /* ------------------------------------------------------------------ */
 
-  identity solar-radiation {
-    base ccm2m:transducer-type;
-    ccm2m:default-category "sensor";
-    ccm2m:default-unit "W/m2";
-    ccm2m:default-precision "0";
-    description "Solar radiation measurement (W/m2).";
-  }
+     identity solar-radiation {
+       base ccm2m:transducer-type;
+       ccm2m:default-category "sensor";
+       ccm2m:default-unit "W/m2";
+       ccm2m:default-precision "0";
+       description "Solar radiation measurement (W/m2).";
+     }
 
-  identity precipitation {
-    base ccm2m:transducer-type;
-    ccm2m:default-category "sensor";
-    ccm2m:default-unit "mm";
-    ccm2m:default-precision "1";
-    description "Precipitation measurement (mm).";
-  }
+     identity precipitation {
+       base ccm2m:transducer-type;
+       ccm2m:default-category "sensor";
+       ccm2m:default-unit "mm";
+       ccm2m:default-precision "1";
+       description "Precipitation measurement (mm).";
+     }
 
-  identity air-temperature {
-    base ccm2m:transducer-type;
-    ccm2m:default-category "sensor";
-    ccm2m:default-unit "Cel";
-    ccm2m:default-precision "2";
-    description "Air temperature measurement (°C).";
-  }
+     identity air-temperature {
+       base ccm2m:transducer-type;
+       ccm2m:default-category "sensor";
+       ccm2m:default-unit "Cel";
+       ccm2m:default-precision "2";
+       description "Air temperature measurement (°C).";
+     }
 
-  identity relative-humidity {
-    base ccm2m:transducer-type;
-    ccm2m:default-category "sensor";
-    ccm2m:default-unit "%RH";
-    ccm2m:default-precision "1";
+     identity relative-humidity {
+       base ccm2m:transducer-type;
+       ccm2m:default-category "sensor";
+       ccm2m:default-unit "%RH";
+       ccm2m:default-precision "1";
+       description "Relative humidity measurement (%).";
+     }
+
+     identity barometric-pressure {
+       base ccm2m:transducer-type;
+       ccm2m:default-category "sensor";
+       ccm2m:default-unit "Pa";
 
 
 
@@ -3698,54 +3698,54 @@ Toutain                   Expires 15 March 2027                [Page 66]
 Internet-Draft                coreconf-m2m                September 2026
 
 
-    description "Relative humidity measurement (%).";
-  }
+       ccm2m:default-precision "0";
+       description "Barometric pressure measurement (kPa).";
+     }
 
-  identity barometric-pressure {
-    base ccm2m:transducer-type;
-    ccm2m:default-category "sensor";
-    ccm2m:default-unit "Pa";
-    ccm2m:default-precision "0";
-    description "Barometric pressure measurement (kPa).";
-  }
+     identity vapor-pressure {
+       base ccm2m:transducer-type;
+       ccm2m:default-category "sensor";
+       ccm2m:default-unit "Pa";
+       ccm2m:default-precision "0";
+       description "Vapor pressure measurement (kPa).";
+     }
 
-  identity vapor-pressure {
-    base ccm2m:transducer-type;
-    ccm2m:default-category "sensor";
-    ccm2m:default-unit "Pa";
-    ccm2m:default-precision "0";
-    description "Vapor pressure measurement (kPa).";
-  }
+     /* ------------------------------------------------------------------ */
+     /* Wind                                                                 */
+     /* ------------------------------------------------------------------ */
 
-  /* ------------------------------------------------------------------ */
-  /* Wind                                                                 */
-  /* ------------------------------------------------------------------ */
+     identity wind-speed {
+       base ccm2m:transducer-type;
+       ccm2m:default-category "sensor";
+       ccm2m:default-unit "m/s";
+       ccm2m:default-precision "1";
+       description "Horizontal wind speed measurement (m/s).";
+     }
 
-  identity wind-speed {
-    base ccm2m:transducer-type;
-    ccm2m:default-category "sensor";
-    ccm2m:default-unit "m/s";
-    ccm2m:default-precision "1";
-    description "Horizontal wind speed measurement (m/s).";
-  }
+     identity wind-direction {
+       base ccm2m:transducer-type;
+       ccm2m:default-category "sensor";
+       ccm2m:default-unit "deg";
+       ccm2m:default-precision "0";
+       description "Wind direction measurement (degrees).";
+     }
 
-  identity wind-direction {
-    base ccm2m:transducer-type;
-    ccm2m:default-category "sensor";
-    ccm2m:default-unit "deg";
-    ccm2m:default-precision "0";
-    description "Wind direction measurement (degrees).";
-  }
+     identity wind-gust {
+       base ccm2m:transducer-type;
+       ccm2m:default-category "sensor";
+       ccm2m:default-unit "m/s";
+       ccm2m:default-precision "1";
+       description "Wind gust measurement (m/s).";
+     }
 
-  identity wind-gust {
-    base ccm2m:transducer-type;
-    ccm2m:default-category "sensor";
-    ccm2m:default-unit "m/s";
-    ccm2m:default-precision "1";
-    description "Wind gust measurement (m/s).";
-  }
+     identity north-wind-speed {
+       base ccm2m:transducer-type;
+       ccm2m:default-category "sensor";
+       ccm2m:default-unit "m/s";
+       ccm2m:default-precision "1";
+       description "North wind speed component (m/s).";
+     }
 
-  identity north-wind-speed {
 
 
 
@@ -3754,54 +3754,54 @@ Toutain                   Expires 15 March 2027                [Page 67]
 Internet-Draft                coreconf-m2m                September 2026
 
 
-    base ccm2m:transducer-type;
-    ccm2m:default-category "sensor";
-    ccm2m:default-unit "m/s";
-    ccm2m:default-precision "1";
-    description "North wind speed component (m/s).";
-  }
+     identity east-wind-speed {
+       base ccm2m:transducer-type;
+       ccm2m:default-category "sensor";
+       ccm2m:default-unit "m/s";
+       ccm2m:default-precision "1";
+       description "East wind speed component (m/s).";
+     }
 
-  identity east-wind-speed {
-    base ccm2m:transducer-type;
-    ccm2m:default-category "sensor";
-    ccm2m:default-unit "m/s";
-    ccm2m:default-precision "1";
-    description "East wind speed component (m/s).";
-  }
+     /* ------------------------------------------------------------------ */
+     /* Lightning                                                            */
+     /* ------------------------------------------------------------------ */
 
-  /* ------------------------------------------------------------------ */
-  /* Lightning                                                            */
-  /* ------------------------------------------------------------------ */
+     identity strike-count {
+       base ccm2m:transducer-type;
+       ccm2m:default-category "sensor";
+       ccm2m:default-unit "count";
+       ccm2m:default-precision "0";
+       description "Lightning strike count.";
+     }
 
-  identity strike-count {
-    base ccm2m:transducer-type;
-    ccm2m:default-category "sensor";
-    ccm2m:default-unit "count";
-    ccm2m:default-precision "0";
-    description "Lightning strike count.";
-  }
+     identity average-distance {
+       base ccm2m:transducer-type;
+       ccm2m:default-category "sensor";
+       ccm2m:default-unit "km";
+       ccm2m:default-precision "1";
+       description "Average lightning distance (km).";
+     }
 
-  identity average-distance {
-    base ccm2m:transducer-type;
-    ccm2m:default-category "sensor";
-    ccm2m:default-unit "km";
-    ccm2m:default-precision "1";
-    description "Average lightning distance (km).";
-  }
+     /* ------------------------------------------------------------------ */
+     /* Orientation                                                          */
+     /* ------------------------------------------------------------------ */
 
-  /* ------------------------------------------------------------------ */
-  /* Orientation                                                          */
-  /* ------------------------------------------------------------------ */
+     identity tilt {
+       base ccm2m:transducer-type;
+       ccm2m:default-category "sensor";
+       ccm2m:default-unit "deg";
+       ccm2m:default-precision "1";
+       description "Sensor tilt measurement (degrees).";
+     }
 
-  identity tilt {
-    base ccm2m:transducer-type;
-    ccm2m:default-category "sensor";
-    ccm2m:default-unit "deg";
-    ccm2m:default-precision "1";
-    description "Sensor tilt measurement (degrees).";
-  }
+     identity x-orientation {
+       base ccm2m:transducer-type;
+       ccm2m:default-category "sensor";
+       description "X-axis orientation (raw accelerometer data).";
+     }
 
-  identity x-orientation {
+     identity y-orientation {
+       base ccm2m:transducer-type;
 
 
 
@@ -3810,39 +3810,33 @@ Toutain                   Expires 15 March 2027                [Page 68]
 Internet-Draft                coreconf-m2m                September 2026
 
 
-    base ccm2m:transducer-type;
-    ccm2m:default-category "sensor";
-    description "X-axis orientation (raw accelerometer data).";
-  }
+       ccm2m:default-category "sensor";
+       description "Y-axis orientation (raw accelerometer data).";
+     }
 
-  identity y-orientation {
-    base ccm2m:transducer-type;
-    ccm2m:default-category "sensor";
-    description "Y-axis orientation (raw accelerometer data).";
-  }
+     identity compass-heading {
+       base ccm2m:transducer-type;
+       ccm2m:default-category "sensor";
+       ccm2m:default-unit "deg";
+       ccm2m:default-precision "0";
+       description "Compass heading clockwise from north reference (degrees).";
+     }
 
-  identity compass-heading {
-    base ccm2m:transducer-type;
-    ccm2m:default-category "sensor";
-    ccm2m:default-unit "deg";
-    ccm2m:default-precision "0";
-    description "Compass heading clockwise from north reference (degrees).";
-  }
+     /* ------------------------------------------------------------------ */
+     /* Internal                                                             */
+     /* ------------------------------------------------------------------ */
 
-  /* ------------------------------------------------------------------ */
-  /* Internal                                                             */
-  /* ------------------------------------------------------------------ */
+     identity humidity-sensor-temperature {
+       base ccm2m:transducer-type;
+       ccm2m:default-category "sensor";
+       ccm2m:default-unit "Cel";
+       ccm2m:default-precision "2";
+       description "Internal temperature of the humidity sensor (°C).";
+     }
+   }
+   <CODE ENDS>
 
-  identity humidity-sensor-temperature {
-    base ccm2m:transducer-type;
-    ccm2m:default-category "sensor";
-    ccm2m:default-unit "Cel";
-    ccm2m:default-precision "2";
-    description "Internal temperature of the humidity sensor (°C).";
-  }
-}
-
-                     Figure 31: atmos.yang module
+                        Figure 31: atmos.yang module
 
 Appendix E.  atmos SID File (CSV)
 
@@ -3851,6 +3845,12 @@ Appendix E.  atmos SID File (CSV)
    point of 10000000 (out of a 10 million SID mega-range assumed for
    this example).  These SIDs are commercial/vendor assignments, not
    IETF or SDO ones, and are provided here for illustration only.
+
+
+
+
+
+
 
 
 
@@ -4133,6 +4133,35 @@ Appendix G.  SCHC Rule Set
    application and device IPv6 addresses are supposed to be known
    (aaaa::2/64 and dddd::6/64, respectively).
 
+   Field names (FID) are the identities defined by the "ietf-schc" YANG
+   module [RFC9363] [SCHC-TOWARD-9363BIS], without their common "fid-"
+   prefix (e.g. "ipv6-version" for "fid-ipv6-version"), rather than the
+   plain-text FID names of [RFC8724] itself.  CoAP options use the
+   Universal Option identity "coap-option" [SCHC-TOWARD-9363BIS], common
+
+
+
+Toutain                   Expires 15 March 2027                [Page 74]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
+   to every option, with the actual option number given in parentheses,
+   rather than the twenty per-option FIDs deprecated by that identity.
+   Matching operators (MO) and compression/decompression actions (CDA)
+   are as defined in [RFC8724]; FL is the Field Length, DI the Direction
+   Indicator, and TV the Target Value (the Field Position, FP, is
+   omitted from the tables below for compactness; it defaults to 1
+   unless a field is repeated, which does not happen in this Rule Set).
+
+   Below each rule table, the resulting residue format is given for the
+   Down (network to device) and Up (device to network) directions: the
+   ordered list of fields that still carry a residue after compression
+   -- i.e. those whose CDA is not "not-sent", "compute-length", or
+   "compute-checksum" -- together with the number of bits sent for that
+   field ("var" when the size is not fixed), followed by the total
+   residue size for that direction.
+
 G.1.  Rule 0: Used to fetch a single value (bidirect)
 
 
@@ -4141,7 +4170,34 @@ G.1.  Rule 0: Used to fetch a single value (bidirect)
 
 
 
-Toutain                   Expires 15 March 2027                [Page 74]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Toutain                   Expires 15 March 2027                [Page 75]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4197,7 +4253,7 @@ Residue (Up):   udp-app-port(16b) | coap-tkl(4b) | coap-code(1b) |
 
 
 
-Toutain                   Expires 15 March 2027                [Page 75]
+Toutain                   Expires 15 March 2027                [Page 76]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4253,7 +4309,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 15 March 2027                [Page 76]
+Toutain                   Expires 15 March 2027                [Page 77]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4309,7 +4365,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 15 March 2027                [Page 77]
+Toutain                   Expires 15 March 2027                [Page 78]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4365,7 +4421,7 @@ G.2.  Rule 1: Used to iPatch, ack with 7/3.  Empty CoAP for notification
 
 
 
-Toutain                   Expires 15 March 2027                [Page 78]
+Toutain                   Expires 15 March 2027                [Page 79]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4421,7 +4477,7 @@ Residue (Up):   udp-app-port(16b) | coap-tkl(4b) | coap-code(8b) |
 
 
 
-Toutain                   Expires 15 March 2027                [Page 79]
+Toutain                   Expires 15 March 2027                [Page 80]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4477,7 +4533,7 @@ G.3.  Rule 2: Used for notitifications (observe)
 
 
 
-Toutain                   Expires 15 March 2027                [Page 80]
+Toutain                   Expires 15 March 2027                [Page 81]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4533,7 +4589,7 @@ Residue (Up):   udp-app-port(16b) | coap-type(1b) | coap-tkl(4b) |
 
 
 
-Toutain                   Expires 15 March 2027                [Page 81]
+Toutain                   Expires 15 March 2027                [Page 82]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4589,7 +4645,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 15 March 2027                [Page 82]
+Toutain                   Expires 15 March 2027                [Page 83]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4645,7 +4701,7 @@ G.4.  Rule 3: Empty messages (e.g., ACK with empty code, or RST)
 
 
 
-Toutain                   Expires 15 March 2027                [Page 83]
+Toutain                   Expires 15 March 2027                [Page 84]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4701,7 +4757,7 @@ G.5.  Rule 4: ICMPv6 destination unreachable (any code)
 
 
 
-Toutain                   Expires 15 March 2027                [Page 84]
+Toutain                   Expires 15 March 2027                [Page 85]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4757,7 +4813,7 @@ Residue (Up):   icmpv6-code(8b) | udp-app-port(16b)
 
 
 
-Toutain                   Expires 15 March 2027                [Page 85]
+Toutain                   Expires 15 March 2027                [Page 86]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4766,6 +4822,8 @@ Acknowledgments
 
    This work has been supported by the SCHC Chair from IMT Atlantique
    and Afnic.
+
+   Claude (Anthropic) assisted with editing this document.
 
 Author's Address
 
@@ -4811,6 +4869,4 @@ Author's Address
 
 
 
-
-
-Toutain                   Expires 15 March 2027                [Page 86]
+Toutain                   Expires 15 March 2027                [Page 87]
