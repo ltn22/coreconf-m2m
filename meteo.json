@@ -132,7 +132,7 @@
         ]},   {
         "RuleIDValue" : 4,
         "RuleIDLength": 5,
-        "Description": "ICMPv6 port unreachable",
+        "Description": "ICMPv6 destination unreachable (any code)",
         "Compression": [
             {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
             {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "not-sent"},
@@ -147,7 +147,7 @@
             {"FID": "IPV6.APP_IID", "TV": "::2/64","MO": "equal","CDA": "not-sent"},
 
             {"FID": "ICMPV6.TYPE", "TV": 1, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "ICMPV6.CODE", "TV": 4, "MO": "equal", "CDA": "not-sent"},
+            {"FID": "ICMPV6.CODE",             "MO": "ignore", "CDA": "value-sent"},
             {"FID": "ICMPV6.CKSUM",   "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
             {"FID": "UNUSED", "FL": 32, "MO": "ignore", "CDA": "not-sent"},
 

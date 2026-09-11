@@ -3192,8 +3192,9 @@ Residue (Up):   udp-app-port(16b) | coap-tkl(4b) | coap-code(1b) |
 
 This rule is used for FETCH: the client sends one or more SID values,
 potentially with keys, and receives a CORECONF structure in return.
-Errors are handled by Rule 3 (empty message) and Rule 5 (ICMPv6 port
-unreachable), not by this rule. The Content-Format is always 140
+Errors are handled by Rule 3 (empty message) and Rule 4 (ICMPv6
+destination unreachable), not by this rule. The Content-Format is
+always 140
 (`application/yang-data+cbor;id=sid` {{RFC9254}}). Messages are
 Non-Confirmable (NON), and the Token is mandatory to associate the
 response with its query.
@@ -3325,8 +3326,8 @@ this rule covers both cases. Rule 3, which is identical in both
 directions (DI `bi` throughout, including CODE), is used instead when
 the message does not follow this structure at all — an empty/generic
 message such as an ACK with no code or an RST, in either direction. An
-unreachable device is signaled out-of-band by an ICMPv6 port
-unreachable message, handled by Rule 5.
+unreachable device is signaled out-of-band by an ICMPv6 destination
+unreachable message, handled by Rule 4.
 
 {{fig-schc-rule-1-example}} applies Rule 1 to the sensor-alert
 configuration of {{fig-alert-config}}: the request, 83 bytes
@@ -3545,49 +3546,62 @@ Residue (Up):   udp-app-port(16b) | coap-type(2b) | coap-tkl(4b) |
 ~~~~
 {: #fig-schc-rule-3 title="SCHC Rule 3 (RuleIDLength=5), with residue format" artwork-align="left"}
 
-## Rule 4: ICMPv6 port unreachable
+Beyond empty ACKs and RSTs, this rule is also the fallback for an
+error response to a FETCH (Rule 0) or an Observe exchange (Rule 2)
+whose CODE is not 2.05 Content: since TYPE, TKL, CODE and MID are all
+left uncompressed here, any CoAP error code (e.g. 4.04, 4.05, 5.00)
+matches, and any diagnostic payload that may follow the header is
+carried unchanged, exactly as for a normal FETCH response.
+
+## Rule 4: ICMPv6 destination unreachable (any code)
 
 ~~~~
-/---------------------+----------+----+-----------+---------+------------\
-| FID                 | FL       | DI | TV        | MO      | CDA        |
-+=====================+==========+====+===========+=========+============+
-| ipv6-version        | 4        | bi | 6         | equal   | not-sent   |
-| ipv6-trafficclass   | 8        | bi | 0         | ignore  | not-sent   |
-| ipv6-flowlabel      | 20       | bi | 0         | ignore  | not-sent   |
-| ipv6-payload-length | 16       | bi |           | ignore  | compute    |
-| ipv6-nextheader     | 8        | bi | 58        | equal   | not-sent   |
-| ipv6-hoplimit       | 8        | bi | 255       | ignore  | not-sent   |
-| ipv6-devprefix      | 64       | bi | dddd::/64 | equal   | not-sent   |
-| ipv6-deviid         | 64       | bi | ::6/64    | equal   | not-sent   |
-| ipv6-appprefix      | 64       | bi | aaaa::/64 | equal   | not-sent   |
-| ipv6-appiid         | 64       | bi | ::2/64    | equal   | not-sent   |
-| icmpv6-type         | 8        | bi | 1         | equal   | not-sent   |
-| icmpv6-code         | 8        | bi | 4         | equal   | not-sent   |
-| icmpv6-checksum     | 16       | bi | 0         | ignore  | compute    |
-| unused              | 32       | bi |           | ignore  | not-sent   |
-| ipv6-version        | 4        | bi | 6         | equal   | not-sent   |
-| ipv6-trafficclass   | 8        | bi | 0         | ignore  | not-sent   |
-| ipv6-flowlabel      | 20       | bi | 0         | ignore  | not-sent   |
-| ipv6-payload-length | 16       | bi |           | ignore  | compute    |
-| ipv6-nextheader     | 8        | bi | 17        | equal   | not-sent   |
-| ipv6-hoplimit       | 8        | bi | 255       | ignore  | not-sent   |
-| ipv6-devprefix      | 64       | bi | dddd::/64 | equal   | not-sent   |
-| ipv6-deviid         | 64       | bi | ::6/64    | equal   | not-sent   |
-| ipv6-appprefix      | 64       | bi | aaaa::/64 | equal   | not-sent   |
-| ipv6-appiid         | 64       | bi | ::2/64    | equal   | not-sent   |
-| udp-dev-port        | 16       | bi | 5683      | equal   | not-sent   |
-| udp-app-port        | 16       | bi |           | ignore  | value-sent |
-| udp-length          | 16       | bi | 0         | ignore  | compute    |
-| udp-checksum        | 16       | bi | 0         | ignore  | compute    |
-| payload             | var      | bi |           | ignore  | not-sent   |
-\---------------------+----------+----+-----------+---------+------------/
+/---------------------+--------+----+-----------+---------+------------\
+| FID                 | FL     | DI | TV        | MO      | CDA        |
++=====================+========+====+===========+=========+============+
+| ipv6-version        | 4      | bi | 6         | equal   | not-sent   |
+| ipv6-trafficclass   | 8      | bi | 0         | ignore  | not-sent   |
+| ipv6-flowlabel      | 20     | bi | 0         | ignore  | not-sent   |
+| ipv6-payload-length | 16     | bi |           | ignore  | compute    |
+| ipv6-nextheader     | 8      | bi | 58        | equal   | not-sent   |
+| ipv6-hoplimit       | 8      | bi | 255       | ignore  | not-sent   |
+| ipv6-devprefix      | 64     | bi | dddd::/64 | equal   | not-sent   |
+| ipv6-deviid         | 64     | bi | ::6/64    | equal   | not-sent   |
+| ipv6-appprefix      | 64     | bi | aaaa::/64 | equal   | not-sent   |
+| ipv6-appiid         | 64     | bi | ::2/64    | equal   | not-sent   |
+| icmpv6-type         | 8      | bi | 1         | equal   | not-sent   |
+| icmpv6-code         | 8      | bi |           | ignore  | value-sent |
+| icmpv6-checksum     | 16     | bi | 0         | ignore  | compute    |
+| unused              | 32     | bi |           | ignore  | not-sent   |
+| ipv6-version        | 4      | bi | 6         | equal   | not-sent   |
+| ipv6-trafficclass   | 8      | bi | 0         | ignore  | not-sent   |
+| ipv6-flowlabel      | 20     | bi | 0         | ignore  | not-sent   |
+| ipv6-payload-length | 16     | bi |           | ignore  | compute    |
+| ipv6-nextheader     | 8      | bi | 17        | equal   | not-sent   |
+| ipv6-hoplimit       | 8      | bi | 255       | ignore  | not-sent   |
+| ipv6-devprefix      | 64     | bi | dddd::/64 | equal   | not-sent   |
+| ipv6-deviid         | 64     | bi | ::6/64    | equal   | not-sent   |
+| ipv6-appprefix      | 64     | bi | aaaa::/64 | equal   | not-sent   |
+| ipv6-appiid         | 64     | bi | ::2/64    | equal   | not-sent   |
+| udp-dev-port        | 16     | bi | 5683      | equal   | not-sent   |
+| udp-app-port        | 16     | bi |           | ignore  | value-sent |
+| udp-length          | 16     | bi | 0         | ignore  | compute    |
+| udp-checksum        | 16     | bi | 0         | ignore  | compute    |
+| payload             | var    | bi |           | ignore  | not-sent   |
+\---------------------+--------+----+-----------+---------+------------/
 
-Residue (Down): udp-app-port(16b)
-  Total: 16b
-Residue (Up):   udp-app-port(16b)
-  Total: 16b
+Residue (Down): icmpv6-code(8b) | udp-app-port(16b)
+  Total: 24b
+Residue (Up):   icmpv6-code(8b) | udp-app-port(16b)
+  Total: 24b
 ~~~~
 {: #fig-schc-rule-4 title="SCHC Rule 4 (RuleIDLength=5), with residue format" artwork-align="left"}
+
+ICMPv6 Type is fixed to 1 (Destination Unreachable), but Code is left
+uncompressed so that this rule covers every Destination Unreachable
+reason (0: no route, 1: administratively prohibited, 3: address
+unreachable, 4: port unreachable), not just the port-unreachable case
+that triggers when the CORECONF UDP endpoint itself is down.
 
 
 
