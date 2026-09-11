@@ -86,15 +86,15 @@ Table of Contents
      5.2.  Querying a quantity . . . . . . . . . . . . . . . . . . .  19
      5.3.  Notification  . . . . . . . . . . . . . . . . . . . . . .  20
    6.  From CBOR/SID to Textual Identifiers  . . . . . . . . . . . .  23
-   7.  Interconnection with an Ontology  . . . . . . . . . . . . . .  23
+   7.  Interconnection with an Ontology  . . . . . . . . . . . . . .  24
      7.1.  Extending Ontology to coreconf-m2m  . . . . . . . . . . .  24
      7.2.  SOSA  . . . . . . . . . . . . . . . . . . . . . . . . . .  25
        7.2.1.  Instantiating from YANG . . . . . . . . . . . . . . .  26
-       7.2.2.  Control . . . . . . . . . . . . . . . . . . . . . . .  27
+       7.2.2.  Control . . . . . . . . . . . . . . . . . . . . . . .  28
        7.2.3.  Storing Transducer Quantities . . . . . . . . . . . .  30
        7.2.4.  Storing Actuator Commands . . . . . . . . . . . . . .  31
-     7.3.  SensorThings  . . . . . . . . . . . . . . . . . . . . . .  32
-       7.3.1.  Example . . . . . . . . . . . . . . . . . . . . . . .  32
+     7.3.  SensorThings  . . . . . . . . . . . . . . . . . . . . . .  33
+       7.3.1.  Example . . . . . . . . . . . . . . . . . . . . . . .  33
      7.4.  SAREF . . . . . . . . . . . . . . . . . . . . . . . . . .  38
    8.  MCP . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  38
    9.  Compression . . . . . . . . . . . . . . . . . . . . . . . . .  41
@@ -125,13 +125,13 @@ Internet-Draft                coreconf-m2m                September 2026
    Appendix G.  SCHC Rule Set  . . . . . . . . . . . . . . . . . . .  74
      G.1.  Rule 0: Used to fetch a single value (bidirect) . . . . .  74
      G.2.  Rule 1: Used to iPatch, ack with 7/3.  Empty CoAP for
-           notification in UP  . . . . . . . . . . . . . . . . . . .  78
-     G.3.  Rule 2: Used for notitifications (observe)  . . . . . . .  78
+           notification in UP  . . . . . . . . . . . . . . . . . . .  77
+     G.3.  Rule 2: Used for notitifications (observe)  . . . . . . .  79
      G.4.  Rule 3: Empty messages (e.g., ACK with empty code, or
-           RST)  . . . . . . . . . . . . . . . . . . . . . . . . . .  79
-     G.5.  Rule 4: ICMPv6 port unreachable . . . . . . . . . . . . .  80
-   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  81
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  81
+           RST)  . . . . . . . . . . . . . . . . . . . . . . . . . .  81
+     G.5.  Rule 4: ICMPv6 port unreachable . . . . . . . . . . . . .  81
+   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  82
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  82
 
 1.  Introduction
 
@@ -418,7 +418,7 @@ Internet-Draft                coreconf-m2m                September 2026
       one to alert when a quantity reaches a minimum or maximum
       threshold.
 
-   Figure 27 in Appendix A gives an overview of the module YANG tree.
+   Figure 28 in Appendix A gives an overview of the module YANG tree.
 
 3.2.1.  Bootstrap Sub-Tree
 
@@ -884,12 +884,12 @@ Internet-Draft                coreconf-m2m                September 2026
              {3: 10000001}, {3: 10000013}, {3: 10000003}, {3: 10000009},
              {3: 10000006}, {3: 10000004}]}}
 
-         Figure 6: Resource discovery: FETCH request and response
+      Figure 6: Resource discovery: FETCH request and response (SCHC
+                                 Rule 0)
 
    In the request, the payload 19 F2 32 is the CBOR encoding of the
    unsigned integer 62002, which is the SID of "/bootstrap".  In the
    response, the outer key 62002 identifies the bootstrap branch, and
-   the inner keys are delta SIDs relative to 62002, as defined in
 
 
 
@@ -898,6 +898,7 @@ Toutain                   Expires 15 March 2027                [Page 16]
 Internet-Draft                coreconf-m2m                September 2026
 
 
+   the inner keys are delta SIDs relative to 62002, as defined in
    [RFC9254]: 7 (reference-epoch), 8 (uptime), 6 (minimal-step), and 1
    (the "inventory" list).  Each entry in the inventory list is itself a
    map whose key 3 is a delta SID relative to the list SID (62003), i.e.
@@ -909,7 +910,6 @@ Internet-Draft                coreconf-m2m                September 2026
    The client MUST have access to the corresponding YANG file to
    discover the transducers' default parameters, indicating the unit,
    the precision and the nature of the transducer.
-
 
 
 
@@ -1034,7 +1034,7 @@ Internet-Draft                coreconf-m2m                September 2026
        {62077: 196}
 
       Figure 8: FETCH request and response for air-temperature current
-                                   value
+                            value (SCHC Rule 0)
 
    The FETCH body [62077, 10000001] is a CORECONF instance-identifier:
    the first element (62077) is the SID of
@@ -1084,7 +1084,8 @@ Internet-Draft                coreconf-m2m                September 2026
      Payload: 21 bytes
        {62081: {4: 196, 1: 217, 2: 203, 3: 202, 6: 7, 5: 8}}
 
-    Figure 9: FETCH request and response for air-temperature statistics
+          Figure 9: FETCH request and response for air-temperature
+                          statistics (SCHC Rule 0)
 
    The FETCH body [62081, 10000001] requests the statistics sub-tree
    (SID 62081) for air-temperature (10000001).  In the response, the
@@ -1116,7 +1117,6 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-
 Toutain                   Expires 15 March 2027                [Page 20]
 
 Internet-Draft                coreconf-m2m                September 2026
@@ -1136,7 +1136,7 @@ Internet-Draft                coreconf-m2m                September 2026
        Token: 248e
 
        Figure 11: iPATCH to configure history notification parameters
-                            for air- temperature
+                     for air- temperature (SCHC Rule 1)
 
    The iPATCH key [62060, 10000001] is an instance-identifier targeting
    the notification-parameters/history node (SID 62060) for air-
@@ -1144,25 +1144,25 @@ Internet-Draft                coreconf-m2m                September 2026
    1}} sets three history parameters using delta SIDs relative to 62060:
    step=120 s, max-samples=10, and encoding=delta (value 1).
 
-   The client then initiates an Observe subscription with a FETCH on the
-   notification stream resource /s, as shown in Figure 12.
+   An iPATCH is used the same way to configure a sensor-alert: the
+   client sets the low and high thresholds, and activates the alert, as
+   shown in Figure 12.
 
+     CoAP Request:
+     Non-Confirmable, iPATCH, MID:42312
+       Token: 2490
+       Opt #1: Uri-Path: c
+       Opt #2: Content-Format: 140 (application/yang-data+cbor;id=sid)
 
+     Payload: 24 bytes
+       {[62068, 10000001]: {62068: {1: true, 4: 350, 5: 50}}}
 
+     CoAP Response:
+     Non-Confirmable, 2.04 Changed, MID:65150
+       Token: 2490
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+      Figure 12: iPATCH to configure sensor-alert thresholds for air-
+                         temperature (SCHC Rule 1)
 
 
 
@@ -1177,6 +1177,17 @@ Toutain                   Expires 15 March 2027                [Page 21]
 
 Internet-Draft                coreconf-m2m                September 2026
 
+
+   The iPATCH key [62068, 10000001] targets the notification-parameters/
+   sensor-alert node (SID 62068) for air-temperature.  The value {62068:
+   {1: true, 4: 350, 5: 50}} sets three leaves using delta SIDs relative
+   to 62068: active=true (delta 1), t-max=350 (delta 4), and t-min=50
+   (delta 5).  Since air-temperature has precision=1 (as in Figure 8),
+   these raw integers represent 35.0 Cel and 5.0 Cel: the device raises
+   an alert once the temperature leaves that range.
+
+   The client then initiates an Observe subscription with a FETCH on the
+   notification stream resource /s, as shown in Figure 13.
 
      CoAP Request:
      Non-Confirmable, FETCH, MID:42311
@@ -1207,25 +1218,14 @@ Internet-Draft                coreconf-m2m                September 2026
      Payload: 16 bytes
        {62048: [189, 14, -3, 1, 5, 7, 3, 2, 1, 2]}
 
-         Figure 12: FETCH+Observe subscription on `/s` and history
-                     notification for air- temperature
+         Figure 13: FETCH+Observe subscription on `/s` and history
+              notification for air- temperature (SCHC Rule 2)
 
    The FETCH body [62048, 10000001] subscribes directly to the time-
    series "values" leaf-list (SID 62048) for air-temperature, rather
    than the whole time-series entry: since the subscription is already
    transducer-specific, echoing the "type" back in every notification
    would only repeat what the client already knows.  The server
-   acknowledges with an empty map {}. The notification then carries the
-   values list under its absolute SID, [189, 14, -3, 1, 5, 7, 3, 2, 1,
-   2], using delta encoding: 189 is the absolute reference (18.9oC,
-   precision=1), and each subsequent value is the difference from the
-   previous one.
-
-   The client decodes the delta-encoded time-series values and displays
-   the result as shown in Figure 13:
-
-
-
 
 
 
@@ -1233,6 +1233,15 @@ Toutain                   Expires 15 March 2027                [Page 22]
 
 Internet-Draft                coreconf-m2m                September 2026
 
+
+   acknowledges with an empty map {}. The notification then carries the
+   values list under its absolute SID, [189, 14, -3, 1, 5, 7, 3, 2, 1,
+   2], using delta encoding: 189 is the absolute reference (18.9oC,
+   precision=1), and each subsequent value is the difference from the
+   previous one.
+
+   The client decodes the delta-encoded time-series values and displays
+   the result as shown in Figure 14:
 
      [9] air-temperature: 18.9 Cel  (09:57:42)
      [9] air-temperature: 20.3 Cel  (09:59:42)
@@ -1245,7 +1254,7 @@ Internet-Draft                coreconf-m2m                September 2026
      [9] air-temperature: 21.9 Cel  (10:13:42)
      [9] air-temperature: 22.1 Cel  (10:15:42)
 
-        Figure 13: Decoded air-temperature time-series from history
+        Figure 14: Decoded air-temperature time-series from history
                                 notification
 
    The whole batch of samples is decoded from a single notification
@@ -1274,6 +1283,13 @@ Internet-Draft                coreconf-m2m                September 2026
    deployed.  It allows finding the SID and YANG files associated with a
    specific SID.
 
+
+
+Toutain                   Expires 15 March 2027                [Page 23]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
 7.  Interconnection with an Ontology
 
    The goal of coreconf-m2m is to discover the resources managed by the
@@ -1282,14 +1298,6 @@ Internet-Draft                coreconf-m2m                September 2026
    ontology.  This section discusses how the elements it carries relate
    to some existing ontologies and APIs, so that a gateway or
    application can align them with a richer semantic model when needed,
-
-
-
-Toutain                   Expires 15 March 2027                [Page 23]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
    once translated to textual identifiers as described in Section 6.
 
 7.1.  Extending Ontology to coreconf-m2m
@@ -1330,14 +1338,6 @@ Internet-Draft                coreconf-m2m                September 2026
    It also defines properties attached to a sosa:Sensor, tying it back
    to its YANG identity:
 
-   *  ccm2m:type carries the transducer's identity SID (see Figure 7);
-
-   *  ccm2m:id is the instance identifier of the sensor on its platform,
-      distinguishing multiple sensors of the same type;
-
-
-
-
 
 
 
@@ -1345,6 +1345,11 @@ Toutain                   Expires 15 March 2027                [Page 24]
 
 Internet-Draft                coreconf-m2m                September 2026
 
+
+   *  ccm2m:type carries the transducer's identity SID (see Figure 7);
+
+   *  ccm2m:id is the instance identifier of the sensor on its platform,
+      distinguishing multiple sensors of the same type;
 
    *  ccm2m:precision and ccm2m:outputUnit carry the default-precision
       and default-unit declared on that identity, or their overrides
@@ -1389,11 +1394,6 @@ Internet-Draft                coreconf-m2m                September 2026
    sosa:Platform, and each of its transducers maps to a sosa:Sensor or a
    sosa:Actuator hosted by that platform.
 
-   SOSA also defines a sosa:Sampler type, but it corresponds more to
-   sample-taking than to measurement, so it may be present in the
-   ontology without requiring a link with the coreconf-m2m YANG data
-   model.
-
 
 
 
@@ -1402,7 +1402,12 @@ Toutain                   Expires 15 March 2027                [Page 25]
 Internet-Draft                coreconf-m2m                September 2026
 
 
-   Figure 14 shows a generic, abstract example of such a platform,
+   SOSA also defines a sosa:Sampler type, but it corresponds more to
+   sample-taking than to measurement, so it may be present in the
+   ontology without requiring a link with the coreconf-m2m YANG data
+   model.
+
+   Figure 15 shows a generic, abstract example of such a platform,
    expressed in the Turtle RDF syntax, independently of any particular
    naming scheme.
 
@@ -1415,7 +1420,7 @@ Internet-Draft                coreconf-m2m                September 2026
        sosa:isHostedBy <platform> ;
        sosa:observes <property> .
 
-       Figure 14: Generic Turtle example of a sosa:Platform hosting a
+       Figure 15: Generic Turtle example of a sosa:Platform hosting a
                                 sosa:Sensor
 
 7.2.1.  Instantiating from YANG
@@ -1426,7 +1431,7 @@ Internet-Draft                coreconf-m2m                September 2026
    derived from that name and from its entry in "/bootstrap/inventory",
    e.g. station.example.com/sensor/air-temperature.
 
-   Figure 15 gives the CDDL [RFC8610] for constructing such an object
+   Figure 16 gives the CDDL [RFC8610] for constructing such an object
    IRI from the platform's DNS name and an inventory entry, using the
    ".cat" control operator [RFC9165] to express the concatenation of its
    text fragments.
@@ -1442,14 +1447,9 @@ Internet-Draft                coreconf-m2m                September 2026
    platform-name = tstr
    transducer-name = tstr
 
-     Figure 15: CDDL for a sosa object IRI derived from the platform's
+     Figure 16: CDDL for a sosa object IRI derived from the platform's
                                   DNS name
 
-   For example, with platform-name = "station.example.com", category =
-   "sensor", and transducer-name = "air-temperature", the resulting
-   object-iri is station.example.com/sensor/air-temperature, matching
-   the example already given above.  Figure 16 shows this instantiation
-   in Turtle, adapted from sosa/sosa_graph.ttl.
 
 
 
@@ -1457,6 +1457,12 @@ Toutain                   Expires 15 March 2027                [Page 26]
 
 Internet-Draft                coreconf-m2m                September 2026
 
+
+   For example, with platform-name = "station.example.com", category =
+   "sensor", and transducer-name = "air-temperature", the resulting
+   object-iri is station.example.com/sensor/air-temperature, matching
+   the example already given above.  Figure 17 shows this instantiation
+   in Turtle, adapted from sosa/sosa_graph.ttl.
 
 @prefix sosa:  <http://www.w3.org/ns/sosa/> .
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
@@ -1484,7 +1490,7 @@ Internet-Draft                coreconf-m2m                September 2026
     rdfs:label "air-temperature" ;
     sosa:isObservedBy <https://station.example.com/sensor/air-temperature> .
 
-       Figure 16: Concrete instantiation of the sosa:Platform/
+       Figure 17: Concrete instantiation of the sosa:Platform/
    sosa:Sensor pattern for air-temperature, with ccm2m: properties
                   bridging back to the YANG/SID data
 
@@ -1494,6 +1500,19 @@ Internet-Draft                coreconf-m2m                September 2026
    (WGS84) vocabulary, are commonly paired with SOSA for this purpose,
    and correspond to "characteristics/geo-location" (Section 3.2.2) in
    the YANG model.
+
+
+
+
+
+
+
+
+
+Toutain                   Expires 15 March 2027                [Page 27]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
 7.2.2.  Control
 
@@ -1507,14 +1526,7 @@ Internet-Draft                coreconf-m2m                September 2026
    threshold"), and, for an actuator, writing a new value ("instant-
    write").
 
-
-
-Toutain                   Expires 15 March 2027                [Page 27]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
-   Figure 17 shows the air-temperature sosa:Sensor with its
+   Figure 18 shows the air-temperature sosa:Sensor with its
    ccm2m:Control instances attached via ccm2m:hasControl, using the SIDs
    introduced in Section 5.2 and Section 5.3.
 
@@ -1550,6 +1562,14 @@ ex:control/reset-stat a ccm2m:Control ;
 
 ex:control/setup-history a ccm2m:SetupNotification ;
     ccm2m:controlType "setup-history" ;
+
+
+
+Toutain                   Expires 15 March 2027                [Page 28]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
     ccm2m:coapMethod "iPATCH" ;
     ccm2m:coapPath "/c" ;
     ccm2m:targetSid "62060"^^ccm2m:SID ;
@@ -1562,14 +1582,6 @@ ex:control/setup-history/step a ccm2m:NotificationParam ;
 
 ex:control/setup-history/encoding a ccm2m:NotificationParam ;
     ccm2m:paramName "encoding" ;
-
-
-
-Toutain                   Expires 15 March 2027                [Page 28]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
     ccm2m:paramSid "62062"^^ccm2m:SID .
 
 ex:control/subscribe-history a ccm2m:Control ;
@@ -1579,7 +1591,7 @@ ex:control/subscribe-history a ccm2m:Control ;
     ccm2m:coapPath "/s" ;
     ccm2m:targetSid "62048"^^ccm2m:SID .
 
-       Figure 17: ccm2m:Control instances attached to the air-
+       Figure 18: ccm2m:Control instances attached to the air-
                        temperature sosa:Sensor
 
    ex:control/read-single is the same as described in Figure 8 (SID
@@ -1595,10 +1607,24 @@ ex:control/subscribe-history a ccm2m:Control ;
    62062); it only configures the notification and does not itself start
    it. ex:control/subscribe-history is the control that actually starts
    the history stream: it is the same as the FETCH+Observe described in
-   Figure 12 (SID 62048, "/history/time-series/values").  A client that
+   Figure 13 (SID 62048, "/history/time-series/values").  A client that
    already knows this graph can therefore issue the corresponding CoAP
    requests without a separate FETCH+parse round trip on the YANG/SID
    files.
+
+
+
+
+
+
+
+
+
+
+Toutain                   Expires 15 March 2027                [Page 29]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
    ccm2m:Control has no dedicated "stop" instance: as described in
    Section 3.3, a subscription started by subscribe-history ends when
@@ -1614,17 +1640,6 @@ ex:control/subscribe-history a ccm2m:Control ;
    transducer whose category is "sensor-actuator" yields two object
    IRIs, one under each role, since it is instantiated as both a
    sosa:Sensor and a sosa:Actuator.
-
-
-
-
-
-
-
-Toutain                   Expires 15 March 2027                [Page 29]
-
-Internet-Draft                coreconf-m2m                September 2026
-
 
 7.2.3.  Storing Transducer Quantities
 
@@ -1642,10 +1657,30 @@ Internet-Draft                coreconf-m2m                September 2026
 
    For a history notification, phenomenonTime is reconstructed per
    sample from "step" as described in Section 3.3, while resultTime is
-   the single instant at which the whole batch was received.  Figure 18
+   the single instant at which the whole batch was received.  Figure 19
    shows three such observations, taken from the air-temperature values
-   already decoded in Figure 13: all three share the same resultTime,
+   already decoded in Figure 14: all three share the same resultTime,
    since they were delivered together in one notification.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Toutain                   Expires 15 March 2027                [Page 30]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
 @prefix sosa: <http://www.w3.org/ns/sosa/> .
 @prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
@@ -1672,15 +1707,8 @@ ex:observation/3 a sosa:Observation ;
     sosa:phenomenonTime "2026-09-02T10:01:42Z"^^xsd:dateTime ;
     sosa:resultTime "2026-09-02T10:15:45Z"^^xsd:dateTime .
 
-  Figure 18: Three dated sosa:Observation instances, decoded from a
+  Figure 19: Three dated sosa:Observation instances, decoded from a
                          history notification
-
-
-
-Toutain                   Expires 15 March 2027                [Page 30]
-
-Internet-Draft                coreconf-m2m                September 2026
-
 
 7.2.4.  Storing Actuator Commands
 
@@ -1694,9 +1722,21 @@ Internet-Draft                coreconf-m2m                September 2026
    since nothing was measured.
 
    None of the ATMOS41 transducers used throughout this document is an
-   actuator (all declare default-category: "sensor"), so Figure 19
+   actuator (all declare default-category: "sensor"), so Figure 20
    illustrates the pattern with a fictitious device instead: a pump
    whose rotation speed is set through an "instant-write" command.
+
+
+
+
+
+
+
+
+Toutain                   Expires 15 March 2027                [Page 31]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
 @prefix sosa:  <http://www.w3.org/ns/sosa/> .
 @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
@@ -1724,20 +1764,12 @@ ex:actuation/1 a sosa:Actuation ;
     sosa:hasResult "1500"^^xsd:integer ;
     sosa:resultTime "2026-09-07T14:22:10Z"^^xsd:dateTime .
 
-    Figure 19: Fictitious sosa:Actuation setting a pump's rotation
+    Figure 20: Fictitious sosa:Actuation setting a pump's rotation
                speed to 1500 rpm, with its ccm2m: data
 
    "PPPPPP" is a placeholder: this pump does not exist in the atmos
    module used throughout this document, so its identity has no real SID
    (unlike 10000001 for air-temperature, defined in atmos).
-
-
-
-Toutain                   Expires 15 March 2027                [Page 31]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
    ccm2m:targetSid, however, is the real SID 62077 for
    "/transducers/transducer/quantity/value": this leaf is defined in
    coreconf-m2m itself, not in a device-specific module, so it is the
@@ -1746,10 +1778,21 @@ Internet-Draft                coreconf-m2m                September 2026
    own instance via its (fictitious) type, is the write counterpart of
    that same "read-single" FETCH.
 
-   The pattern is otherwise symmetrical to Figure 18: sosa:Observation,
+   The pattern is otherwise symmetrical to Figure 19: sosa:Observation,
    sosa:observedProperty and sosa:hasSimpleResult become sosa:Actuation,
    sosa:actsOnProperty and sosa:hasResult, and sosa:madeBySensor becomes
    sosa:madeByActuator.
+
+
+
+
+
+
+
+Toutain                   Expires 15 March 2027                [Page 32]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
 7.3.  SensorThings
 
@@ -1771,28 +1814,14 @@ Internet-Draft                coreconf-m2m                September 2026
 
 7.3.1.  Example
 
-   Figure 20, Figure 23, and Figure 24 transpose the SOSA example of
-   Section 7.2.2 and Figure 18 into SensorThings JSON entities, using
+   Figure 21, Figure 24, and Figure 25 transpose the SOSA example of
+   Section 7.2.2 and Figure 19 into SensorThings JSON entities, using
    the same station.example.com platform and air-temperature transducer.
    SensorThings has no equivalent of RDF's open, arbitrary predicates,
    so the ccm2m: extension is added as ancillary data instead: each
    entity's properties field is a free-form JSON object, into which the
    same ccm2m: keys used in the SOSA examples are placed as ordinary
    object members.
-
-
-
-
-
-
-
-
-
-
-Toutain                   Expires 15 March 2027                [Page 32]
-
-Internet-Draft                coreconf-m2m                September 2026
-
 
    GET /Things(1)
 
@@ -1807,7 +1836,19 @@ Internet-Draft                coreconf-m2m                September 2026
      }
    }
 
-         Figure 20: A coreconf-m2m platform as a SensorThings Thing
+         Figure 21: A coreconf-m2m platform as a SensorThings Thing
+
+
+
+
+
+
+
+
+Toutain                   Expires 15 March 2027                [Page 33]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
    A Thing's properties bag is where the ccm2m: extension lives: there
    is no dedicated Thing property for a CoAP endpoint or a bootstrap
@@ -1831,7 +1872,7 @@ Internet-Draft                coreconf-m2m                September 2026
      ]
    }
 
-          Figure 21: Reaching a Thing's Sensor via its Datastream
+          Figure 22: Reaching a Thing's Sensor via its Datastream
 
    i.e. Thing --> Datastream --> Sensor, rather than Thing --> Sensor
    directly.  The symmetric path for actuation is Thing -->
@@ -1841,14 +1882,6 @@ Internet-Draft                coreconf-m2m                September 2026
    Unlike SOSA, SensorThings has a dedicated entity for geo-location:
    Location, reached via Thing/Locations (a Thing can have more than
    one, and a Location can be shared by several Things).
-
-
-
-
-Toutain                   Expires 15 March 2027                [Page 33]
-
-Internet-Draft                coreconf-m2m                September 2026
-
 
    GET /Things(1)/Locations
 
@@ -1864,39 +1897,6 @@ Internet-Draft                coreconf-m2m                September 2026
      }]
    }
 
-     Figure 22: A Thing's Location, the SensorThings equivalent of the
-                   geo:lat/ geo:long pair used with SOSA
-
-   This corresponds to the same "characteristics/geo-location"
-   (Section 3.2.2) as the geo:lat/geo:long pair used in Figure 16.
-   HistoricalLocations additionally tracks changes of Location over
-   time, for a mobile device.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1905,6 +1905,14 @@ Toutain                   Expires 15 March 2027                [Page 34]
 
 Internet-Draft                coreconf-m2m                September 2026
 
+
+     Figure 23: A Thing's Location, the SensorThings equivalent of the
+                   geo:lat/ geo:long pair used with SOSA
+
+   This corresponds to the same "characteristics/geo-location"
+   (Section 3.2.2) as the geo:lat/geo:long pair used in Figure 17.
+   HistoricalLocations additionally tracks changes of Location over
+   time, for a mobile device.
 
 GET /Sensors(1)
 
@@ -1935,19 +1943,11 @@ GET /Datastreams(1)
   }
 }
 
-       Figure 23: The air-temperature Sensor and its Datastream
+       Figure 24: The air-temperature Sensor and its Datastream
 
-   A Sensor's encodingType/metadata pair describes its datasheet, not
-   its identity: metadata is a URL to that document (or the document
-   itself, for a text-based encodingType), and encodingType says what
-   format it is in -- application/pdf and SensorML are the two most
-   common in practice.  The Sensor's ccm2m:type plays the same role as
-   on a sosa:Sensor.  Unlike SOSA, where ccm2m:outputUnit had to be
-   added because SOSA has no native concept of unit, a Datastream
-   already carries unitOfMeasurement natively (a QUDT IRI, symbol, and
-   name), so no ccm2m: property is needed for it here.  An
-   ObservedProperty entity (not shown), linked from the Datastream,
-   plays the role of sosa:ObservableProperty.
+
+
+
 
 
 
@@ -1961,6 +1961,18 @@ Toutain                   Expires 15 March 2027                [Page 35]
 
 Internet-Draft                coreconf-m2m                September 2026
 
+
+   A Sensor's encodingType/metadata pair describes its datasheet, not
+   its identity: metadata is a URL to that document (or the document
+   itself, for a text-based encodingType), and encodingType says what
+   format it is in -- application/pdf and SensorML are the two most
+   common in practice.  The Sensor's ccm2m:type plays the same role as
+   on a sosa:Sensor.  Unlike SOSA, where ccm2m:outputUnit had to be
+   added because SOSA has no native concept of unit, a Datastream
+   already carries unitOfMeasurement natively (a QUDT IRI, symbol, and
+   name), so no ccm2m: property is needed for it here.  An
+   ObservedProperty entity (not shown), linked from the Datastream,
+   plays the role of sosa:ObservableProperty.
 
    GET /Datastreams(1)/Observations?$top=3&$orderby=phenomenonTime desc
 
@@ -1987,28 +1999,16 @@ Internet-Draft                coreconf-m2m                September 2026
      ]
    }
 
-      Figure 24: Three dated Observations, the SensorThings equivalent
+      Figure 25: Three dated Observations, the SensorThings equivalent
                          of fig-sosa- observations
 
-   These are the same three samples as Figure 18: result plays the role
+   These are the same three samples as Figure 19: result plays the role
    of sosa:hasSimpleResult, already a plain JSON number rather than a
    typed literal, and phenomenonTime/resultTime carry the same
    distinction as sosa:phenomenonTime/sosa:resultTime -- all three share
    one resultTime, since they were delivered together in one history
    notification, while phenomenonTime is reconstructed per sample from
    "step".
-
-   For actuation, SensorThings has a separate set of entities (the
-   "Tasking Core" profile): Actuator, TaskingCapability, and Task,
-   mirroring Sensor, Datastream, and Observation respectively.
-   Figure 25 transposes the fictitious pump of Figure 19 into these
-   entities.
-
-
-
-
-
-
 
 
 
@@ -2017,6 +2017,12 @@ Toutain                   Expires 15 March 2027                [Page 36]
 
 Internet-Draft                coreconf-m2m                September 2026
 
+
+   For actuation, SensorThings has a separate set of entities (the
+   "Tasking Core" profile): Actuator, TaskingCapability, and Task,
+   mirroring Sensor, Datastream, and Observation respectively.
+   Figure 26 transposes the fictitious pump of Figure 20 into these
+   entities.
 
    GET /Actuators(1)
 
@@ -2058,14 +2064,8 @@ Internet-Draft                coreconf-m2m                September 2026
      }]
    }
 
-           Figure 25: Actuator, TaskingCapability, and Task, the
+           Figure 26: Actuator, TaskingCapability, and Task, the
                SensorThings equivalent of fig-sosa-actuation
-
-   The Actuator plays the same role as the Sensor of Figure 23,
-   including the same application/pdf/metadata pattern for its
-   datasheet. ccm2m:targetSid on the TaskingCapability plays the role of
-   ccm2m:targetSid on the SOSA ccm2m:Control for "instant-write": both
-   name the SID to iPATCH to actually issue the command.  A Task's
 
 
 
@@ -2074,6 +2074,11 @@ Toutain                   Expires 15 March 2027                [Page 37]
 Internet-Draft                coreconf-m2m                September 2026
 
 
+   The Actuator plays the same role as the Sensor of Figure 24,
+   including the same application/pdf/metadata pattern for its
+   datasheet. ccm2m:targetSid on the TaskingCapability plays the role of
+   ccm2m:targetSid on the SOSA ccm2m:Control for "instant-write": both
+   name the SID to iPATCH to actually issue the command.  A Task's
    taskingParameters plays the role of sosa:hasResult, and creationTime
    of sosa:resultTime; as with the Sensor's ccm2m:type, "PPPPPP" is a
    placeholder, since this pump has no real identity SID.
@@ -2116,12 +2121,7 @@ Internet-Draft                coreconf-m2m                September 2026
    *  stop_history_notify(hostname, sensor) -- cancel a running
       subscription;
 
-   *  list_active_history_subscriptions() -- list every subscription
-      currently running, across clients.
 
-   The "frost-sensorthings" MCP server wraps the SensorThings REST API
-   itself, generically (not tied to the ccm2m ontology), respecting
-   FROST's own query syntax, on any of the entity sets of Section 7.3:
 
 
 
@@ -2129,6 +2129,13 @@ Toutain                   Expires 15 March 2027                [Page 38]
 
 Internet-Draft                coreconf-m2m                September 2026
 
+
+   *  list_active_history_subscriptions() -- list every subscription
+      currently running, across clients.
+
+   The "frost-sensorthings" MCP server wraps the SensorThings REST API
+   itself, generically (not tied to the ccm2m ontology), respecting
+   FROST's own query syntax, on any of the entity sets of Section 7.3:
 
    *  list_service_capabilities() -- the entity sets this FROST-Server
       instance exposes;
@@ -2143,7 +2150,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
    *  get_related(entity_set, entity_id, relation, ...) -- navigate a
       relationship, e.g. get_related("Things", 1, "Datastreams") (see
-      Figure 21);
+      Figure 22);
 
    *  create_entity, update_entity, delete_entity -- write access.
 
@@ -2153,19 +2160,12 @@ Internet-Draft                coreconf-m2m                September 2026
    call read_instant for one of them -- without separately tracking SID
    files or CoAP endpoints itself.
 
-   Figure 26 illustrates this with a concrete question: "what is the
+   Figure 27 illustrates this with a concrete question: "what is the
    temperature right now in Rennes?"  The agent first uses FROST to turn
    "Rennes" into a device and a sensor, then uses coreconf-m2m to read
    that sensor live; the result is written back to FROST as it comes in,
    so a later question about the same value would find it already there
    instead of triggering a new CoAP exchange.
-
-
-
-
-
-
-
 
 
 
@@ -2225,7 +2225,7 @@ Internet-Draft                coreconf-m2m                September 2026
    |                 |--------------------------------------->
    |                 |                   |                   |
 
-         Figure 26: Answering "what is the temperature right now in
+         Figure 27: Answering "what is the temperature right now in
      Rennes?" by combining the frost-sensorthings and coreconf-m2m MCP
                                   servers
 
@@ -2646,7 +2646,7 @@ Internet-Draft                coreconf-m2m                September 2026
                +--ro type     identityref
                +--ro value?   int64
 
-                    Figure 27: coreconf-m2m module tree
+                    Figure 28: coreconf-m2m module tree
 
 Appendix B.  Complete YANG Module
 
@@ -3494,7 +3494,7 @@ Internet-Draft                coreconf-m2m                September 2026
   }
 }
 
-             Figure 28: Complete coreconf-m2m YANG module
+             Figure 29: Complete coreconf-m2m YANG module
 
 Appendix C.  SID File (CSV)
 
@@ -3610,7 +3610,7 @@ Internet-Draft                coreconf-m2m                September 2026
 62087,data,/coreconf-m2m:transducers/transducer/statistics/stdev
 62088,data,/coreconf-m2m:transducers/transducer/type
 
-       Figure 29: SID assignments for coreconf-m2m (CSV format)
+       Figure 30: SID assignments for coreconf-m2m (CSV format)
 
 Appendix D.  atmos YANG Module
 
@@ -3842,7 +3842,7 @@ Internet-Draft                coreconf-m2m                September 2026
   }
 }
 
-                     Figure 30: atmos.yang module
+                     Figure 31: atmos.yang module
 
 Appendix E.  atmos SID File (CSV)
 
@@ -3887,7 +3887,7 @@ Internet-Draft                coreconf-m2m                September 2026
    10000017,identity,x-orientation
    10000018,identity,y-orientation
 
-      Figure 31: SID assignments for atmos (CSV format, illustrative)
+      Figure 32: SID assignments for atmos (CSV format, illustrative)
 
 Appendix F.  ccm2m Ontology
 
@@ -4118,7 +4118,7 @@ Declared once on the Sensor; not repeated per Observation.""" ;
     rdfs:domain  sosa:Sensor ;
     rdfs:range   xsd:integer .
 
-      Figure 32: The ccm2m: extension vocabulary, in Turtle/OWL
+      Figure 33: The ccm2m: extension vocabulary, in Turtle/OWL
 
 Appendix G.  SCHC Rule Set
 
@@ -4183,7 +4183,7 @@ Residue (Up):   udp-app-port(16b) | coap-tkl(4b) | coap-code(1b) |
                 coap-mid(16b) | coap-token(var)
   Total: 37b+var
 
-     Figure 33: SCHC Rule 0 (RuleIDLength=5), with residue format
+     Figure 34: SCHC Rule 0 (RuleIDLength=5), with residue format
 
    This rule is used for FETCH: the client sends one or more SID values,
    potentially with keys, and receives a CORECONF structure in return.
@@ -4202,11 +4202,11 @@ Toutain                   Expires 15 March 2027                [Page 75]
 Internet-Draft                coreconf-m2m                September 2026
 
 
-   Figure 34 applies Rule 0 to two of the exchanges shown earlier: the
+   Figure 35 applies Rule 0 to two of the exchanges shown earlier: the
    bootstrap discovery of Figure 6 and the air-temperature query of
    Figure 8.  Each message crosses two SCHC instances: a compressor/
    decompressor at the constrained device and its peer at the network
-   edge, next to the application.  Only the residue fields of Figure 33
+   edge, next to the application.  Only the residue fields of Figure 34
    (app-port, coap-tkl, coap-code, coap-mid, coap-token -- 53 bits, plus
    the 5-bit RuleID) cross the constrained link between the two SCHC
    instances; the full IPv6/UDP/CoAP message, shown here with its CoAP
@@ -4215,55 +4215,15 @@ Internet-Draft                coreconf-m2m                September 2026
    segments.  The application port (app-port) is an arbitrary ephemeral
    port, chosen here as 52344 for illustration.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Toutain                   Expires 15 March 2027                [Page 76]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
    Device            SCHC                SCHC                App
 
    Bootstrap discovery -- request (Down):
    |                 |                   |                   |
    |                 |                   |<---- Pkt 64B -----|
-   |                 |<- residue->11B ---|                   |
+   |                 |  Rule 0/5         |                   |
+   |                 |  residue: 53b     |                   |
+   |                 |  payload: 3B      |                   |
+   |                 |<- 11B (pad 6b) ---|                   |
    |<--- Pkt 64B ----|                   |                   |
      IPv6(40B)+UDP(8B)+CoAP(16B) = 64 B
      FETCH /bootstrap  MID=39919 Token=2aaf
@@ -4272,7 +4232,10 @@ Internet-Draft                coreconf-m2m                September 2026
    Bootstrap discovery -- response (Up):
    |                 |                   |                   |
    |--- Pkt 175B --->|                   |                   |
-   |                 |-- residue->126B ->|                   |
+   |                 |  Rule 0/5         |                   |
+   |                 |  residue: 53b     |                   |
+   |                 |  payload: 118B    |                   |
+   |                 |-- 126B (pad 6b) ->|                   |
    |                 |                   |---- Pkt 175B ---->|
      IPv6(40B)+UDP(8B)+CoAP(127B) = 175 B
      2.05 Content  MID=39919 Token=2aaf
@@ -4281,22 +4244,36 @@ Internet-Draft                coreconf-m2m                September 2026
    Air-temperature query -- request (Down):
    |                 |                   |                   |
    |                 |                   |<---- Pkt 70B -----|
-   |                 |<- residue->17B ---|                   |
+   |                 |  Rule 0/5         |                   |
+   |                 |  residue: 53b     |                   |
+   |                 |  payload: 9B      |                   |
+   |                 |<- 17B (pad 6b) ---|                   |
    |<--- Pkt 70B ----|                   |                   |
      IPv6(40B)+UDP(8B)+CoAP(22B) = 70 B
+
+
+
+Toutain                   Expires 15 March 2027                [Page 76]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
      FETCH /c  MID=12229 Token=2dae
      Payload: [62077, 10000001] (9 B)
 
    Air-temperature query -- response (Up):
    |                 |                   |                   |
    |---- Pkt 63B --->|                   |                   |
-   |                 |-- residue->14B -->|                   |
+   |                 |  Rule 0/5         |                   |
+   |                 |  residue: 53b     |                   |
+   |                 |  payload: 6B      |                   |
+   |                 |-- 14B (pad 6b) -->|                   |
    |                 |                   |----- Pkt 63B ---->|
      IPv6(40B)+UDP(8B)+CoAP(15B) = 63 B
      2.05 Content  MID=12229 Token=2dae
      Payload: {62077: 196} (6 B)
 
-       Figure 34: Rule 0 applied to a bootstrap discovery and an air-
+       Figure 35: Rule 0 applied to a bootstrap discovery and an air-
               temperature query, across the two SCHC instances
 
    The compression ratio is best on small responses (bootstrap discovery
@@ -4304,6 +4281,29 @@ Internet-Draft                coreconf-m2m                September 2026
    since SCHC only compresses the fixed IPv6/UDP/CoAP header fields, not
    the CoAP payload (bootstrap response: 175 -> 126 bytes, 28%,
    dominated by the 118-byte payload).
+
+G.2.  Rule 1: Used to iPatch, ack with 7/3.  Empty CoAP for notification
+      in UP
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4313,9 +4313,6 @@ Toutain                   Expires 15 March 2027                [Page 77]
 
 Internet-Draft                coreconf-m2m                September 2026
 
-
-G.2.  Rule 1: Used to iPatch, ack with 7/3.  Empty CoAP for notification
-      in UP
 
 /---------------------+----------+----+-----------+---------+------------\
 | FID                 | FL       | DI | TV        | MO      | CDA        |
@@ -4353,15 +4350,18 @@ Residue (Up):   udp-app-port(16b) | coap-tkl(4b) | coap-code(8b) |
                 coap-mid(16b) | coap-token(var)
   Total: 44b+var
 
-     Figure 35: SCHC Rule 1 (RuleIDLength=5), with residue format
+     Figure 36: SCHC Rule 1 (RuleIDLength=5), with residue format
 
-G.3.  Rule 2: Used for notitifications (observe)
-
-
-
-
-
-
+   The request side of this rule does not change from Rule 0: the CoAP
+   CODE is fixed to 7 (iPATCH), and the request carries the SID(s) being
+   updated together with their new values, using the same Content-Format
+   140.  The response, however, is simpler than a FETCH response: it is
+   only a success/failure notification, with no CORECONF structure in
+   the payload, so CODE is left uncompressed (value-sent) rather than
+   mapped as in Rule 0 -- it carries 2.04 Changed on success, or a CoAP
+   error code (e.g. 4.00, 4.04) when the iPATCH itself fails; either way
+   the message still has the same structure (a bare CODE, no payload),
+   so this rule covers both cases.  Rule 3, which is identical in both
 
 
 
@@ -4370,50 +4370,50 @@ Toutain                   Expires 15 March 2027                [Page 78]
 Internet-Draft                coreconf-m2m                September 2026
 
 
-/---------------------+----------+----+-----------+---------+------------\
-| FID                 | FL       | DI | TV        | MO      | CDA        |
-+=====================+==========+====+===========+=========+============+
-| ipv6-version        | 4        | bi | 6         | equal   | not-sent   |
-| ipv6-trafficclass   | 8        | bi | 0         | ignore  | not-sent   |
-| ipv6-flowlabel      | 20       | bi | 0         | ignore  | not-sent   |
-| ipv6-payload-length | 16       | bi |           | ignore  | compute    |
-| ipv6-nextheader     | 8        | bi | 17        | equal   | not-sent   |
-| ipv6-hoplimit       | 8        | bi | 255       | ignore  | not-sent   |
-| ipv6-devprefix      | 64       | bi | dddd::/64 | equal   | not-sent   |
-| ipv6-deviid         | 64       | bi | ::6/64    | equal   | not-sent   |
-| ipv6-appprefix      | 64       | bi | aaaa::/64 | equal   | not-sent   |
-| ipv6-appiid         | 64       | bi | ::2/64    | equal   | not-sent   |
-| udp-dev-port        | 16       | bi | 5683      | equal   | not-sent   |
-| udp-app-port        | 16       | bi |           | ignore  | value-sent |
-| udp-length          | 16       | bi | 0         | ignore  | compute    |
-| udp-checksum        | 16       | bi | 0         | ignore  | compute    |
-| coap-version        | 2        | bi | 1         | equal   | not-sent   |
-| coap-type           | 2        | bi | 0,1       | match-  | mapping-   |
-|                     |          |    |           | mapping | sent       |
-| coap-tkl            | 4        | bi | 0         | ignore  | value-sent |
-| coap-code           | 8        | bi | 5,7,69    | match-  | mapping-   |
-|                     |          |    |           | mapping | sent       |
-| coap-mid            | 16       | bi | 0         | ignore  | value-sent |
-| coap-token          | length-  | bi |           | ignore  | value-sent |
-|                     | byte(16) |    |           |         |            |
-| coap-option(6)      | var      | bi |           | ignore  | value-sent |
-| coap-option(11)     | var      | dw | "s"       | equal   | not-sent   |
-| coap-option(12)     | var      | bi | 140       | equal   | not-sent   |
-| coap-option(17)     | var      | dw | 140       | equal   | not-sent   |
-\---------------------+----------+----+-----------+---------+------------/
+   directions (DI bi throughout, including CODE), is used instead when
+   the message does not follow this structure at all -- an empty/generic
+   message such as an ACK with no code or an RST, in either direction.
+   An unreachable device is signaled out-of-band by an ICMPv6 port
+   unreachable message, handled by Rule 5.
 
-Residue (Down): udp-app-port(16b) | coap-type(1b) | coap-tkl(4b) |
-                coap-code(2b) | coap-mid(16b) |
-                coap-token(var) | coap-option(6)(var)
-  Total: 39b+var
-Residue (Up):   udp-app-port(16b) | coap-type(1b) | coap-tkl(4b) |
-                coap-code(2b) | coap-mid(16b) |
-                coap-token(var) | coap-option(6)(var)
-  Total: 39b+var
+   Figure 37 applies Rule 1 to the sensor-alert configuration of
+   Figure 12: the request, 83 bytes uncompressed, crosses the
+   constrained link as a 32-byte compressed message (5-bit RuleID +
+   52-bit residue + the 24-byte iPATCH payload, padded to a byte
+   boundary).  The response -- 2.04 Changed, with no payload --
+   collapses to 9 bytes (5-bit RuleID + 60-bit residue, padded), against
+   54 bytes uncompressed.
 
-     Figure 36: SCHC Rule 2 (RuleIDLength=5), with residue format
+   Device            SCHC                SCHC                App
 
-G.4.  Rule 3: Empty messages (e.g., ACK with empty code, or RST)
+   Alert configuration -- request (Down):
+   |                 |                   |                   |
+   |                 |                   |<---- Pkt 83B -----|
+   |                 |  Rule 1/5         |                   |
+   |                 |  residue: 52b     |                   |
+   |                 |  payload: 24B     |                   |
+   |                 |<- 32B (pad 7b) ---|                   |
+   |<--- Pkt 83B ----|                   |                   |
+     IPv6(40B)+UDP(8B)+CoAP(35B) = 83 B
+     iPATCH /c  MID=42312 Token=2490
+     Payload: {[62068,..]: {...}} (24 B)
+
+   Alert configuration -- response (Up):
+   |                 |                   |                   |
+   |---- Pkt 54B --->|                   |                   |
+   |                 |  Rule 1/5         |                   |
+   |                 |  residue: 60b     |                   |
+   |                 |  payload: 0B      |                   |
+   |                 |--- 9B (pad 7b) -->|                   |
+   |                 |                   |----- Pkt 54B ---->|
+     IPv6(40B)+UDP(8B)+CoAP(6B) = 54 B
+     2.04 Changed  MID=42312 Token=2490
+     Payload: (none)
+
+    Figure 37: Rule 1 applied to the sensor-alert configuration example
+
+G.3.  Rule 2: Used for notitifications (observe)
+
 
 
 
@@ -4425,6 +4425,70 @@ Toutain                   Expires 15 March 2027                [Page 79]
 
 Internet-Draft                coreconf-m2m                September 2026
 
+
+/---------------------+--------+----+-----------+---------+------------\
+| FID                 | FL     | DI | TV        | MO      | CDA        |
++=====================+========+====+===========+=========+============+
+| ipv6-version        | 4      | bi | 6         | equal   | not-sent   |
+| ipv6-trafficclass   | 8      | bi | 0         | ignore  | not-sent   |
+| ipv6-flowlabel      | 20     | bi | 0         | ignore  | not-sent   |
+| ipv6-payload-length | 16     | bi |           | ignore  | compute    |
+| ipv6-nextheader     | 8      | bi | 17        | equal   | not-sent   |
+| ipv6-hoplimit       | 8      | bi | 255       | ignore  | not-sent   |
+| ipv6-devprefix      | 64     | bi | dddd::/64 | equal   | not-sent   |
+| ipv6-deviid         | 64     | bi | ::6/64    | equal   | not-sent   |
+| ipv6-appprefix      | 64     | bi | aaaa::/64 | equal   | not-sent   |
+| ipv6-appiid         | 64     | bi | ::2/64    | equal   | not-sent   |
+| udp-dev-port        | 16     | bi | 5683      | equal   | not-sent   |
+| udp-app-port        | 16     | bi |           | ignore  | value-sent |
+| udp-length          | 16     | bi | 0         | ignore  | compute    |
+| udp-checksum        | 16     | bi | 0         | ignore  | compute    |
+| coap-version        | 2      | bi | 1         | equal   | not-sent   |
+| coap-type           | 2      | bi | 0,1       | match-  | mapping-   |
+|                     |        |    |           | mapping | sent       |
+| coap-tkl            | 4      | bi | 0         | ignore  | value-sent |
+| coap-code           | 8      | dw | 5         | equal   | not-sent   |
+| coap-code           | 8      | up | 69        | equal   | not-sent   |
+| coap-mid            | 16     | bi | 0         | ignore  | value-sent |
+| coap-token          | length | bi |           | ignore  | value-sent |
+|                     | -byte( |    |           |         |            |
+|                     | 16)    |    |           |         |            |
+| coap-option(6)      | var    | bi |           | ignore  | value-sent |
+| coap-option(11)     | var    | dw | "s"       | equal   | not-sent   |
+| coap-option(12)     | var    | bi | 140       | equal   | not-sent   |
+| coap-option(17)     | var    | dw | 140       | equal   | not-sent   |
+\---------------------+--------+----+-----------+---------+------------/
+
+Residue (Down): udp-app-port(16b) | coap-type(1b) | coap-tkl(4b) |
+                coap-mid(16b) | coap-token(var) |
+                coap-option(6)(var)
+  Total: 37b+var
+Residue (Up):   udp-app-port(16b) | coap-type(1b) | coap-tkl(4b) |
+                coap-mid(16b) | coap-token(var) |
+                coap-option(6)(var)
+  Total: 37b+var
+
+     Figure 38: SCHC Rule 2 (RuleIDLength=5), with residue format
+
+   This rule is the same as Rule 0, except that the Uri-Path targets
+   "/s" instead of "/c", and an Observe option (option 6) is present in
+   both directions to carry the subscription/notification counter.  CODE
+   is fixed per direction, not mapped: FETCH (5) Down for the
+
+
+
+Toutain                   Expires 15 March 2027                [Page 80]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
+   subscription request, 2.05 Content (69) Up for the acknowledgment and
+   every notification, so it contributes no residue at all.  TYPE is
+   restricted to a two-value mapping, CON (0) or NON (1): an ACK or RST
+   -- which carries no CODE and no Observe option -- does not match this
+   rule's fixed fields and falls through to Rule 3 instead.
+
+G.4.  Rule 3: Empty messages (e.g., ACK with empty code, or RST)
 
 /---------------------+----------+----+-----------+---------+------------\
 | FID                 | FL       | DI | TV        | MO      | CDA        |
@@ -4461,7 +4525,7 @@ Residue (Up):   udp-app-port(16b) | coap-type(2b) | coap-tkl(4b) |
                 coap-token(var)
   Total: 46b+var
 
-     Figure 37: SCHC Rule 3 (RuleIDLength=5), with residue format
+     Figure 39: SCHC Rule 3 (RuleIDLength=5), with residue format
 
 G.5.  Rule 4: ICMPv6 port unreachable
 
@@ -4469,15 +4533,7 @@ G.5.  Rule 4: ICMPv6 port unreachable
 
 
 
-
-
-
-
-
-
-
-
-Toutain                   Expires 15 March 2027                [Page 80]
+Toutain                   Expires 15 March 2027                [Page 81]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4521,7 +4577,7 @@ Residue (Down): udp-app-port(16b)
 Residue (Up):   udp-app-port(16b)
   Total: 16b
 
-     Figure 38: SCHC Rule 4 (RuleIDLength=5), with residue format
+     Figure 40: SCHC Rule 4 (RuleIDLength=5), with residue format
 
 Acknowledgments
 
@@ -4533,7 +4589,7 @@ Author's Address
 
 
 
-Toutain                   Expires 15 March 2027                [Page 81]
+Toutain                   Expires 15 March 2027                [Page 82]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4589,4 +4645,4 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 15 March 2027                [Page 82]
+Toutain                   Expires 15 March 2027                [Page 83]

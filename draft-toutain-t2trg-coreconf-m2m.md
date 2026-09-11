@@ -668,7 +668,7 @@ on "/bootstrap" (SID 62002) as shown in
            {3: 10000001}, {3: 10000013}, {3: 10000003}, {3: 10000009},
            {3: 10000006}, {3: 10000004}]}}
 ~~~~
-{: #fig-resource-discovery title="Resource discovery: FETCH request and response" artwork-align="left"}
+{: #fig-resource-discovery title="Resource discovery: FETCH request and response (SCHC Rule 0)" artwork-align="left"}
 
 In the request, the payload `19 F2 32` is the CBOR encoding of the unsigned
 integer 62002, which is the SID of "/bootstrap". In the response, the outer
@@ -758,7 +758,7 @@ the exchange for the current value of air-temperature.
   Payload: 6 bytes
     {62077: 196}
 ~~~~
-{: #fig-query-value title="FETCH request and response for air-temperature current value" artwork-align="left"}
+{: #fig-query-value title="FETCH request and response for air-temperature current value (SCHC Rule 0)" artwork-align="left"}
 
 The FETCH body `[62077, 10000001]` is a CORECONF instance-identifier: the
 first element (62077) is the SID of "/transducers/transducer/quantity/value",
@@ -791,7 +791,7 @@ transducer:
   Payload: 21 bytes
     {62081: {4: 196, 1: 217, 2: 203, 3: 202, 6: 7, 5: 8}}
 ~~~~
-{: #fig-query-stats title="FETCH request and response for air-temperature statistics" artwork-align="left"}
+{: #fig-query-stats title="FETCH request and response for air-temperature statistics (SCHC Rule 0)" artwork-align="left"}
 
 The FETCH body `[62081, 10000001]` requests the statistics sub-tree (SID
 62081) for air-temperature (10000001). In the response, the inner map
@@ -835,13 +835,42 @@ parameters for the air-temperature transducer, as shown in
   Non-Confirmable, 2.04 Changed, MID:65147
     Token: 248e
 ~~~~
-{: #fig-notification-config title="iPATCH to configure history notification parameters for air-temperature" artwork-align="left"}
+{: #fig-notification-config title="iPATCH to configure history notification parameters for air-temperature (SCHC Rule 1)" artwork-align="left"}
 
 The iPATCH key `[62060, 10000001]` is an instance-identifier targeting the
 notification-parameters/history node (SID 62060) for air-temperature (type
 10000001). The value `{62060: {6: 120, 4: 10, 2: 1}}` sets three history
 parameters using delta SIDs relative to 62060: step=120 s, max-samples=10,
 and encoding=delta (value 1).
+
+An iPATCH is used the same way to configure a sensor-alert: the client
+sets the low and high thresholds, and activates the alert, as shown in
+{{fig-alert-config}}.
+
+~~~~
+  CoAP Request:
+  Non-Confirmable, iPATCH, MID:42312
+    Token: 2490
+    Opt #1: Uri-Path: c
+    Opt #2: Content-Format: 140 (application/yang-data+cbor;id=sid)
+
+  Payload: 24 bytes
+    {[62068, 10000001]: {62068: {1: true, 4: 350, 5: 50}}}
+
+  CoAP Response:
+  Non-Confirmable, 2.04 Changed, MID:65150
+    Token: 2490
+~~~~
+{: #fig-alert-config title="iPATCH to configure sensor-alert thresholds for air-temperature (SCHC Rule 1)" artwork-align="left"}
+
+The iPATCH key `[62068, 10000001]` targets the notification-parameters/
+sensor-alert node (SID 62068) for air-temperature. The value
+`{62068: {1: true, 4: 350, 5: 50}}` sets three leaves using delta SIDs
+relative to 62068: active=true (delta 1), t-max=350 (delta 4), and
+t-min=50 (delta 5). Since air-temperature has precision=1 (as in
+{{fig-query-value}}), these raw integers represent 35.0 Cel and
+5.0 Cel: the device raises an alert once the temperature leaves that
+range.
 
 The client then initiates an Observe subscription with a FETCH on the
 notification stream resource `/s`, as shown in {{fig-notification-observe}}.
@@ -876,7 +905,7 @@ CoAP Notification:
   Payload: 16 bytes
     {62048: [189, 14, -3, 1, 5, 7, 3, 2, 1, 2]}
 ~~~~
-{: #fig-notification-observe title="FETCH+Observe subscription on `/s` and history notification for air-temperature" artwork-align="left"}
+{: #fig-notification-observe title="FETCH+Observe subscription on `/s` and history notification for air-temperature (SCHC Rule 2)" artwork-align="left"}
 
 The FETCH body `[62048, 10000001]` subscribes directly to the
 time-series "values" leaf-list (SID 62048) for air-temperature, rather
@@ -3189,7 +3218,10 @@ Device            SCHC                SCHC                App
 Bootstrap discovery -- request (Down):
 |                 |                   |                   |
 |                 |                   |<---- Pkt 64B -----|
-|                 |<- residue->11B ---|                   |
+|                 |  Rule 0/5         |                   |
+|                 |  residue: 53b     |                   |
+|                 |  payload: 3B      |                   |
+|                 |<- 11B (pad 6b) ---|                   |
 |<--- Pkt 64B ----|                   |                   |
   IPv6(40B)+UDP(8B)+CoAP(16B) = 64 B
   FETCH /bootstrap  MID=39919 Token=2aaf
@@ -3198,7 +3230,10 @@ Bootstrap discovery -- request (Down):
 Bootstrap discovery -- response (Up):
 |                 |                   |                   |
 |--- Pkt 175B --->|                   |                   |
-|                 |-- residue->126B ->|                   |
+|                 |  Rule 0/5         |                   |
+|                 |  residue: 53b     |                   |
+|                 |  payload: 118B    |                   |
+|                 |-- 126B (pad 6b) ->|                   |
 |                 |                   |---- Pkt 175B ---->|
   IPv6(40B)+UDP(8B)+CoAP(127B) = 175 B
   2.05 Content  MID=39919 Token=2aaf
@@ -3207,7 +3242,10 @@ Bootstrap discovery -- response (Up):
 Air-temperature query -- request (Down):
 |                 |                   |                   |
 |                 |                   |<---- Pkt 70B -----|
-|                 |<- residue->17B ---|                   |
+|                 |  Rule 0/5         |                   |
+|                 |  residue: 53b     |                   |
+|                 |  payload: 9B      |                   |
+|                 |<- 17B (pad 6b) ---|                   |
 |<--- Pkt 70B ----|                   |                   |
   IPv6(40B)+UDP(8B)+CoAP(22B) = 70 B
   FETCH /c  MID=12229 Token=2dae
@@ -3216,7 +3254,10 @@ Air-temperature query -- request (Down):
 Air-temperature query -- response (Up):
 |                 |                   |                   |
 |---- Pkt 63B --->|                   |                   |
-|                 |-- residue->14B -->|                   |
+|                 |  Rule 0/5         |                   |
+|                 |  residue: 53b     |                   |
+|                 |  payload: 6B      |                   |
+|                 |-- 14B (pad 6b) -->|                   |
 |                 |                   |----- Pkt 63B ---->|
   IPv6(40B)+UDP(8B)+CoAP(15B) = 63 B
   2.05 Content  MID=12229 Token=2dae
@@ -3271,51 +3312,115 @@ Residue (Up):   udp-app-port(16b) | coap-tkl(4b) | coap-code(8b) |
 ~~~~
 {: #fig-schc-rule-1 title="SCHC Rule 1 (RuleIDLength=5), with residue format" artwork-align="left"}
 
+The request side of this rule does not change from Rule 0: the CoAP
+CODE is fixed to 7 (iPATCH), and the request carries the SID(s) being
+updated together with their new values, using the same Content-Format
+140. The response, however, is simpler than a FETCH response: it is
+only a success/failure notification, with no CORECONF structure in the
+payload, so CODE is left uncompressed (`value-sent`) rather than
+mapped as in Rule 0 — it carries 2.04 Changed on success, or a CoAP
+error code (e.g. 4.00, 4.04) when the iPATCH itself fails; either way
+the message still has the same structure (a bare CODE, no payload), so
+this rule covers both cases. Rule 3, which is identical in both
+directions (DI `bi` throughout, including CODE), is used instead when
+the message does not follow this structure at all — an empty/generic
+message such as an ACK with no code or an RST, in either direction. An
+unreachable device is signaled out-of-band by an ICMPv6 port
+unreachable message, handled by Rule 5.
+
+{{fig-schc-rule-1-example}} applies Rule 1 to the sensor-alert
+configuration of {{fig-alert-config}}: the request, 83 bytes
+uncompressed, crosses the constrained link as a 32-byte compressed
+message (5-bit RuleID + 52-bit residue + the 24-byte iPATCH payload,
+padded to a byte boundary). The response — 2.04 Changed, with no
+payload — collapses to 9 bytes (5-bit RuleID + 60-bit residue,
+padded), against 54 bytes uncompressed.
+
+~~~~
+Device            SCHC                SCHC                App
+
+Alert configuration -- request (Down):
+|                 |                   |                   |
+|                 |                   |<---- Pkt 83B -----|
+|                 |  Rule 1/5         |                   |
+|                 |  residue: 52b     |                   |
+|                 |  payload: 24B     |                   |
+|                 |<- 32B (pad 7b) ---|                   |
+|<--- Pkt 83B ----|                   |                   |
+  IPv6(40B)+UDP(8B)+CoAP(35B) = 83 B
+  iPATCH /c  MID=42312 Token=2490
+  Payload: {[62068,..]: {...}} (24 B)
+
+Alert configuration -- response (Up):
+|                 |                   |                   |
+|---- Pkt 54B --->|                   |                   |
+|                 |  Rule 1/5         |                   |
+|                 |  residue: 60b     |                   |
+|                 |  payload: 0B      |                   |
+|                 |--- 9B (pad 7b) -->|                   |
+|                 |                   |----- Pkt 54B ---->|
+  IPv6(40B)+UDP(8B)+CoAP(6B) = 54 B
+  2.04 Changed  MID=42312 Token=2490
+  Payload: (none)
+~~~~
+{: #fig-schc-rule-1-example title="Rule 1 applied to the sensor-alert configuration example" artwork-align="left"}
+
 ## Rule 2: Used for notitifications (observe)
 
 ~~~~
-/---------------------+----------+----+-----------+---------+------------\
-| FID                 | FL       | DI | TV        | MO      | CDA        |
-+=====================+==========+====+===========+=========+============+
-| ipv6-version        | 4        | bi | 6         | equal   | not-sent   |
-| ipv6-trafficclass   | 8        | bi | 0         | ignore  | not-sent   |
-| ipv6-flowlabel      | 20       | bi | 0         | ignore  | not-sent   |
-| ipv6-payload-length | 16       | bi |           | ignore  | compute    |
-| ipv6-nextheader     | 8        | bi | 17        | equal   | not-sent   |
-| ipv6-hoplimit       | 8        | bi | 255       | ignore  | not-sent   |
-| ipv6-devprefix      | 64       | bi | dddd::/64 | equal   | not-sent   |
-| ipv6-deviid         | 64       | bi | ::6/64    | equal   | not-sent   |
-| ipv6-appprefix      | 64       | bi | aaaa::/64 | equal   | not-sent   |
-| ipv6-appiid         | 64       | bi | ::2/64    | equal   | not-sent   |
-| udp-dev-port        | 16       | bi | 5683      | equal   | not-sent   |
-| udp-app-port        | 16       | bi |           | ignore  | value-sent |
-| udp-length          | 16       | bi | 0         | ignore  | compute    |
-| udp-checksum        | 16       | bi | 0         | ignore  | compute    |
-| coap-version        | 2        | bi | 1         | equal   | not-sent   |
-| coap-type           | 2        | bi | 0,1       | match-  | mapping-   |
-|                     |          |    |           | mapping | sent       |
-| coap-tkl            | 4        | bi | 0         | ignore  | value-sent |
-| coap-code           | 8        | bi | 5,7,69    | match-  | mapping-   |
-|                     |          |    |           | mapping | sent       |
-| coap-mid            | 16       | bi | 0         | ignore  | value-sent |
-| coap-token          | length-  | bi |           | ignore  | value-sent |
-|                     | byte(16) |    |           |         |            |
-| coap-option(6)      | var      | bi |           | ignore  | value-sent |
-| coap-option(11)     | var      | dw | "s"       | equal   | not-sent   |
-| coap-option(12)     | var      | bi | 140       | equal   | not-sent   |
-| coap-option(17)     | var      | dw | 140       | equal   | not-sent   |
-\---------------------+----------+----+-----------+---------+------------/
+/---------------------+--------+----+-----------+---------+------------\
+| FID                 | FL     | DI | TV        | MO      | CDA        |
++=====================+========+====+===========+=========+============+
+| ipv6-version        | 4      | bi | 6         | equal   | not-sent   |
+| ipv6-trafficclass   | 8      | bi | 0         | ignore  | not-sent   |
+| ipv6-flowlabel      | 20     | bi | 0         | ignore  | not-sent   |
+| ipv6-payload-length | 16     | bi |           | ignore  | compute    |
+| ipv6-nextheader     | 8      | bi | 17        | equal   | not-sent   |
+| ipv6-hoplimit       | 8      | bi | 255       | ignore  | not-sent   |
+| ipv6-devprefix      | 64     | bi | dddd::/64 | equal   | not-sent   |
+| ipv6-deviid         | 64     | bi | ::6/64    | equal   | not-sent   |
+| ipv6-appprefix      | 64     | bi | aaaa::/64 | equal   | not-sent   |
+| ipv6-appiid         | 64     | bi | ::2/64    | equal   | not-sent   |
+| udp-dev-port        | 16     | bi | 5683      | equal   | not-sent   |
+| udp-app-port        | 16     | bi |           | ignore  | value-sent |
+| udp-length          | 16     | bi | 0         | ignore  | compute    |
+| udp-checksum        | 16     | bi | 0         | ignore  | compute    |
+| coap-version        | 2      | bi | 1         | equal   | not-sent   |
+| coap-type           | 2      | bi | 0,1       | match-  | mapping-   |
+|                     |        |    |           | mapping | sent       |
+| coap-tkl            | 4      | bi | 0         | ignore  | value-sent |
+| coap-code           | 8      | dw | 5         | equal   | not-sent   |
+| coap-code           | 8      | up | 69        | equal   | not-sent   |
+| coap-mid            | 16     | bi | 0         | ignore  | value-sent |
+| coap-token          | length | bi |           | ignore  | value-sent |
+|                     | -byte( |    |           |         |            |
+|                     | 16)    |    |           |         |            |
+| coap-option(6)      | var    | bi |           | ignore  | value-sent |
+| coap-option(11)     | var    | dw | "s"       | equal   | not-sent   |
+| coap-option(12)     | var    | bi | 140       | equal   | not-sent   |
+| coap-option(17)     | var    | dw | 140       | equal   | not-sent   |
+\---------------------+--------+----+-----------+---------+------------/
 
 Residue (Down): udp-app-port(16b) | coap-type(1b) | coap-tkl(4b) |
-                coap-code(2b) | coap-mid(16b) |
-                coap-token(var) | coap-option(6)(var)
-  Total: 39b+var
+                coap-mid(16b) | coap-token(var) |
+                coap-option(6)(var)
+  Total: 37b+var
 Residue (Up):   udp-app-port(16b) | coap-type(1b) | coap-tkl(4b) |
-                coap-code(2b) | coap-mid(16b) |
-                coap-token(var) | coap-option(6)(var)
-  Total: 39b+var
+                coap-mid(16b) | coap-token(var) |
+                coap-option(6)(var)
+  Total: 37b+var
 ~~~~
 {: #fig-schc-rule-2 title="SCHC Rule 2 (RuleIDLength=5), with residue format" artwork-align="left"}
+
+This rule is the same as Rule 0, except that the Uri-Path targets "/s"
+instead of "/c", and an Observe option (option 6) is present in both
+directions to carry the subscription/notification counter. CODE is
+fixed per direction, not mapped: FETCH (5) Down for the subscription
+request, 2.05 Content (69) Up for the acknowledgment and every
+notification, so it contributes no residue at all. TYPE is restricted
+to a two-value mapping, CON (0) or NON (1): an ACK or RST — which
+carries no CODE and no Observe option — does not match this rule's
+fixed fields and falls through to Rule 3 instead.
 
 ## Rule 3: Empty messages (e.g., ACK with empty code, or RST)
 
