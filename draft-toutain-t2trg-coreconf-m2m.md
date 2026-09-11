@@ -594,16 +594,15 @@ CORECONF defines mappings for all CoAP methods, but this document uses only two:
   iPATCH is the preferred way to clear a parameter, making DELETE unnecessary
   for datastore modifications.
 
-The recommended CoAP Content-Formats for all exchanges are:
+The recommended CoAP Content-Format for all exchanges is Content-Format
+140 (`application/yang-data+cbor;id=sid` {{RFC9254}}), used uniformly
+for FETCH request bodies (which carry the list of SIDs to retrieve),
+response bodies, and iPATCH payloads, where data nodes are identified
+by their SID.
 
-* Content-Format 141 (`application/yang-fetch+cbor`) for FETCH request bodies,
-  which carry the list of SIDs to retrieve.
-* Content-Format 142 (`application/yang-data+cbor;id=sid`) for all response
-  bodies and iPATCH payloads, where data nodes are identified by their SID.
-
-Using these two content formats ensures maximum interoperability with CORECONF
+Using a single content format ensures maximum interoperability with CORECONF
 implementations and keeps the payloads as compact as possible. Limiting
-exchanges to a small number of well-known packet formats also benefits SCHC
+exchanges to a single well-known packet format also benefits SCHC
 compression {{RFC8724}}: the fewer distinct header patterns in use, the more
 efficiently SCHC rules can compress the CoAP headers, reducing overhead on the
 most constrained links.
@@ -650,8 +649,8 @@ on "/bootstrap" (SID 62002) as shown in
   Non-Confirmable, FETCH, MID:39919
     Token: 2aaf
     Opt #1: Uri-Path: c
-    Opt #2: Content-Format: 141 (application/yang-fetch+cbor)
-    Opt #3: Accept: 142 (application/yang-data+cbor;id=sid)
+    Opt #2: Content-Format: 140 (application/yang-data+cbor;id=sid)
+    Opt #3: Accept: 140 (application/yang-data+cbor;id=sid)
 
   Payload: 3 bytes
     19 F2 32  # unsigned(62002) : /bootstrap
@@ -659,7 +658,7 @@ on "/bootstrap" (SID 62002) as shown in
   CoAP Response:
   Non-Confirmable, 2.05 Content, MID:57745
     Token: 2aaf
-    Opt #1: Content-Format: 142 (application/yang-data+cbor;id=sid)
+    Opt #1: Content-Format: 140 (application/yang-data+cbor;id=sid)
 
   Payload: 118 bytes
     {62002:
@@ -745,8 +744,8 @@ the exchange for the current value of air-temperature.
   Non-Confirmable, FETCH, MID:12229
     Token: 2dae
     Opt #1: Uri-Path: c
-    Opt #2: Content-Format: 141 (application/yang-fetch+cbor)
-    Opt #3: Accept: 142 (application/yang-data+cbor;id=sid)
+    Opt #2: Content-Format: 140 (application/yang-data+cbor;id=sid)
+    Opt #3: Accept: 140 (application/yang-data+cbor;id=sid)
 
   Payload: 9 bytes
     [62077, 10000001]
@@ -754,7 +753,7 @@ the exchange for the current value of air-temperature.
   CoAP Response:
   Non-Confirmable, 2.05 Content, MID:57779
     Token: 2dae
-    Opt #1: Content-Format: 142 (application/yang-data+cbor;id=sid)
+    Opt #1: Content-Format: 140 (application/yang-data+cbor;id=sid)
 
   Payload: 6 bytes
     {62077: 196}
@@ -778,8 +777,8 @@ transducer:
   Non-Confirmable, FETCH, MID:18878
     Token: 5420
     Opt #1: Uri-Path: c
-    Opt #2: Content-Format: 141 (application/yang-fetch+cbor)
-    Opt #3: Accept: 142 (application/yang-data+cbor;id=sid)
+    Opt #2: Content-Format: 140 (application/yang-data+cbor;id=sid)
+    Opt #3: Accept: 140 (application/yang-data+cbor;id=sid)
 
   Payload: 9 bytes
     [62081, 10000001]
@@ -787,7 +786,7 @@ transducer:
   CoAP Response:
   Non-Confirmable, 2.05 Content, MID:32290
     Token: 5420
-    Opt #1: Content-Format: 142 (application/yang-data+cbor;id=sid)
+    Opt #1: Content-Format: 140 (application/yang-data+cbor;id=sid)
 
   Payload: 21 bytes
     {62081: {4: 196, 1: 217, 2: 203, 3: 202, 6: 7, 5: 8}}
@@ -827,7 +826,7 @@ parameters for the air-temperature transducer, as shown in
   Non-Confirmable, iPATCH, MID:42310
     Token: 248e
     Opt #1: Uri-Path: c
-    Opt #2: Content-Format: 142 (application/yang-data+cbor;id=sid)
+    Opt #2: Content-Format: 140 (application/yang-data+cbor;id=sid)
 
   Payload: 22 bytes
     {[62060, 10000001]: {62060: {6: 120, 4: 10, 2: 1}}}
@@ -853,8 +852,8 @@ notification stream resource `/s`, as shown in {{fig-notification-observe}}.
     Token: 248f
     Opt #1: Observe: 0
     Opt #2: Uri-Path: s
-    Opt #3: Content-Format: 141 (application/yang-fetch+cbor)
-    Opt #4: Accept: 142 (application/yang-data+cbor;id=sid)
+    Opt #3: Content-Format: 140 (application/yang-data+cbor;id=sid)
+    Opt #4: Accept: 140 (application/yang-data+cbor;id=sid)
 
   Payload: 9 bytes
     [62048, 10000001]
@@ -863,7 +862,7 @@ CoAP Response (subscription acknowledgment):
   Non-Confirmable, 2.05 Content, MID:65148
     Token: 248f
     Opt #1: Observe: 0
-    Opt #2: Content-Format: 142 (application/yang-data+cbor;id=sid)
+    Opt #2: Content-Format: 140 (application/yang-data+cbor;id=sid)
 
   Payload: 1 byte
     {}
@@ -872,7 +871,7 @@ CoAP Notification:
   Non-Confirmable, 2.05 Content, MID:65149
     Token: 248f
     Opt #1: Observe: 1
-    Opt #2: Content-Format: 142 (application/yang-data+cbor;id=sid)
+    Opt #2: Content-Format: 140 (application/yang-data+cbor;id=sid)
 
   Payload: 16 bytes
     {62048: [189, 14, -3, 1, 5, 7, 3, 2, 1, 2]}
@@ -3173,9 +3172,8 @@ residue size for that direction.
 |                     | -byte( |    |           |         |            |
 |                     | 16)    |    |           |         |            |
 | coap-option(11)     | var    | dw | "c"       | equal   | not-sent   |
-| coap-option(12)     | var    | dw | 141       | equal   | not-sent   |
-| coap-option(12)     | var    | up | 141       | equal   | not-sent   |
-| coap-option(17)     | var    | dw | 141       | equal   | not-sent   |
+| coap-option(12)     | var    | bi | 140       | equal   | not-sent   |
+| coap-option(17)     | var    | dw | 140       | equal   | not-sent   |
 \---------------------+--------+----+-----------+---------+------------/
 
 Residue (Down): udp-app-port(16b) | coap-tkl(4b) | coap-code(1b) |
@@ -3217,13 +3215,12 @@ Residue (Up):   udp-app-port(16b) | coap-tkl(4b) | coap-code(1b) |
 |                     | -byte( |    |           |         |            |
 |                     | 16)    |    |           |         |            |
 | coap-option(11)     | var    | dw | "c"       | equal   | not-sent   |
-| coap-option(12)     | var    | dw | 141,142   | match-  | mapping-   |
-|                     |        |    |           | mapping | sent       |
+| coap-option(12)     | var    | dw | 140       | equal   | not-sent   |
 \---------------------+--------+----+-----------+---------+------------/
 
 Residue (Down): udp-app-port(16b) | coap-tkl(4b) | coap-mid(16b) |
-                coap-token(var) | coap-option(12)(1b)
-  Total: 37b+var
+                coap-token(var)
+  Total: 36b+var
 Residue (Up):   udp-app-port(16b) | coap-tkl(4b) | coap-code(8b) |
                 coap-mid(16b) | coap-token(var)
   Total: 44b+var
@@ -3262,9 +3259,8 @@ Residue (Up):   udp-app-port(16b) | coap-tkl(4b) | coap-code(8b) |
 |                     | 16)    |    |           |         |            |
 | coap-option(6)      | var    | bi |           | ignore  | value-sent |
 | coap-option(11)     | var    | dw | "s"       | equal   | not-sent   |
-| coap-option(12)     | var    | dw | 141       | equal   | not-sent   |
-| coap-option(12)     | var    | up | 142       | equal   | not-sent   |
-| coap-option(17)     | var    | dw | 142       | equal   | not-sent   |
+| coap-option(12)     | var    | bi | 140       | equal   | not-sent   |
+| coap-option(17)     | var    | dw | 140       | equal   | not-sent   |
 \---------------------+--------+----+-----------+---------+------------/
 
 Residue (Down): udp-app-port(16b) | coap-type(1b) | coap-tkl(4b) |
@@ -3362,6 +3358,8 @@ Residue (Up):   udp-app-port(16b)
   Total: 16b
 ~~~~
 {: #fig-schc-rule-4 title="SCHC Rule 4 (RuleIDLength=5), with residue format" artwork-align="left"}
+
+
 
 
 

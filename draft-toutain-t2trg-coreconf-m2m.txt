@@ -80,7 +80,7 @@ Table of Contents
      3.3.  Notifications . . . . . . . . . . . . . . . . . . . . . .  14
    4.  CORECONF Overview in the M2M Context  . . . . . . . . . . . .  14
      4.1.  CoAP Methods Mapping  . . . . . . . . . . . . . . . . . .  15
-     4.2.  SID Allocations . . . . . . . . . . . . . . . . . . . . .  16
+     4.2.  SID Allocations . . . . . . . . . . . . . . . . . . . . .  15
    5.  CORECONF Traffic  . . . . . . . . . . . . . . . . . . . . . .  16
      5.1.  Resource Discovery  . . . . . . . . . . . . . . . . . . .  16
      5.2.  Querying a quantity . . . . . . . . . . . . . . . . . . .  19
@@ -803,21 +803,18 @@ Internet-Draft                coreconf-m2m                September 2026
       node to an empty value with iPATCH is the preferred way to clear a
       parameter, making DELETE unnecessary for datastore modifications.
 
-   The recommended CoAP Content-Formats for all exchanges are:
+   The recommended CoAP Content-Format for all exchanges is Content-
+   Format 140 (application/yang-data+cbor;id=sid [RFC9254]), used
+   uniformly for FETCH request bodies (which carry the list of SIDs to
+   retrieve), response bodies, and iPATCH payloads, where data nodes are
+   identified by their SID.
 
-   *  Content-Format 141 (application/yang-fetch+cbor) for FETCH request
-      bodies, which carry the list of SIDs to retrieve.
-
-   *  Content-Format 142 (application/yang-data+cbor;id=sid) for all
-      response bodies and iPATCH payloads, where data nodes are
-      identified by their SID.
-
-   Using these two content formats ensures maximum interoperability with
+   Using a single content format ensures maximum interoperability with
    CORECONF implementations and keeps the payloads as compact as
-   possible.  Limiting exchanges to a small number of well-known packet
-   formats also benefits SCHC compression [RFC8724]: the fewer distinct
-   header patterns in use, the more efficiently SCHC rules can compress
-   the CoAP headers, reducing overhead on the most constrained links.
+   possible.  Limiting exchanges to a single well-known packet format
+   also benefits SCHC compression [RFC8724]: the fewer distinct header
+   patterns in use, the more efficiently SCHC rules can compress the
+   CoAP headers, reducing overhead on the most constrained links.
 
    FETCH and iPATCH requests MUST be sent as Non-Confirmable (NON) CoAP
    messages.  This leaves the application free to implement its own
@@ -832,8 +829,11 @@ Internet-Draft                coreconf-m2m                September 2026
    client is also a valid way to signal that the subscription should be
    terminated.
 
+4.2.  SID Allocations
 
-
+   The coreconf-m2m model is intended to be assigned in the IETF
+   experimental SID space, with a model entry point of 62000.
+   Appendix C gives the complete SID mapping for this model.
 
 
 
@@ -841,12 +841,6 @@ Toutain                   Expires 15 March 2027                [Page 15]
 
 Internet-Draft                coreconf-m2m                September 2026
 
-
-4.2.  SID Allocations
-
-   The coreconf-m2m model is intended to be assigned in the IETF
-   experimental SID space, with a model entry point of 62000.
-   Appendix C gives the complete SID mapping for this model.
 
    The atmos module, however, cannot be assigned SIDs in the IETF or
    another SDO space, unless this commercial module is itself
@@ -871,8 +865,8 @@ Internet-Draft                coreconf-m2m                September 2026
     Non-Confirmable, FETCH, MID:39919
       Token: 2aaf
       Opt #1: Uri-Path: c
-      Opt #2: Content-Format: 141 (application/yang-fetch+cbor)
-      Opt #3: Accept: 142 (application/yang-data+cbor;id=sid)
+      Opt #2: Content-Format: 140 (application/yang-data+cbor;id=sid)
+      Opt #3: Accept: 140 (application/yang-data+cbor;id=sid)
 
     Payload: 3 bytes
       19 F2 32  # unsigned(62002) : /bootstrap
@@ -880,7 +874,7 @@ Internet-Draft                coreconf-m2m                September 2026
     CoAP Response:
     Non-Confirmable, 2.05 Content, MID:57745
       Token: 2aaf
-      Opt #1: Content-Format: 142 (application/yang-data+cbor;id=sid)
+      Opt #1: Content-Format: 140 (application/yang-data+cbor;id=sid)
 
     Payload: 118 bytes
       {62002:
@@ -890,6 +884,12 @@ Internet-Draft                coreconf-m2m                September 2026
              {3: 10000001}, {3: 10000013}, {3: 10000003}, {3: 10000009},
              {3: 10000006}, {3: 10000004}]}}
 
+         Figure 6: Resource discovery: FETCH request and response
+
+   In the request, the payload 19 F2 32 is the CBOR encoding of the
+   unsigned integer 62002, which is the SID of "/bootstrap".  In the
+   response, the outer key 62002 identifies the bootstrap branch, and
+   the inner keys are delta SIDs relative to 62002, as defined in
 
 
 
@@ -898,12 +898,6 @@ Toutain                   Expires 15 March 2027                [Page 16]
 Internet-Draft                coreconf-m2m                September 2026
 
 
-         Figure 6: Resource discovery: FETCH request and response
-
-   In the request, the payload 19 F2 32 is the CBOR encoding of the
-   unsigned integer 62002, which is the SID of "/bootstrap".  In the
-   response, the outer key 62002 identifies the bootstrap branch, and
-   the inner keys are delta SIDs relative to 62002, as defined in
    [RFC9254]: 7 (reference-epoch), 8 (uptime), 6 (minimal-step), and 1
    (the "inventory" list).  Each entry in the inventory list is itself a
    map whose key 3 is a delta SID relative to the list SID (62003), i.e.
@@ -915,6 +909,12 @@ Internet-Draft                coreconf-m2m                September 2026
    The client MUST have access to the corresponding YANG file to
    discover the transducers' default parameters, indicating the unit,
    the precision and the nature of the transducer.
+
+
+
+
+
+
 
 
 
@@ -1019,8 +1019,8 @@ Internet-Draft                coreconf-m2m                September 2026
      Non-Confirmable, FETCH, MID:12229
        Token: 2dae
        Opt #1: Uri-Path: c
-       Opt #2: Content-Format: 141 (application/yang-fetch+cbor)
-       Opt #3: Accept: 142 (application/yang-data+cbor;id=sid)
+       Opt #2: Content-Format: 140 (application/yang-data+cbor;id=sid)
+       Opt #3: Accept: 140 (application/yang-data+cbor;id=sid)
 
      Payload: 9 bytes
        [62077, 10000001]
@@ -1028,7 +1028,7 @@ Internet-Draft                coreconf-m2m                September 2026
      CoAP Response:
      Non-Confirmable, 2.05 Content, MID:57779
        Token: 2dae
-       Opt #1: Content-Format: 142 (application/yang-data+cbor;id=sid)
+       Opt #1: Content-Format: 140 (application/yang-data+cbor;id=sid)
 
      Payload: 6 bytes
        {62077: 196}
@@ -1070,8 +1070,8 @@ Internet-Draft                coreconf-m2m                September 2026
      Non-Confirmable, FETCH, MID:18878
        Token: 5420
        Opt #1: Uri-Path: c
-       Opt #2: Content-Format: 141 (application/yang-fetch+cbor)
-       Opt #3: Accept: 142 (application/yang-data+cbor;id=sid)
+       Opt #2: Content-Format: 140 (application/yang-data+cbor;id=sid)
+       Opt #3: Accept: 140 (application/yang-data+cbor;id=sid)
 
      Payload: 9 bytes
        [62081, 10000001]
@@ -1079,7 +1079,7 @@ Internet-Draft                coreconf-m2m                September 2026
      CoAP Response:
      Non-Confirmable, 2.05 Content, MID:32290
        Token: 5420
-       Opt #1: Content-Format: 142 (application/yang-data+cbor;id=sid)
+       Opt #1: Content-Format: 140 (application/yang-data+cbor;id=sid)
 
      Payload: 21 bytes
        {62081: {4: 196, 1: 217, 2: 203, 3: 202, 6: 7, 5: 8}}
@@ -1126,7 +1126,7 @@ Internet-Draft                coreconf-m2m                September 2026
      Non-Confirmable, iPATCH, MID:42310
        Token: 248e
        Opt #1: Uri-Path: c
-       Opt #2: Content-Format: 142 (application/yang-data+cbor;id=sid)
+       Opt #2: Content-Format: 140 (application/yang-data+cbor;id=sid)
 
      Payload: 22 bytes
        {[62060, 10000001]: {62060: {6: 120, 4: 10, 2: 1}}}
@@ -1183,8 +1183,8 @@ Internet-Draft                coreconf-m2m                September 2026
        Token: 248f
        Opt #1: Observe: 0
        Opt #2: Uri-Path: s
-       Opt #3: Content-Format: 141 (application/yang-fetch+cbor)
-       Opt #4: Accept: 142 (application/yang-data+cbor;id=sid)
+       Opt #3: Content-Format: 140 (application/yang-data+cbor;id=sid)
+       Opt #4: Accept: 140 (application/yang-data+cbor;id=sid)
 
      Payload: 9 bytes
        [62048, 10000001]
@@ -1193,7 +1193,7 @@ Internet-Draft                coreconf-m2m                September 2026
      Non-Confirmable, 2.05 Content, MID:65148
        Token: 248f
        Opt #1: Observe: 0
-       Opt #2: Content-Format: 142 (application/yang-data+cbor;id=sid)
+       Opt #2: Content-Format: 140 (application/yang-data+cbor;id=sid)
 
      Payload: 1 byte
        {}
@@ -1202,7 +1202,7 @@ Internet-Draft                coreconf-m2m                September 2026
      Non-Confirmable, 2.05 Content, MID:65149
        Token: 248f
        Opt #1: Observe: 1
-       Opt #2: Content-Format: 142 (application/yang-data+cbor;id=sid)
+       Opt #2: Content-Format: 140 (application/yang-data+cbor;id=sid)
 
      Payload: 16 bytes
        {62048: [189, 14, -3, 1, 5, 7, 3, 2, 1, 2]}
@@ -4229,9 +4229,8 @@ Internet-Draft                coreconf-m2m                September 2026
 |                     | -byte( |    |           |         |            |
 |                     | 16)    |    |           |         |            |
 | coap-option(11)     | var    | dw | "c"       | equal   | not-sent   |
-| coap-option(12)     | var    | dw | 141       | equal   | not-sent   |
-| coap-option(12)     | var    | up | 141       | equal   | not-sent   |
-| coap-option(17)     | var    | dw | 141       | equal   | not-sent   |
+| coap-option(12)     | var    | bi | 140       | equal   | not-sent   |
+| coap-option(17)     | var    | dw | 140       | equal   | not-sent   |
 \---------------------+--------+----+-----------+---------+------------/
 
 Residue (Down): udp-app-port(16b) | coap-tkl(4b) | coap-code(1b) |
@@ -4245,6 +4244,7 @@ Residue (Up):   udp-app-port(16b) | coap-tkl(4b) | coap-code(1b) |
 
 G.2.  Rule 1: Used to iPatch, ack with 7/3.  Empty CoAP for notification
       in UP
+
 
 
 
@@ -4285,13 +4285,12 @@ Internet-Draft                coreconf-m2m                September 2026
 |                     | -byte( |    |           |         |            |
 |                     | 16)    |    |           |         |            |
 | coap-option(11)     | var    | dw | "c"       | equal   | not-sent   |
-| coap-option(12)     | var    | dw | 141,142   | match-  | mapping-   |
-|                     |        |    |           | mapping | sent       |
+| coap-option(12)     | var    | dw | 140       | equal   | not-sent   |
 \---------------------+--------+----+-----------+---------+------------/
 
 Residue (Down): udp-app-port(16b) | coap-tkl(4b) | coap-mid(16b) |
-                coap-token(var) | coap-option(12)(1b)
-  Total: 37b+var
+                coap-token(var)
+  Total: 36b+var
 Residue (Up):   udp-app-port(16b) | coap-tkl(4b) | coap-code(8b) |
                 coap-mid(16b) | coap-token(var)
   Total: 44b+var
@@ -4299,6 +4298,7 @@ Residue (Up):   udp-app-port(16b) | coap-tkl(4b) | coap-code(8b) |
      Figure 34: SCHC Rule 1 (RuleIDLength=5), with residue format
 
 G.3.  Rule 2: Used for notitifications (observe)
+
 
 
 
@@ -4343,9 +4343,8 @@ Internet-Draft                coreconf-m2m                September 2026
 |                     | 16)    |    |           |         |            |
 | coap-option(6)      | var    | bi |           | ignore  | value-sent |
 | coap-option(11)     | var    | dw | "s"       | equal   | not-sent   |
-| coap-option(12)     | var    | dw | 141       | equal   | not-sent   |
-| coap-option(12)     | var    | up | 142       | equal   | not-sent   |
-| coap-option(17)     | var    | dw | 142       | equal   | not-sent   |
+| coap-option(12)     | var    | bi | 140       | equal   | not-sent   |
+| coap-option(17)     | var    | dw | 140       | equal   | not-sent   |
 \---------------------+--------+----+-----------+---------+------------/
 
 Residue (Down): udp-app-port(16b) | coap-type(1b) | coap-tkl(4b) |
@@ -4360,6 +4359,7 @@ Residue (Up):   udp-app-port(16b) | coap-type(1b) | coap-tkl(4b) |
      Figure 35: SCHC Rule 2 (RuleIDLength=5), with residue format
 
 G.4.  Rule 3: Empty messages (e.g., ACK with empty code, or RST)
+
 
 
 
