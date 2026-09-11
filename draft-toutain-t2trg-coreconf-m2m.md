@@ -3132,8 +3132,8 @@ actions (CDA) are as defined in {{RFC8724}}; FL is the Field Length,
 DI the Direction Indicator, and TV the Target Value (the Field
 Position, FP, is omitted from the tables below for compactness; it
 defaults to 1 unless a field is repeated, which does not happen in
-this Rule Set). The bootstrap rule (Rule 0 in the source Rule Set) is
-omitted here, being identical in structure to Rule 1.
+this Rule Set). Bootstrap is now handled by a separate mechanism
+outside this Rule Set and is not shown here.
 
 Below each rule table, the resulting residue format is given for the
 Down (network to device) and Up (device to network) directions: the
@@ -3143,7 +3143,7 @@ i.e. those whose CDA is not "not-sent", "compute-length", or
 field ("var" when the size is not fixed), followed by the total
 residue size for that direction.
 
-## Rule 1: Used to fetch a single value (bidirect)
+## Rule 0: Used to fetch a single value (bidirect)
 
 ~~~~
 /---------------------+--------+----+-----------+---------+------------\
@@ -3187,9 +3187,9 @@ Residue (Up):   udp-app-port(16b) | coap-tkl(4b) | coap-code(1b) |
                 coap-mid(16b) | coap-token(var)
   Total: 37b+var
 ~~~~
-{: #fig-schc-rule-1 title="SCHC Rule 1 (RuleIDLength=5), with residue format" artwork-align="left"}
+{: #fig-schc-rule-0 title="SCHC Rule 0 (RuleIDLength=5), with residue format" artwork-align="left"}
 
-## Rule 2: Used to iPatch, ack with 7/3. Empty CoAP for notification in UP
+## Rule 1: Used to iPatch, ack with 7/3. Empty CoAP for notification in UP
 
 ~~~~
 /---------------------+--------+----+-----------+---------+------------\
@@ -3230,9 +3230,9 @@ Residue (Up):   udp-app-port(16b) | coap-tkl(4b) | coap-code(8b) |
                 coap-mid(16b) | coap-token(var)
   Total: 44b+var
 ~~~~
-{: #fig-schc-rule-2 title="SCHC Rule 2 (RuleIDLength=5), with residue format" artwork-align="left"}
+{: #fig-schc-rule-1 title="SCHC Rule 1 (RuleIDLength=5), with residue format" artwork-align="left"}
 
-## Rule 3: Used for notitifications (observe)
+## Rule 2: Used for notitifications (observe)
 
 ~~~~
 /---------------------+--------+----+-----------+---------+------------\
@@ -3278,9 +3278,9 @@ Residue (Up):   udp-app-port(16b) | coap-type(1b) | coap-tkl(4b) |
                 coap-token(var) | coap-option(6)(var)
   Total: 39b+var
 ~~~~
-{: #fig-schc-rule-3 title="SCHC Rule 3 (RuleIDLength=5), with residue format" artwork-align="left"}
+{: #fig-schc-rule-2 title="SCHC Rule 2 (RuleIDLength=5), with residue format" artwork-align="left"}
 
-## Rule 4: Empty messages (e.g., ACK with empty code, or RST)
+## Rule 3: Empty messages (e.g., ACK with empty code, or RST)
 
 ~~~~
 /---------------------+--------+----+-----------+---------+------------\
@@ -3319,9 +3319,9 @@ Residue (Up):   udp-app-port(16b) | coap-type(2b) | coap-tkl(4b) |
                 coap-token(var)
   Total: 46b+var
 ~~~~
-{: #fig-schc-rule-4 title="SCHC Rule 4 (RuleIDLength=5), with residue format" artwork-align="left"}
+{: #fig-schc-rule-3 title="SCHC Rule 3 (RuleIDLength=5), with residue format" artwork-align="left"}
 
-## Rule 5: ICMPv6 port unreachable
+## Rule 4: ICMPv6 port unreachable
 
 ~~~~
 /---------------------+--------+----+-----------+---------+------------\
@@ -3363,7 +3363,8 @@ Residue (Down): udp-app-port(16b)
 Residue (Up):   udp-app-port(16b)
   Total: 16b
 ~~~~
-{: #fig-schc-rule-5 title="SCHC Rule 5 (RuleIDLength=5), with residue format" artwork-align="left"}
+{: #fig-schc-rule-4 title="SCHC Rule 4 (RuleIDLength=5), with residue format" artwork-align="left"}
+
 
 
 

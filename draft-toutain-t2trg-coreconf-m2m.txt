@@ -4,8 +4,8 @@
 
 Thing-to-Thing Research Group (T2TRG)                         L. Toutain
 Internet-Draft                                            IMT Atlantique
-Intended status: Informational                         10 September 2026
-Expires: 14 March 2027
+Intended status: Informational                         11 September 2026
+Expires: 15 March 2027
 
 
              CORECONF for Machine-to-Machine Communication
@@ -40,7 +40,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 14 March 2027.
+   This Internet-Draft will expire on 15 March 2027.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Toutain                   Expires 14 March 2027                 [Page 1]
+Toutain                   Expires 15 March 2027                 [Page 1]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Toutain                   Expires 14 March 2027                 [Page 2]
+Toutain                   Expires 15 March 2027                 [Page 2]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -123,13 +123,13 @@ Internet-Draft                coreconf-m2m                September 2026
    Appendix E.  atmos SID File (CSV) . . . . . . . . . . . . . . . .  69
    Appendix F.  ccm2m Ontology . . . . . . . . . . . . . . . . . . .  70
    Appendix G.  SCHC Rule Set  . . . . . . . . . . . . . . . . . . .  74
-     G.1.  Rule 1: Used to fetch a single value (bidirect) . . . . .  75
-     G.2.  Rule 2: Used to iPatch, ack with 7/3.  Empty CoAP for
+     G.1.  Rule 0: Used to fetch a single value (bidirect) . . . . .  75
+     G.2.  Rule 1: Used to iPatch, ack with 7/3.  Empty CoAP for
            notification in UP  . . . . . . . . . . . . . . . . . . .  76
-     G.3.  Rule 3: Used for notitifications (observe)  . . . . . . .  77
-     G.4.  Rule 4: Empty messages (e.g., ACK with empty code, or
+     G.3.  Rule 2: Used for notitifications (observe)  . . . . . . .  77
+     G.4.  Rule 3: Empty messages (e.g., ACK with empty code, or
            RST)  . . . . . . . . . . . . . . . . . . . . . . . . . .  78
-     G.5.  Rule 5: ICMPv6 port unreachable . . . . . . . . . . . . .  79
+     G.5.  Rule 4: ICMPv6 port unreachable . . . . . . . . . . . . .  79
    Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  80
    Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  80
 
@@ -165,7 +165,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                 [Page 3]
+Toutain                   Expires 15 March 2027                 [Page 3]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -221,7 +221,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                 [Page 4]
+Toutain                   Expires 15 March 2027                 [Page 4]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -277,7 +277,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                 [Page 5]
+Toutain                   Expires 15 March 2027                 [Page 5]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -333,7 +333,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                 [Page 6]
+Toutain                   Expires 15 March 2027                 [Page 6]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -389,7 +389,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                 [Page 7]
+Toutain                   Expires 15 March 2027                 [Page 7]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -445,7 +445,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                 [Page 8]
+Toutain                   Expires 15 March 2027                 [Page 8]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -501,7 +501,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                 [Page 9]
+Toutain                   Expires 15 March 2027                 [Page 9]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -557,7 +557,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 10]
+Toutain                   Expires 15 March 2027                [Page 10]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -613,7 +613,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 11]
+Toutain                   Expires 15 March 2027                [Page 11]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -669,7 +669,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 12]
+Toutain                   Expires 15 March 2027                [Page 12]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -725,7 +725,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 13]
+Toutain                   Expires 15 March 2027                [Page 13]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -781,7 +781,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 14]
+Toutain                   Expires 15 March 2027                [Page 14]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -837,7 +837,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 15]
+Toutain                   Expires 15 March 2027                [Page 15]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -893,7 +893,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 16]
+Toutain                   Expires 15 March 2027                [Page 16]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -949,7 +949,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 17]
+Toutain                   Expires 15 March 2027                [Page 17]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1005,7 +1005,7 @@ Connected. 14 sensor(s) discovered, minimal step 120 s.
 
 
 
-Toutain                   Expires 14 March 2027                [Page 18]
+Toutain                   Expires 15 March 2027                [Page 18]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1061,7 +1061,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 19]
+Toutain                   Expires 15 March 2027                [Page 19]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1117,7 +1117,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 20]
+Toutain                   Expires 15 March 2027                [Page 20]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1173,7 +1173,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 21]
+Toutain                   Expires 15 March 2027                [Page 21]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1229,7 +1229,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 22]
+Toutain                   Expires 15 March 2027                [Page 22]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1285,7 +1285,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 23]
+Toutain                   Expires 15 March 2027                [Page 23]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1341,7 +1341,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 24]
+Toutain                   Expires 15 March 2027                [Page 24]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1397,7 +1397,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 25]
+Toutain                   Expires 15 March 2027                [Page 25]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1453,7 +1453,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 26]
+Toutain                   Expires 15 March 2027                [Page 26]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1509,7 +1509,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 27]
+Toutain                   Expires 15 March 2027                [Page 27]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1565,7 +1565,7 @@ ex:control/setup-history/encoding a ccm2m:NotificationParam ;
 
 
 
-Toutain                   Expires 14 March 2027                [Page 28]
+Toutain                   Expires 15 March 2027                [Page 28]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1621,7 +1621,7 @@ ex:control/subscribe-history a ccm2m:Control ;
 
 
 
-Toutain                   Expires 14 March 2027                [Page 29]
+Toutain                   Expires 15 March 2027                [Page 29]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1677,7 +1677,7 @@ ex:observation/3 a sosa:Observation ;
 
 
 
-Toutain                   Expires 14 March 2027                [Page 30]
+Toutain                   Expires 15 March 2027                [Page 30]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1733,7 +1733,7 @@ ex:actuation/1 a sosa:Actuation ;
 
 
 
-Toutain                   Expires 14 March 2027                [Page 31]
+Toutain                   Expires 15 March 2027                [Page 31]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1789,7 +1789,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 32]
+Toutain                   Expires 15 March 2027                [Page 32]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1845,7 +1845,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 33]
+Toutain                   Expires 15 March 2027                [Page 33]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1901,7 +1901,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 34]
+Toutain                   Expires 15 March 2027                [Page 34]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -1957,7 +1957,7 @@ GET /Datastreams(1)
 
 
 
-Toutain                   Expires 14 March 2027                [Page 35]
+Toutain                   Expires 15 March 2027                [Page 35]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2013,7 +2013,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 36]
+Toutain                   Expires 15 March 2027                [Page 36]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2069,7 +2069,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 37]
+Toutain                   Expires 15 March 2027                [Page 37]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2125,7 +2125,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 38]
+Toutain                   Expires 15 March 2027                [Page 38]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2181,7 +2181,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 39]
+Toutain                   Expires 15 March 2027                [Page 39]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2237,7 +2237,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 40]
+Toutain                   Expires 15 March 2027                [Page 40]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2293,7 +2293,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 41]
+Toutain                   Expires 15 March 2027                [Page 41]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2349,7 +2349,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 42]
+Toutain                   Expires 15 March 2027                [Page 42]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2405,7 +2405,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 43]
+Toutain                   Expires 15 March 2027                [Page 43]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2461,7 +2461,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 44]
+Toutain                   Expires 15 March 2027                [Page 44]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2517,7 +2517,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 45]
+Toutain                   Expires 15 March 2027                [Page 45]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2573,7 +2573,7 @@ Appendix A.  Module Tree
 
 
 
-Toutain                   Expires 14 March 2027                [Page 46]
+Toutain                   Expires 15 March 2027                [Page 46]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2629,7 +2629,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 47]
+Toutain                   Expires 15 March 2027                [Page 47]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2685,7 +2685,7 @@ module coreconf-m2m {
 
 
 
-Toutain                   Expires 14 March 2027                [Page 48]
+Toutain                   Expires 15 March 2027                [Page 48]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2741,7 +2741,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 49]
+Toutain                   Expires 15 March 2027                [Page 49]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2797,7 +2797,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 50]
+Toutain                   Expires 15 March 2027                [Page 50]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2853,7 +2853,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 51]
+Toutain                   Expires 15 March 2027                [Page 51]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2909,7 +2909,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 52]
+Toutain                   Expires 15 March 2027                [Page 52]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2965,7 +2965,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 53]
+Toutain                   Expires 15 March 2027                [Page 53]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3021,7 +3021,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 54]
+Toutain                   Expires 15 March 2027                [Page 54]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3077,7 +3077,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 55]
+Toutain                   Expires 15 March 2027                [Page 55]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3133,7 +3133,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 56]
+Toutain                   Expires 15 March 2027                [Page 56]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3189,7 +3189,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 57]
+Toutain                   Expires 15 March 2027                [Page 57]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3245,7 +3245,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 58]
+Toutain                   Expires 15 March 2027                [Page 58]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3301,7 +3301,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 59]
+Toutain                   Expires 15 March 2027                [Page 59]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3357,7 +3357,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 60]
+Toutain                   Expires 15 March 2027                [Page 60]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3413,7 +3413,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 61]
+Toutain                   Expires 15 March 2027                [Page 61]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3469,7 +3469,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 62]
+Toutain                   Expires 15 March 2027                [Page 62]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3525,7 +3525,7 @@ SID,Namespace,Identifier
 
 
 
-Toutain                   Expires 14 March 2027                [Page 63]
+Toutain                   Expires 15 March 2027                [Page 63]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3581,7 +3581,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 64]
+Toutain                   Expires 15 March 2027                [Page 64]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3637,7 +3637,7 @@ module atmos {
 
 
 
-Toutain                   Expires 14 March 2027                [Page 65]
+Toutain                   Expires 15 March 2027                [Page 65]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3693,7 +3693,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 66]
+Toutain                   Expires 15 March 2027                [Page 66]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3749,7 +3749,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 67]
+Toutain                   Expires 15 March 2027                [Page 67]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3805,7 +3805,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 68]
+Toutain                   Expires 15 March 2027                [Page 68]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3861,7 +3861,7 @@ Appendix E.  atmos SID File (CSV)
 
 
 
-Toutain                   Expires 14 March 2027                [Page 69]
+Toutain                   Expires 15 March 2027                [Page 69]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3917,7 +3917,7 @@ ccm2m:SID
 
 
 
-Toutain                   Expires 14 March 2027                [Page 70]
+Toutain                   Expires 15 March 2027                [Page 70]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3973,7 +3973,7 @@ ccm2m:hasParam
 
 
 
-Toutain                   Expires 14 March 2027                [Page 71]
+Toutain                   Expires 15 March 2027                [Page 71]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4029,7 +4029,7 @@ ccm2m:coapPath
 
 
 
-Toutain                   Expires 14 March 2027                [Page 72]
+Toutain                   Expires 15 March 2027                [Page 72]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4085,7 +4085,7 @@ ccm2m:targetSid
 
 
 
-Toutain                   Expires 14 March 2027                [Page 73]
+Toutain                   Expires 15 March 2027                [Page 73]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4141,7 +4141,7 @@ Appendix G.  SCHC Rule Set
 
 
 
-Toutain                   Expires 14 March 2027                [Page 74]
+Toutain                   Expires 15 March 2027                [Page 74]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4153,8 +4153,8 @@ Internet-Draft                coreconf-m2m                September 2026
    Indicator, and TV the Target Value (the Field Position, FP, is
    omitted from the tables below for compactness; it defaults to 1
    unless a field is repeated, which does not happen in this Rule Set).
-   The bootstrap rule (Rule 0 in the source Rule Set) is omitted here,
-   being identical in structure to Rule 1.
+   Bootstrap is now handled by a separate mechanism outside this Rule
+   Set and is not shown here.
 
    Below each rule table, the resulting residue format is given for the
    Down (network to device) and Up (device to network) directions: the
@@ -4164,7 +4164,7 @@ Internet-Draft                coreconf-m2m                September 2026
    field ("var" when the size is not fixed), followed by the total
    residue size for that direction.
 
-G.1.  Rule 1: Used to fetch a single value (bidirect)
+G.1.  Rule 0: Used to fetch a single value (bidirect)
 
 
 
@@ -4197,7 +4197,7 @@ G.1.  Rule 1: Used to fetch a single value (bidirect)
 
 
 
-Toutain                   Expires 14 March 2027                [Page 75]
+Toutain                   Expires 15 March 2027                [Page 75]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4243,9 +4243,9 @@ Residue (Up):   udp-app-port(16b) | coap-tkl(4b) | coap-code(1b) |
                 coap-mid(16b) | coap-token(var)
   Total: 37b+var
 
-     Figure 33: SCHC Rule 1 (RuleIDLength=5), with residue format
+     Figure 33: SCHC Rule 0 (RuleIDLength=5), with residue format
 
-G.2.  Rule 2: Used to iPatch, ack with 7/3.  Empty CoAP for notification
+G.2.  Rule 1: Used to iPatch, ack with 7/3.  Empty CoAP for notification
       in UP
 
 
@@ -4253,7 +4253,7 @@ G.2.  Rule 2: Used to iPatch, ack with 7/3.  Empty CoAP for notification
 
 
 
-Toutain                   Expires 14 March 2027                [Page 76]
+Toutain                   Expires 15 March 2027                [Page 76]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4296,11 +4296,9 @@ Residue (Up):   udp-app-port(16b) | coap-tkl(4b) | coap-code(8b) |
                 coap-mid(16b) | coap-token(var)
   Total: 44b+var
 
-     Figure 34: SCHC Rule 2 (RuleIDLength=5), with residue format
+     Figure 34: SCHC Rule 1 (RuleIDLength=5), with residue format
 
-G.3.  Rule 3: Used for notitifications (observe)
-
-
+G.3.  Rule 2: Used for notitifications (observe)
 
 
 
@@ -4309,7 +4307,9 @@ G.3.  Rule 3: Used for notitifications (observe)
 
 
 
-Toutain                   Expires 14 March 2027                [Page 77]
+
+
+Toutain                   Expires 15 March 2027                [Page 77]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4357,15 +4357,15 @@ Residue (Up):   udp-app-port(16b) | coap-type(1b) | coap-tkl(4b) |
                 coap-token(var) | coap-option(6)(var)
   Total: 39b+var
 
-     Figure 35: SCHC Rule 3 (RuleIDLength=5), with residue format
+     Figure 35: SCHC Rule 2 (RuleIDLength=5), with residue format
 
-G.4.  Rule 4: Empty messages (e.g., ACK with empty code, or RST)
-
-
+G.4.  Rule 3: Empty messages (e.g., ACK with empty code, or RST)
 
 
 
-Toutain                   Expires 14 March 2027                [Page 78]
+
+
+Toutain                   Expires 15 March 2027                [Page 78]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4406,11 +4406,9 @@ Residue (Up):   udp-app-port(16b) | coap-type(2b) | coap-tkl(4b) |
                 coap-token(var)
   Total: 46b+var
 
-     Figure 36: SCHC Rule 4 (RuleIDLength=5), with residue format
+     Figure 36: SCHC Rule 3 (RuleIDLength=5), with residue format
 
-G.5.  Rule 5: ICMPv6 port unreachable
-
-
+G.5.  Rule 4: ICMPv6 port unreachable
 
 
 
@@ -4421,7 +4419,9 @@ G.5.  Rule 5: ICMPv6 port unreachable
 
 
 
-Toutain                   Expires 14 March 2027                [Page 79]
+
+
+Toutain                   Expires 15 March 2027                [Page 79]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4465,7 +4465,7 @@ Residue (Down): udp-app-port(16b)
 Residue (Up):   udp-app-port(16b)
   Total: 16b
 
-     Figure 37: SCHC Rule 5 (RuleIDLength=5), with residue format
+     Figure 37: SCHC Rule 4 (RuleIDLength=5), with residue format
 
 Acknowledgments
 
@@ -4477,7 +4477,7 @@ Author's Address
 
 
 
-Toutain                   Expires 14 March 2027                [Page 80]
+Toutain                   Expires 15 March 2027                [Page 80]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4533,4 +4533,4 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 14 March 2027                [Page 81]
+Toutain                   Expires 15 March 2027                [Page 81]

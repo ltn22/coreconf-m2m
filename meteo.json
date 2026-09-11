@@ -3,42 +3,6 @@
     "SoR" : [{
         "RuleIDValue" : 0,
         "RuleIDLength": 5,
-        "Description": "Used a bootstrap to get the transducer list (d=0).",
-        "Compression": [	 
-            {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.TC",  "TV": 0, "MO": "ignore", "CDA": "not-sent"},
-            {"FID": "IPV6.FL",  "TV": 0, "MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.LEN",          "MO": "ignore","CDA": "compute-length"},
-            {"FID": "IPV6.NXT", "TV": 17, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "IPV6.HOP_LMT", "TV" : 255,"MO": "ignore","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_PREFIX","TV": "dddd::/64",
-                                                   "MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.DEV_IID", "TV": "::6/64","MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.APP_PREFIX","TV": "aaaa::/64","MO": "equal","CDA": "not-sent"},
-            {"FID": "IPV6.APP_IID", "TV": "::2/64","MO": "equal","CDA": "not-sent"},
-
-            {"FID": "UDP.DEV_PORT",  "TV": 5683,"MO": "equal",  "CDA": "not-sent"},
-            {"FID": "UDP.APP_PORT",             "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "UDP.LEN",       "TV": 0,   "MO": "ignore", "CDA": "compute-length"},
-            {"FID": "UDP.CKSUM",     "TV": 0,   "MO": "ignore", "CDA": "compute-checksum"},
-
-            {"FID": "COAP.VER",  "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TYPE", "DI": "BI", "TV": 1,   "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.TKL",  "DI": "BI", "TV": 0,   "MO": "ignore","CDA": "value-sent"},
-            {"FID": "COAP.CODE", "DI": "BI", "TV": [5, 7, 69],   "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.MID",  "DI": "BI", "TV": 0,   "MO": "ignore", "CDA": "value-sent"},
-            {"FID": "COAP.TOKEN", "FL": "length-byte(16)",     "MO": "ignore","CDA": "value-sent"},
-            
-            {"FID": "COAP.option(11)", "FP": 1, "DI": "DW", "TV": ["c", "s"], 
-                                "MO": "match-mapping","CDA": "mapping-sent"},
-            {"FID": "COAP.option(12)", "DI": "DW", "TV": [141,142], "MO": "match-mapping", "CDA": "mapping-sent"},
-            {"FID": "COAP.option(12)", "DI": "UP", "TV":  142, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "COAP.option(15)", "DI": "DW", "TV": "d=0", "MO": "equal", "CDA": "not-sent"},
-            {"FID": "COAP.option(17)", "DI": "DW", "TV": 142, "MO": "equal", "CDA": "not-sent"}
-        ]},
-        {
-        "RuleIDValue" : 1,
-        "RuleIDLength": 5,
         "Description": "Used to fetch a single value (bidirect)",
         "Compression": [
             {"FID": "IPV6.VER", "TV": 6, "MO": "equal", "CDA": "not-sent"},
@@ -72,7 +36,7 @@
             {"FID": "COAP.option(17)", "DI": "DW", "TV":  142, "MO": "equal", "CDA": "not-sent"}
 
         ]},         {
-        "RuleIDValue" : 2,
+        "RuleIDValue" : 1,
         "RuleIDLength": 5,
         "Description": "Used to iPatch, ack with 7/3. Empty CoAP for notification in UP",
         "Compression": [
@@ -105,7 +69,7 @@
                                 "MO": "equal","CDA": "not-sent"},
             {"FID": "COAP.option(12)", "DI": "DW", "TV": [141,142], "MO": "match-mapping", "CDA": "mapping-sent"}
         ]},          {
-        "RuleIDValue" : 3,
+        "RuleIDValue" : 2,
         "RuleIDLength": 5,
         "Description": "Used for notitifications (observe)",
         "Compression": [
@@ -139,7 +103,7 @@
             {"FID": "COAP.option(12)", "DI": "UP", "TV": 142, "MO": "equal", "CDA": "not-sent"},
             {"FID": "COAP.option(17)", "DI": "DW", "TV": 142, "MO": "equal", "CDA": "not-sent"}
         ]},         {
-        "RuleIDValue" : 4,
+        "RuleIDValue" : 3,
         "RuleIDLength": 5,
         "Description": "Empty messages (e.g., ACK with empty code, or RST)",
         "Compression": [
@@ -167,7 +131,7 @@
             {"FID": "COAP.MID",  "DI": "BI",            "MO": "ignore", "CDA": "value-sent"},
             {"FID": "COAP.TOKEN", "FL": "length-byte(16)",     "MO": "ignore","CDA": "value-sent"}
         ]},   {
-        "RuleIDValue" : 5,
+        "RuleIDValue" : 4,
         "RuleIDLength": 5,
         "Description": "ICMPv6 port unreachable",
         "Compression": [
