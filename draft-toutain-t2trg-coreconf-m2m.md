@@ -3272,6 +3272,42 @@ SCHC only compresses the fixed IPv6/UDP/CoAP header fields, not the
 CoAP payload (bootstrap response: 175 -> 126 bytes, 28%, dominated by
 the 118-byte payload).
 
+{{fig-schc-rule-0-error-example}} shows the other side of Rule 0: a
+FETCH targeting a SID the device does not have. The 4.04 Not Found
+response carries no payload and no Content-Format option, so it does
+not match Rule 0's CODE mapping or its fixed Up-direction options; it
+falls through to Rule 3 instead, where TYPE, TKL, CODE and MID are all
+left uncompressed.
+
+~~~~
+Device            SCHC                SCHC                App
+
+FETCH on a non-existent SID -- request (Down):
+|                 |                   |                   |
+|                 |                   |<---- Pkt 64B -----|
+|                 |  Rule 0/5         |                   |
+|                 |  residue: 53b     |                   |
+|                 |  payload: 3B      |                   |
+|                 |<- 11B (pad 6b) ---|                   |
+|<--- Pkt 64B ----|                   |                   |
+  IPv6(40B)+UDP(8B)+CoAP(16B) = 64 B
+  FETCH /c  MID=12230 Token=2daf
+  Payload: 19 F2 93 (SID 62099, 3 B)
+
+4.04 Not Found, no options -- response (Up, Rule 3):
+|                 |                   |                   |
+|---- Pkt 54B --->|                   |                   |
+|                 |  Rule 3/5         |                   |
+|                 |  residue: 62b     |                   |
+|                 |  payload: 0B      |                   |
+|                 |--- 9B (pad 5b) -->|                   |
+|                 |                   |----- Pkt 54B ---->|
+  IPv6(40B)+UDP(8B)+CoAP(6B) = 54 B
+  4.04 Not Found  MID=12230 Token=2daf
+  Payload: (none)
+~~~~
+{: #fig-schc-rule-0-error-example title="A FETCH error: Rule 0 for the request, Rule 3 for the 4.04 response" artwork-align="left"}
+
 ## Rule 1: Used to iPatch, ack with 7/3. Empty CoAP for notification in UP
 
 ~~~~

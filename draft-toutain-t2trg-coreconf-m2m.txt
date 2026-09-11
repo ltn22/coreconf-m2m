@@ -125,13 +125,13 @@ Internet-Draft                coreconf-m2m                September 2026
    Appendix G.  SCHC Rule Set  . . . . . . . . . . . . . . . . . . .  74
      G.1.  Rule 0: Used to fetch a single value (bidirect) . . . . .  74
      G.2.  Rule 1: Used to iPatch, ack with 7/3.  Empty CoAP for
-           notification in UP  . . . . . . . . . . . . . . . . . . .  77
-     G.3.  Rule 2: Used for notitifications (observe)  . . . . . . .  79
+           notification in UP  . . . . . . . . . . . . . . . . . . .  78
+     G.3.  Rule 2: Used for notitifications (observe)  . . . . . . .  80
      G.4.  Rule 3: Empty messages (e.g., ACK with empty code, or
-           RST)  . . . . . . . . . . . . . . . . . . . . . . . . . .  82
-     G.5.  Rule 4: ICMPv6 destination unreachable (any code) . . . .  83
-   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  85
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  85
+           RST)  . . . . . . . . . . . . . . . . . . . . . . . . . .  83
+     G.5.  Rule 4: ICMPv6 destination unreachable (any code) . . . .  84
+   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  86
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  86
 
 1.  Introduction
 
@@ -4282,11 +4282,11 @@ Internet-Draft                coreconf-m2m                September 2026
    the CoAP payload (bootstrap response: 175 -> 126 bytes, 28%,
    dominated by the 118-byte payload).
 
-G.2.  Rule 1: Used to iPatch, ack with 7/3.  Empty CoAP for notification
-      in UP
-
-
-
+   Figure 36 shows the other side of Rule 0: a FETCH targeting a SID the
+   device does not have.  The 4.04 Not Found response carries no payload
+   and no Content-Format option, so it does not match Rule 0's CODE
+   mapping or its fixed Up-direction options; it falls through to Rule 3
+   instead, where TYPE, TKL, CODE and MID are all left uncompressed.
 
 
 
@@ -4310,6 +4310,62 @@ G.2.  Rule 1: Used to iPatch, ack with 7/3.  Empty CoAP for notification
 
 
 Toutain                   Expires 15 March 2027                [Page 77]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
+   Device            SCHC                SCHC                App
+
+   FETCH on a non-existent SID -- request (Down):
+   |                 |                   |                   |
+   |                 |                   |<---- Pkt 64B -----|
+   |                 |  Rule 0/5         |                   |
+   |                 |  residue: 53b     |                   |
+   |                 |  payload: 3B      |                   |
+   |                 |<- 11B (pad 6b) ---|                   |
+   |<--- Pkt 64B ----|                   |                   |
+     IPv6(40B)+UDP(8B)+CoAP(16B) = 64 B
+     FETCH /c  MID=12230 Token=2daf
+     Payload: 19 F2 93 (SID 62099, 3 B)
+
+   4.04 Not Found, no options -- response (Up, Rule 3):
+   |                 |                   |                   |
+   |---- Pkt 54B --->|                   |                   |
+   |                 |  Rule 3/5         |                   |
+   |                 |  residue: 62b     |                   |
+   |                 |  payload: 0B      |                   |
+   |                 |--- 9B (pad 5b) -->|                   |
+   |                 |                   |----- Pkt 54B ---->|
+     IPv6(40B)+UDP(8B)+CoAP(6B) = 54 B
+     4.04 Not Found  MID=12230 Token=2daf
+     Payload: (none)
+
+      Figure 36: A FETCH error: Rule 0 for the request, Rule 3 for the
+                               4.04 response
+
+G.2.  Rule 1: Used to iPatch, ack with 7/3.  Empty CoAP for notification
+      in UP
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Toutain                   Expires 15 March 2027                [Page 78]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4350,7 +4406,7 @@ Residue (Up):   udp-app-port(16b) | coap-tkl(4b) | coap-code(8b) |
                 coap-mid(16b) | coap-token(var)
   Total: 44b+var
 
-     Figure 36: SCHC Rule 1 (RuleIDLength=5), with residue format
+     Figure 37: SCHC Rule 1 (RuleIDLength=5), with residue format
 
    The request side of this rule does not change from Rule 0: the CoAP
    CODE is fixed to 7 (iPATCH), and the request carries the SID(s) being
@@ -4365,7 +4421,7 @@ Residue (Up):   udp-app-port(16b) | coap-tkl(4b) | coap-code(8b) |
 
 
 
-Toutain                   Expires 15 March 2027                [Page 78]
+Toutain                   Expires 15 March 2027                [Page 79]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4376,7 +4432,7 @@ Internet-Draft                coreconf-m2m                September 2026
    An unreachable device is signaled out-of-band by an ICMPv6
    destination unreachable message, handled by Rule 4.
 
-   Figure 37 applies Rule 1 to the sensor-alert configuration of
+   Figure 38 applies Rule 1 to the sensor-alert configuration of
    Figure 12: the request, 83 bytes uncompressed, crosses the
    constrained link as a 32-byte compressed message (5-bit RuleID +
    52-bit residue + the 24-byte iPATCH payload, padded to a byte
@@ -4410,7 +4466,7 @@ Internet-Draft                coreconf-m2m                September 2026
      2.04 Changed  MID=42312 Token=2490
      Payload: (none)
 
-    Figure 37: Rule 1 applied to the sensor-alert configuration example
+    Figure 38: Rule 1 applied to the sensor-alert configuration example
 
 G.3.  Rule 2: Used for notitifications (observe)
 
@@ -4421,7 +4477,7 @@ G.3.  Rule 2: Used for notitifications (observe)
 
 
 
-Toutain                   Expires 15 March 2027                [Page 79]
+Toutain                   Expires 15 March 2027                [Page 80]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4468,7 +4524,7 @@ Residue (Up):   udp-app-port(16b) | coap-type(1b) | coap-tkl(4b) |
                 coap-option(6)(var)
   Total: 37b+var
 
-     Figure 38: SCHC Rule 2 (RuleIDLength=5), with residue format
+     Figure 39: SCHC Rule 2 (RuleIDLength=5), with residue format
 
    This rule is the same as Rule 0, except that the Uri-Path targets
    "/s" instead of "/c", and an Observe option (option 6) is present in
@@ -4477,7 +4533,7 @@ Residue (Up):   udp-app-port(16b) | coap-type(1b) | coap-tkl(4b) |
 
 
 
-Toutain                   Expires 15 March 2027                [Page 80]
+Toutain                   Expires 15 March 2027                [Page 81]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4488,7 +4544,7 @@ Internet-Draft                coreconf-m2m                September 2026
    -- which carries no CODE and no Observe option -- does not match this
    rule's fixed fields and falls through to Rule 3 instead.
 
-   Figure 39 applies Rule 2 (and Rule 3 for the ACK) to an Observe
+   Figure 40 applies Rule 2 (and Rule 3 for the ACK) to an Observe
    subscription on "/s" with three notifications: the first two are Non-
    Confirmable, the third is Confirmable and is acknowledged by an empty
    ACK, which does not match Rule 2's fixed CODE/Observe structure and
@@ -4533,7 +4589,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 15 March 2027                [Page 81]
+Toutain                   Expires 15 March 2027                [Page 82]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4576,7 +4632,7 @@ Internet-Draft                coreconf-m2m                September 2026
      Empty ACK  MID=65151  TKL=0
      Payload: (none)
 
-     Figure 39: Rule 2 applied to an Observe subscription with two NON
+     Figure 40: Rule 2 applied to an Observe subscription with two NON
                           and one CON notification
 
 G.4.  Rule 3: Empty messages (e.g., ACK with empty code, or RST)
@@ -4589,7 +4645,7 @@ G.4.  Rule 3: Empty messages (e.g., ACK with empty code, or RST)
 
 
 
-Toutain                   Expires 15 March 2027                [Page 82]
+Toutain                   Expires 15 March 2027                [Page 83]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4629,7 +4685,7 @@ Residue (Up):   udp-app-port(16b) | coap-type(2b) | coap-tkl(4b) |
                 coap-token(var)
   Total: 46b+var
 
-     Figure 40: SCHC Rule 3 (RuleIDLength=5), with residue format
+     Figure 41: SCHC Rule 3 (RuleIDLength=5), with residue format
 
    Beyond empty ACKs and RSTs, this rule is also the fallback for an
    error response to a FETCH (Rule 0) or an Observe exchange (Rule 2)
@@ -4645,7 +4701,7 @@ G.5.  Rule 4: ICMPv6 destination unreachable (any code)
 
 
 
-Toutain                   Expires 15 March 2027                [Page 83]
+Toutain                   Expires 15 March 2027                [Page 84]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4689,7 +4745,7 @@ Residue (Down): icmpv6-code(8b) | udp-app-port(16b)
 Residue (Up):   icmpv6-code(8b) | udp-app-port(16b)
   Total: 24b
 
-     Figure 41: SCHC Rule 4 (RuleIDLength=5), with residue format
+     Figure 42: SCHC Rule 4 (RuleIDLength=5), with residue format
 
    ICMPv6 Type is fixed to 1 (Destination Unreachable), but Code is left
    uncompressed so that this rule covers every Destination Unreachable
@@ -4701,7 +4757,7 @@ Residue (Up):   icmpv6-code(8b) | udp-app-port(16b)
 
 
 
-Toutain                   Expires 15 March 2027                [Page 84]
+Toutain                   Expires 15 March 2027                [Page 85]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4757,4 +4813,4 @@ Author's Address
 
 
 
-Toutain                   Expires 15 March 2027                [Page 85]
+Toutain                   Expires 15 March 2027                [Page 86]
