@@ -3422,6 +3422,89 @@ to a two-value mapping, CON (0) or NON (1): an ACK or RST — which
 carries no CODE and no Observe option — does not match this rule's
 fixed fields and falls through to Rule 3 instead.
 
+{{fig-schc-rule-2-example}} applies Rule 2 (and Rule 3 for the ACK)
+to an Observe subscription on "/s" with three notifications: the first
+two are Non-Confirmable, the third is Confirmable and is acknowledged
+by an empty ACK, which does not match Rule 2's fixed CODE/Observe
+structure and therefore falls through to Rule 3.
+
+~~~~
+Device            SCHC                SCHC                App
+
+1. Subscribe -- FETCH /s + Observe:0 (Down):
+|                 |                   |                   |
+|                 |                   |<---- Pkt 71B -----|
+|                 |  Rule 2/5         |                   |
+|                 |  residue: 53b     |                   |
+|                 |  payload: 9B      |                   |
+|                 |<- 17B (pad 6b) ---|                   |
+|<--- Pkt 71B ----|                   |                   |
+  IPv6(40B)+UDP(8B)+CoAP(23B) = 71 B
+  FETCH  MID=42311 Token=248f  Observe:0
+  Payload: [62048, 10000001] (9 B)
+
+2. Subscription ack -- Observe:0, NON (Up):
+|                 |                   |                   |
+|---- Pkt 59B --->|                   |                   |
+|                 |  Rule 2/5         |                   |
+|                 |  residue: 53b     |                   |
+|                 |  payload: 1B      |                   |
+|                 |--- 9B (pad 6b) -->|                   |
+|                 |                   |----- Pkt 59B ---->|
+  IPv6(40B)+UDP(8B)+CoAP(11B) = 59 B
+  2.05 Content  MID=65148 Token=248f  Observe:0
+  Payload: {} (1 B)
+
+3. Notification #1 -- Observe:1, NON (Up):
+|                 |                   |                   |
+|---- Pkt 75B --->|                   |                   |
+|                 |  Rule 2/5         |                   |
+|                 |  residue: 61b     |                   |
+|                 |  payload: 16B     |                   |
+|                 |-- 25B (pad 6b) -->|                   |
+|                 |                   |----- Pkt 75B ---->|
+  IPv6(40B)+UDP(8B)+CoAP(27B) = 75 B
+  2.05 Content  MID=65149 Token=248f  Observe:1
+  Payload: 16 B
+
+4. Notification #2 -- Observe:2, NON (Up):
+|                 |                   |                   |
+|---- Pkt 75B --->|                   |                   |
+|                 |  Rule 2/5         |                   |
+|                 |  residue: 61b     |                   |
+|                 |  payload: 16B     |                   |
+|                 |-- 25B (pad 6b) -->|                   |
+|                 |                   |----- Pkt 75B ---->|
+  IPv6(40B)+UDP(8B)+CoAP(27B) = 75 B
+  2.05 Content  MID=65150 Token=248f  Observe:2
+  Payload: 16 B
+
+5. Notification #3 -- Observe:3, CON (Up):
+|                 |                   |                   |
+|---- Pkt 75B --->|                   |                   |
+|                 |  Rule 2/5         |                   |
+|                 |  residue: 61b     |                   |
+|                 |  payload: 16B     |                   |
+|                 |-- 25B (pad 6b) -->|                   |
+|                 |                   |----- Pkt 75B ---->|
+  IPv6(40B)+UDP(8B)+CoAP(27B) = 75 B
+  2.05 Content  MID=65151 Token=248f  Observe:3
+  Payload: 16 B  -- CON, needs an ACK
+
+6. ACK for #3's CON, empty (Down, Rule 3):
+|                 |                   |                   |
+|                 |                   |<---- Pkt 52B -----|
+|                 |  Rule 3/5         |                   |
+|                 |  residue: 46b     |                   |
+|                 |  payload: 0B      |                   |
+|                 |<-- 7B (pad 5b) ---|                   |
+|<--- Pkt 52B ----|                   |                   |
+  IPv6(40B)+UDP(8B)+CoAP(4B) = 52 B
+  Empty ACK  MID=65151  TKL=0
+  Payload: (none)
+~~~~
+{: #fig-schc-rule-2-example title="Rule 2 applied to an Observe subscription with two NON and one CON notification" artwork-align="left"}
+
 ## Rule 3: Empty messages (e.g., ACK with empty code, or RST)
 
 ~~~~
