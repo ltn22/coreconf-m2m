@@ -3568,6 +3568,13 @@ Device            SCHC                SCHC                App
 ~~~~
 {: #fig-schc-rule-2-example title="Rule 2 applied to an Observe subscription with two NON and one CON notification" artwork-align="left"}
 
+The notification stream ends when the client sends a new FETCH on the
+same resource without the Observe option, when the client sends a
+RST, when a Confirmable notification receives no ACK after a number
+of retransmission attempts, or when an ICMPv6 destination unreachable
+message is received for the client — all of which the device
+interprets as a lost subscriber.
+
 ## Rule 3: Empty messages (e.g., ACK with empty code, or RST)
 
 ~~~~

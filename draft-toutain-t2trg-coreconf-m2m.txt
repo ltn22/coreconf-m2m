@@ -128,7 +128,7 @@ Internet-Draft                coreconf-m2m                September 2026
            notification in UP  . . . . . . . . . . . . . . . . . . .  79
      G.3.  Rule 2: Used for notitifications (observe)  . . . . . . .  81
      G.4.  Rule 3: Empty messages (e.g., ACK with empty code, or
-           RST)  . . . . . . . . . . . . . . . . . . . . . . . . . .  84
+           RST)  . . . . . . . . . . . . . . . . . . . . . . . . . .  85
      G.5.  Rule 4: ICMPv6 destination unreachable (any code) . . . .  85
    Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  87
    Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  87
@@ -4691,12 +4691,12 @@ Internet-Draft                coreconf-m2m                September 2026
      Figure 40: Rule 2 applied to an Observe subscription with two NON
                           and one CON notification
 
-G.4.  Rule 3: Empty messages (e.g., ACK with empty code, or RST)
-
-
-
-
-
+   The notification stream ends when the client sends a new FETCH on the
+   same resource without the Observe option, when the client sends a
+   RST, when a Confirmable notification receives no ACK after a number
+   of retransmission attempts, or when an ICMPv6 destination unreachable
+   message is received for the client -- all of which the device
+   interprets as a lost subscriber.
 
 
 
@@ -4705,6 +4705,8 @@ Toutain                   Expires 15 March 2027                [Page 84]
 
 Internet-Draft                coreconf-m2m                September 2026
 
+
+G.4.  Rule 3: Empty messages (e.g., ACK with empty code, or RST)
 
 /---------------------+----------+----+-----------+---------+------------\
 | FID                 | FL       | DI | TV        | MO      | CDA        |
@@ -4751,8 +4753,6 @@ Residue (Up):   udp-app-port(16b) | coap-type(2b) | coap-tkl(4b) |
    carried unchanged, exactly as for a normal FETCH response.
 
 G.5.  Rule 4: ICMPv6 destination unreachable (any code)
-
-
 
 
 
