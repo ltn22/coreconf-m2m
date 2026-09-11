@@ -3173,16 +3173,14 @@ residue size for that direction.
 |                     | -byte( |    |           |         |            |
 |                     | 16)    |    |           |         |            |
 | coap-option(11)     | var    | dw | "c"       | equal   | not-sent   |
-| coap-option(12)     | var    | dw | 141,142   | match-  | mapping-   |
-|                     |        |    |           | mapping | sent       |
-| coap-option(12)     | var    | up | 142       | equal   | not-sent   |
-| coap-option(17)     | var    | dw | 142       | equal   | not-sent   |
+| coap-option(12)     | var    | dw | 141       | equal   | not-sent   |
+| coap-option(12)     | var    | up | 141       | equal   | not-sent   |
+| coap-option(17)     | var    | dw | 141       | equal   | not-sent   |
 \---------------------+--------+----+-----------+---------+------------/
 
 Residue (Down): udp-app-port(16b) | coap-tkl(4b) | coap-code(1b) |
-                coap-mid(16b) | coap-token(var) |
-                coap-option(12)(1b)
-  Total: 38b+var
+                coap-mid(16b) | coap-token(var)
+  Total: 37b+var
 Residue (Up):   udp-app-port(16b) | coap-tkl(4b) | coap-code(1b) |
                 coap-mid(16b) | coap-token(var)
   Total: 37b+var
@@ -3364,6 +3362,7 @@ Residue (Up):   udp-app-port(16b)
   Total: 16b
 ~~~~
 {: #fig-schc-rule-4 title="SCHC Rule 4 (RuleIDLength=5), with residue format" artwork-align="left"}
+
 
 
 

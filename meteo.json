@@ -31,9 +31,9 @@
 
             {"FID": "COAP.option(11)", "FP": 1, "DI": "DW", "TV": "c",
                                 "MO": "equal","CDA": "not-sent"},
-            {"FID": "COAP.option(12)", "DI": "DW", "TV": [141,142], "MO": "match-mapping", "CDA": "mapping-sent"},
-            {"FID": "COAP.option(12)", "DI": "UP", "TV":  142, "MO": "equal", "CDA": "not-sent"},
-            {"FID": "COAP.option(17)", "DI": "DW", "TV":  142, "MO": "equal", "CDA": "not-sent"}
+            {"FID": "COAP.option(12)", "DI": "DW", "TV": 141, "MO": "equal", "CDA": "not-sent"},
+            {"FID": "COAP.option(12)", "DI": "UP", "TV":  141, "MO": "equal", "CDA": "not-sent"},
+            {"FID": "COAP.option(17)", "DI": "DW", "TV":  141, "MO": "equal", "CDA": "not-sent"}
 
         ]},         {
         "RuleIDValue" : 1,
