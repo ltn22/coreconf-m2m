@@ -580,7 +580,7 @@ The notification ends when either:
 
 # CORECONF Overview in the M2M Context
 
-## CoAP Methods Mapping
+## CoAP Methods Mapping {#coap-methods-mapping}
 
 CORECONF defines mappings for all CoAP methods, but this document uses only two:
 
@@ -1759,11 +1759,21 @@ works out this recommendation on two concrete examples.
 A SID that falls outside every configured (`entry_point`, `offset`)
 pair is simply sent as its official value, without breaking any SID that is left out.
 
-
 ## SCHC
 
+The traffic profile given in {{coap-methods-mapping}} recommends
+limiting exchanges to FETCH and iPATCH. This limits the number of
+rules needed to compress coreconf-m2m traffic with SCHC {{RFC8724}}.
+{{annex-schc-rules}} gives an example where two rules are used to
+cover the bidirectional traffic for FETCH and iPATCH (Rules 0 and 1).
+Another rule is related to notifications, carrying an Observe option
+(Rule 2).
 
-TBD.
+It is important to also cover error messages. The example defines one
+generic CoAP rule to cover any TYPE and CODE, without options,
+corresponding to error notifications (Rule 3), and one rule for ICMP
+traffic, to inform the server that the client is no longer active
+(Rule 4).
 
 # Conclusion
 
@@ -3733,42 +3743,41 @@ overlap.
 
 Which module goes first matters: the first module gets the deepest,
 single-byte-encoding range, so it should be the one whose SIDs appear
-most often on the wire. This annex compares the two possible orderings
-on the resource discovery exchange of {{fig-resource-discovery}}, which
-mixes both modules: a coreconf-m2m absolute SID (62002, the
-"/bootstrap" node) and its structural delta keys, against fourteen
-atmos absolute SIDs — one per discovered transducer, since each
-identityref value naming a transducer type is an absolute SID, not a
-delta.
+most often on the wire. Applying the allocation strategy in
+{{I-D.toutain-core-private-sid-translation}} to the resource discovery
+exchange of {{fig-resource-discovery}} — which references fourteen
+distinct atmos identityref values (one per discovered transducer)
+against a single coreconf-m2m absolute SID (62002, the "/bootstrap"
+node, appearing twice — once in the request, once as the response's
+outer key) — the module with the higher count of on-wire absolute-SID
+occurrences, atmos, is given `offset` = 0, and coreconf-m2m is shifted
+by `offset` = -100. This is a property of the traffic pattern, not of
+the modules themselves: a session dominated by coreconf-m2m structural
+exchanges (e.g. repeated FETCH/iPATCH on notification-parameters)
+would favor the opposite ordering.
 
-## Comparing the Two Orderings
+For SCHC to actually perform this compression, Rules 0, 1, and 2
+({{annex-schc-rules}}) each need an additional entry covering the CoAP
+payload, using the `sid-translation` CDA defined in
+{{I-D.toutain-core-private-sid-translation}} together with the
+"fl-remaining" Field Length function {{SCHC-TOWARD-9363BIS}} — which
+consumes whatever bytes are left in the packet, since the payload has
+no fixed length. Since the Function Arguments MAY be repeated, both
+models are covered by a single entry, shown in
+{{fig-sid-translation-entry}}: `entry_point` = 10000000 (atmos) with
+`offset` = 0, followed by `entry_point` = 62000 (coreconf-m2m) with
+`offset` = -100.
 
-**coreconf-m2m first** (`offset` = 0 for coreconf-m2m, `offset` = -400
-for atmos): 62002 translates to the private SID -3, one byte instead
-of three. Each atmos identityref value falls in the -402 to -417
-range, which still requires 3 bytes (down from 5, since the original
-absolute atmos SIDs exceed 65535). The request shrinks from 3 to 1
-byte, and the response from 118 to 88 bytes — a 26% reduction overall.
-
-**atmos first** (`offset` = 0 for atmos, `offset` = -100 for
-coreconf-m2m): the fourteen atmos identityref values now fall in the
--2 to -17 range, encoding in a single byte each (down from 5 bytes),
-while 62002 becomes -103, which still needs 2 bytes (worse than the
-first ordering's 1 byte, but this single occurrence is negligible next
-to fourteen 4-byte-per-value savings). The request grows slightly to 2
-bytes, but the response shrinks from 118 to 61 bytes — a 48% reduction
-overall, nearly twice as good as putting coreconf-m2m first.
-
-The reason is straightforward application of the allocation strategy
-in {{I-D.toutain-core-private-sid-translation}}: this exchange
-references fourteen distinct atmos identityref values but only one
-coreconf-m2m absolute SID (62002, appearing twice — once in the
-request, once as the response's outer key), so the module with the
-higher count of on-wire absolute-SID occurrences — atmos, not
-coreconf-m2m — should receive `offset` = 0. This is a property of the
-traffic pattern, not of the modules themselves: a session dominated by
-coreconf-m2m structural exchanges (e.g. repeated FETCH/iPATCH on
-notification-parameters) would favor the opposite ordering.
+~~~~
+/------------+--------------+----+-----+---------+-------------------\
+| FID        | FL           | DI | TV  | MO      | CDA               |
++============+==============+====+=====+=========+===================+
+| payload    | fl-remaining | bi |     | ignore  | sid-translation(  |
+|            |              |    |     |         | 10000000, 0,      |
+|            |              |    |     |         | 62000, -100)      |
+\------------+--------------+----+-----+---------+-------------------/
+~~~~
+{: #fig-sid-translation-entry title="Payload entry added to Rules 0, 1 and 2 for private SID translation of both models" artwork-align="left"}
 
 ## Worked Example (atmos first)
 
