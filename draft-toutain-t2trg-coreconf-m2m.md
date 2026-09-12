@@ -51,6 +51,7 @@ normative:
 informative:
   RFC8376:   # LPWAN overview
   RFC9179:   # YANG Grouping for Geographic Locations
+  RFC9371:   # Private Enterprise Numbers
   RFC8949:   # CBOR
   RFC7396:   # JSON Merge Patch
   RFC8428:   # SenML
@@ -1715,7 +1716,48 @@ descriptions to gain a better understanding of the device.
 
 ## SID translation
 
-TBD.
+Official YANG SIDs {{I-D.ietf-core-sid}} are globally unique integers,
+but that global scope makes them larger than strictly necessary on a
+link where only two endpoints ever talk to each other and no
+third-party CORECONF implementation needs to be interoperable with.
+{{I-D.toutain-core-private-sid-translation}} defines a mechanism for
+such closed deployments: each official SID is transformed, purely
+arithmetically, into a small negative integer, as a "private SID",
+which encodes in a smaller CBOR sequence.
+
+The transformation is:
+
+~~~
+privateSID = (offset - 1) - (current_sid - entry_point)
+~~~
+
+where `entry_point` is the lowest SID officially allocated to the
+YANG Data Model the SID belongs to, and `offset` is a non-positive
+integer that shifts the model's private range so that it does not
+overlap with another translated model's range. With `offset` = 0, the
+node at `entry_point` maps to -1, the next one to -2, and so on:
+`offset` lets a second, third, etc. model be translated in the same
+session by shifting each one's private range further into negative
+territory, without changing the formula itself or which module a
+given negative SID belongs to. Both endpoints MUST share the same
+`entry_point` and `offset` per model for the translation to be
+consistent.
+
+More generally, a coreconf-m2m deployment involves at least two kinds
+of YANG Data Models translated together: the coreconf-m2m model
+itself, together with augmentations it may receive, and one
+or more device-description models, such as atmos in this document's
+examples. If coreconf-m2m is eventually standardized as an IETF model,
+its SIDs will sit in the low thousands, while device-description
+models, being commercial and vendor-specific, are expected to be
+assigned SIDs in a Registrar's block or a Private Enterprise Number
+range {{RFC9371}} both starting much higher. The device-description
+model SHOULD therefore be given the smaller offset (typically 0, the
+deepest range), and the coreconf-m2m model the larger one (or not translated). {{annex-private-sid}}
+works out this recommendation on two concrete examples.
+
+A SID that falls outside every configured (`entry_point`, `offset`)
+pair is simply sent as its official value, without breaking any SID that is left out.
 
 
 ## SCHC

@@ -99,13 +99,13 @@ Table of Contents
    8.  MCP . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  38
    9.  Compression . . . . . . . . . . . . . . . . . . . . . . . . .  41
      9.1.  SID translation . . . . . . . . . . . . . . . . . . . . .  41
-     9.2.  SCHC  . . . . . . . . . . . . . . . . . . . . . . . . . .  41
-   10. Conclusion  . . . . . . . . . . . . . . . . . . . . . . . . .  41
-   11. Security Considerations . . . . . . . . . . . . . . . . . . .  42
-   12. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  42
-     12.1.  YANG Module Registration . . . . . . . . . . . . . . . .  42
-     12.2.  SID Range Allocation . . . . . . . . . . . . . . . . . .  42
-   13. References  . . . . . . . . . . . . . . . . . . . . . . . . .  42
+     9.2.  SCHC  . . . . . . . . . . . . . . . . . . . . . . . . . .  42
+   10. Conclusion  . . . . . . . . . . . . . . . . . . . . . . . . .  42
+   11. Security Considerations . . . . . . . . . . . . . . . . . . .  43
+   12. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  43
+     12.1.  YANG Module Registration . . . . . . . . . . . . . . . .  43
+     12.2.  SID Range Allocation . . . . . . . . . . . . . . . . . .  43
+   13. References  . . . . . . . . . . . . . . . . . . . . . . . . .  43
 
 
 
@@ -114,29 +114,29 @@ Toutain                   Expires 16 March 2027                 [Page 2]
 Internet-Draft                coreconf-m2m                September 2026
 
 
-     13.1.  Normative References . . . . . . . . . . . . . . . . . .  42
+     13.1.  Normative References . . . . . . . . . . . . . . . . . .  43
      13.2.  Informative References . . . . . . . . . . . . . . . . .  44
-   Appendix A.  Module Tree  . . . . . . . . . . . . . . . . . . . .  46
-   Appendix B.  Complete YANG Module . . . . . . . . . . . . . . . .  48
-   Appendix C.  SID File (CSV) . . . . . . . . . . . . . . . . . . .  63
-   Appendix D.  atmos YANG Module  . . . . . . . . . . . . . . . . .  65
-   Appendix E.  atmos SID File (CSV) . . . . . . . . . . . . . . . .  69
-   Appendix F.  ccm2m Ontology . . . . . . . . . . . . . . . . . . .  70
-   Appendix G.  SCHC Rule Set  . . . . . . . . . . . . . . . . . . .  74
-     G.1.  Rule 0: Used to fetch a single value (bidirect) . . . . .  75
+   Appendix A.  Module Tree  . . . . . . . . . . . . . . . . . . . .  47
+   Appendix B.  Complete YANG Module . . . . . . . . . . . . . . . .  49
+   Appendix C.  SID File (CSV) . . . . . . . . . . . . . . . . . . .  64
+   Appendix D.  atmos YANG Module  . . . . . . . . . . . . . . . . .  66
+   Appendix E.  atmos SID File (CSV) . . . . . . . . . . . . . . . .  70
+   Appendix F.  ccm2m Ontology . . . . . . . . . . . . . . . . . . .  71
+   Appendix G.  SCHC Rule Set  . . . . . . . . . . . . . . . . . . .  75
+     G.1.  Rule 0: Used to fetch a single value (bidirect) . . . . .  76
      G.2.  Rule 1: Used to iPatch, ack with 7/3.  Empty CoAP for
-           notification in UP  . . . . . . . . . . . . . . . . . . .  79
-     G.3.  Rule 2: Used for notitifications (observe)  . . . . . . .  81
+           notification in UP  . . . . . . . . . . . . . . . . . . .  80
+     G.3.  Rule 2: Used for notitifications (observe)  . . . . . . .  82
      G.4.  Rule 3: Empty messages (e.g., ACK with empty code, or
-           RST)  . . . . . . . . . . . . . . . . . . . . . . . . . .  85
-     G.5.  Rule 4: ICMPv6 destination unreachable (any code) . . . .  85
-   Appendix H.  Private SID Translation  . . . . . . . . . . . . . .  87
-     H.1.  Comparing the Two Orderings . . . . . . . . . . . . . . .  87
-     H.2.  Worked Example (atmos first)  . . . . . . . . . . . . . .  88
+           RST)  . . . . . . . . . . . . . . . . . . . . . . . . . .  86
+     G.5.  Rule 4: ICMPv6 destination unreachable (any code) . . . .  86
+   Appendix H.  Private SID Translation  . . . . . . . . . . . . . .  88
+     H.1.  Comparing the Two Orderings . . . . . . . . . . . . . . .  88
+     H.2.  Worked Example (atmos first)  . . . . . . . . . . . . . .  89
      H.3.  Second Example: Time-Series Subscription and
-           Notification  . . . . . . . . . . . . . . . . . . . . . .  89
-   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  89
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  90
+           Notification  . . . . . . . . . . . . . . . . . . . . . .  90
+   Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  90
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  91
 
 1.  Introduction
 
@@ -2253,7 +2253,54 @@ Internet-Draft                coreconf-m2m                September 2026
 
 9.1.  SID translation
 
-   TBD.
+   Official YANG SIDs [I-D.ietf-core-sid] are globally unique integers,
+   but that global scope makes them larger than strictly necessary on a
+   link where only two endpoints ever talk to each other and no third-
+   party CORECONF implementation needs to be interoperable with.
+   [I-D.toutain-core-private-sid-translation] defines a mechanism for
+   such closed deployments: each official SID is transformed, purely
+   arithmetically, into a small negative integer, as a "private SID",
+   which encodes in a smaller CBOR sequence.
+
+   The transformation is:
+
+   privateSID = (offset - 1) - (current_sid - entry_point)
+
+   where entry_point is the lowest SID officially allocated to the YANG
+   Data Model the SID belongs to, and offset is a non-positive integer
+   that shifts the model's private range so that it does not overlap
+   with another translated model's range.  With offset = 0, the node at
+   entry_point maps to -1, the next one to -2, and so on: offset lets a
+   second, third, etc. model be translated in the same session by
+   shifting each one's private range further into negative territory,
+   without changing the formula itself or which module a given negative
+   SID belongs to.  Both endpoints MUST share the same entry_point and
+   offset per model for the translation to be consistent.
+
+   More generally, a coreconf-m2m deployment involves at least two kinds
+   of YANG Data Models translated together: the coreconf-m2m model
+   itself, together with augmentations it may receive, and one or more
+   device-description models, such as atmos in this document's examples.
+   If coreconf-m2m is eventually standardized as an IETF model, its SIDs
+   will sit in the low thousands, while device-description models, being
+   commercial and vendor-specific, are expected to be assigned SIDs in a
+   Registrar's block or a Private Enterprise Number range [RFC9371] both
+   starting much higher.  The device-description model SHOULD therefore
+   be given the smaller offset (typically 0, the deepest range), and the
+   coreconf-m2m model the larger one (or not translated).  Appendix H
+   works out this recommendation on two concrete examples.
+
+
+
+
+Toutain                   Expires 16 March 2027                [Page 41]
+
+Internet-Draft                coreconf-m2m                September 2026
+
+
+   A SID that falls outside every configured (entry_point, offset) pair
+   is simply sent as its official value, without breaking any SID that
+   is left out.
 
 9.2.  SCHC
 
@@ -2291,17 +2338,21 @@ Internet-Draft                coreconf-m2m                September 2026
        data representation of the information, and allows a systematic
        conversion into the ontology.
 
-
-
-Toutain                   Expires 16 March 2027                [Page 41]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
    Based on the coreconf-m2m model, a device manufacturer only has to
    publish its data model, with its identityref identities, for that
    device to be included into the ontology and be understood by humans
    or by an LLM.
+
+
+
+
+
+
+
+Toutain                   Expires 16 March 2027                [Page 42]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
 11.  Security Considerations
 
@@ -2346,19 +2397,18 @@ Internet-Draft                coreconf-m2m                September 2026
               RFC 7950, DOI 10.17487/RFC7950, August 2016,
               <https://www.rfc-editor.org/info/rfc7950>.
 
-
-
-
-Toutain                   Expires 16 March 2027                [Page 42]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
    [RFC8610]  Birkholz, H., Vigano, C., and C. Bormann, "Concise Data
               Definition Language (CDDL): A Notational Convention to
               Express Concise Binary Object Representation (CBOR) and
               JSON Data Structures", RFC 8610, DOI 10.17487/RFC8610,
               June 2019, <https://www.rfc-editor.org/info/rfc8610>.
+
+
+
+Toutain                   Expires 16 March 2027                [Page 43]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
    [RFC9165]  Bormann, C., "Additional Control Operators for the Concise
               Data Definition Language (CDDL)", RFC 9165,
@@ -2400,21 +2450,21 @@ Internet-Draft                coreconf-m2m                September 2026
               DOI 10.17487/RFC2119, March 1997,
               <https://www.rfc-editor.org/info/rfc2119>.
 
-
-
-
-
-
-Toutain                   Expires 16 March 2027                [Page 43]
-
-Internet-Draft                coreconf-m2m                September 2026
-
-
    [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://www.rfc-editor.org/info/rfc8174>.
 
 13.2.  Informative References
+
+
+
+
+
+
+Toutain                   Expires 16 March 2027                [Page 44]
+
+Internet-Draft                coreconf-m2m                September 2026
+
 
    [RFC8376]  Farrell, S., Ed., "Low-Power Wide Area Network (LPWAN)
               Overview", RFC 8376, DOI 10.17487/RFC8376, May 2018,
@@ -2423,6 +2473,11 @@ Internet-Draft                coreconf-m2m                September 2026
    [RFC9179]  Hopps, C., "A YANG Grouping for Geographic Locations",
               RFC 9179, DOI 10.17487/RFC9179, February 2022,
               <https://www.rfc-editor.org/info/rfc9179>.
+
+   [RFC9371]  Baber, A. and P. Hoffman, "Registration Procedures for
+              Private Enterprise Numbers (PENs)", RFC 9371,
+              DOI 10.17487/RFC9371, March 2023,
+              <https://www.rfc-editor.org/info/rfc9371>.
 
    [RFC8949]  Bormann, C. and P. Hoffman, "Concise Binary Object
               Representation (CBOR)", STD 94, RFC 8949,
@@ -2455,17 +2510,21 @@ Internet-Draft                coreconf-m2m                September 2026
               December 2023, <https://datatracker.ietf.org/doc/html/
               draft-ietf-core-sid-24>.
 
-   [I-D.gudi-t2trg-senml-as-coreconf]
-              G, M., Toutain, L., Fernandez, A., and J. BONNIN, "SenML
-              is CORECONF (almost)", Work in Progress, Internet-Draft,
 
 
 
-Toutain                   Expires 16 March 2027                [Page 44]
+
+
+
+
+Toutain                   Expires 16 March 2027                [Page 45]
 
 Internet-Draft                coreconf-m2m                September 2026
 
 
+   [I-D.gudi-t2trg-senml-as-coreconf]
+              G, M., Toutain, L., Fernandez, A., and J. BONNIN, "SenML
+              is CORECONF (almost)", Work in Progress, Internet-Draft,
               draft-gudi-t2trg-senml-as-coreconf-00, 7 October 2024,
               <https://datatracker.ietf.org/doc/html/draft-gudi-t2trg-
               senml-as-coreconf-00>.
@@ -2514,10 +2573,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-
-
-
-Toutain                   Expires 16 March 2027                [Page 45]
+Toutain                   Expires 16 March 2027                [Page 46]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2573,7 +2629,7 @@ Appendix A.  Module Tree
 
 
 
-Toutain                   Expires 16 March 2027                [Page 46]
+Toutain                   Expires 16 March 2027                [Page 47]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2629,7 +2685,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 16 March 2027                [Page 47]
+Toutain                   Expires 16 March 2027                [Page 48]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2685,7 +2741,7 @@ Appendix B.  Complete YANG Module
 
 
 
-Toutain                   Expires 16 March 2027                [Page 48]
+Toutain                   Expires 16 March 2027                [Page 49]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2741,7 +2797,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 16 March 2027                [Page 49]
+Toutain                   Expires 16 March 2027                [Page 50]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2797,7 +2853,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 16 March 2027                [Page 50]
+Toutain                   Expires 16 March 2027                [Page 51]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2853,7 +2909,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 16 March 2027                [Page 51]
+Toutain                   Expires 16 March 2027                [Page 52]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2909,7 +2965,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 16 March 2027                [Page 52]
+Toutain                   Expires 16 March 2027                [Page 53]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -2965,7 +3021,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 16 March 2027                [Page 53]
+Toutain                   Expires 16 March 2027                [Page 54]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3021,7 +3077,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 16 March 2027                [Page 54]
+Toutain                   Expires 16 March 2027                [Page 55]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3077,7 +3133,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 16 March 2027                [Page 55]
+Toutain                   Expires 16 March 2027                [Page 56]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3133,7 +3189,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 16 March 2027                [Page 56]
+Toutain                   Expires 16 March 2027                [Page 57]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3189,7 +3245,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 16 March 2027                [Page 57]
+Toutain                   Expires 16 March 2027                [Page 58]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3245,7 +3301,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 16 March 2027                [Page 58]
+Toutain                   Expires 16 March 2027                [Page 59]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3301,7 +3357,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 16 March 2027                [Page 59]
+Toutain                   Expires 16 March 2027                [Page 60]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3357,7 +3413,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 16 March 2027                [Page 60]
+Toutain                   Expires 16 March 2027                [Page 61]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3413,7 +3469,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 16 March 2027                [Page 61]
+Toutain                   Expires 16 March 2027                [Page 62]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3469,7 +3525,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 16 March 2027                [Page 62]
+Toutain                   Expires 16 March 2027                [Page 63]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3525,7 +3581,7 @@ SID,Namespace,Identifier
 
 
 
-Toutain                   Expires 16 March 2027                [Page 63]
+Toutain                   Expires 16 March 2027                [Page 64]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3581,7 +3637,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 16 March 2027                [Page 64]
+Toutain                   Expires 16 March 2027                [Page 65]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3637,7 +3693,7 @@ Appendix D.  atmos YANG Module
 
 
 
-Toutain                   Expires 16 March 2027                [Page 65]
+Toutain                   Expires 16 March 2027                [Page 66]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3693,7 +3749,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 16 March 2027                [Page 66]
+Toutain                   Expires 16 March 2027                [Page 67]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3749,7 +3805,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 16 March 2027                [Page 67]
+Toutain                   Expires 16 March 2027                [Page 68]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3805,7 +3861,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 16 March 2027                [Page 68]
+Toutain                   Expires 16 March 2027                [Page 69]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3861,7 +3917,7 @@ Appendix E.  atmos SID File (CSV)
 
 
 
-Toutain                   Expires 16 March 2027                [Page 69]
+Toutain                   Expires 16 March 2027                [Page 70]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3917,7 +3973,7 @@ ccm2m:SID
 
 
 
-Toutain                   Expires 16 March 2027                [Page 70]
+Toutain                   Expires 16 March 2027                [Page 71]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -3973,7 +4029,7 @@ ccm2m:hasParam
 
 
 
-Toutain                   Expires 16 March 2027                [Page 71]
+Toutain                   Expires 16 March 2027                [Page 72]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4029,7 +4085,7 @@ ccm2m:coapPath
 
 
 
-Toutain                   Expires 16 March 2027                [Page 72]
+Toutain                   Expires 16 March 2027                [Page 73]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4085,7 +4141,7 @@ ccm2m:targetSid
 
 
 
-Toutain                   Expires 16 March 2027                [Page 73]
+Toutain                   Expires 16 March 2027                [Page 74]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4141,7 +4197,7 @@ Appendix G.  SCHC Rule Set
 
 
 
-Toutain                   Expires 16 March 2027                [Page 74]
+Toutain                   Expires 16 March 2027                [Page 75]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4197,7 +4253,7 @@ G.1.  Rule 0: Used to fetch a single value (bidirect)
 
 
 
-Toutain                   Expires 16 March 2027                [Page 75]
+Toutain                   Expires 16 March 2027                [Page 76]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4253,7 +4309,7 @@ Residue (Up):   udp-app-port(16b) | coap-tkl(4b) | coap-code(1b) |
 
 
 
-Toutain                   Expires 16 March 2027                [Page 76]
+Toutain                   Expires 16 March 2027                [Page 77]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4309,7 +4365,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 16 March 2027                [Page 77]
+Toutain                   Expires 16 March 2027                [Page 78]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4365,7 +4421,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 16 March 2027                [Page 78]
+Toutain                   Expires 16 March 2027                [Page 79]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4421,7 +4477,7 @@ G.2.  Rule 1: Used to iPatch, ack with 7/3.  Empty CoAP for notification
 
 
 
-Toutain                   Expires 16 March 2027                [Page 79]
+Toutain                   Expires 16 March 2027                [Page 80]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4477,7 +4533,7 @@ Residue (Up):   udp-app-port(16b) | coap-tkl(4b) | coap-code(8b) |
 
 
 
-Toutain                   Expires 16 March 2027                [Page 80]
+Toutain                   Expires 16 March 2027                [Page 81]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4533,7 +4589,7 @@ G.3.  Rule 2: Used for notitifications (observe)
 
 
 
-Toutain                   Expires 16 March 2027                [Page 81]
+Toutain                   Expires 16 March 2027                [Page 82]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4589,7 +4645,7 @@ Residue (Up):   udp-app-port(16b) | coap-type(1b) | coap-tkl(4b) |
 
 
 
-Toutain                   Expires 16 March 2027                [Page 82]
+Toutain                   Expires 16 March 2027                [Page 83]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4645,7 +4701,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 16 March 2027                [Page 83]
+Toutain                   Expires 16 March 2027                [Page 84]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4701,7 +4757,7 @@ Internet-Draft                coreconf-m2m                September 2026
 
 
 
-Toutain                   Expires 16 March 2027                [Page 84]
+Toutain                   Expires 16 March 2027                [Page 85]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4757,7 +4813,7 @@ G.5.  Rule 4: ICMPv6 destination unreachable (any code)
 
 
 
-Toutain                   Expires 16 March 2027                [Page 85]
+Toutain                   Expires 16 March 2027                [Page 86]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4813,7 +4869,7 @@ Residue (Up):   icmpv6-code(8b) | udp-app-port(16b)
 
 
 
-Toutain                   Expires 16 March 2027                [Page 86]
+Toutain                   Expires 16 March 2027                [Page 87]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4869,7 +4925,7 @@ H.1.  Comparing the Two Orderings
 
 
 
-Toutain                   Expires 16 March 2027                [Page 87]
+Toutain                   Expires 16 March 2027                [Page 88]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4925,7 +4981,7 @@ H.2.  Worked Example (atmos first)
 
 
 
-Toutain                   Expires 16 March 2027                [Page 88]
+Toutain                   Expires 16 March 2027                [Page 89]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -4981,7 +5037,7 @@ Acknowledgments
 
 
 
-Toutain                   Expires 16 March 2027                [Page 89]
+Toutain                   Expires 16 March 2027                [Page 90]
 
 Internet-Draft                coreconf-m2m                September 2026
 
@@ -5037,4 +5093,4 @@ Author's Address
 
 
 
-Toutain                   Expires 16 March 2027                [Page 90]
+Toutain                   Expires 16 March 2027                [Page 91]
