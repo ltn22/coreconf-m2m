@@ -60,6 +60,7 @@ informative:
   I-D.gudi-t2trg-senml-as-coreconf:
   I-D.birkholz-yang-core-telemetry:
   I-D.toutain-core-sid-encoding:
+  I-D.toutain-core-private-sid-translation:
   SCHC-TOWARD-9363BIS:
     title: "Toward RFC 9363bis: Changes to the SCHC YANG Data Model"
     author:
@@ -1711,11 +1712,14 @@ descriptions to gain a better understanding of the device.
 
 # Compression
 
-## SCHC
+
+## SID translation
 
 TBD.
 
-## CORECONF Payload
+
+## SCHC
+
 
 TBD.
 
@@ -3672,8 +3676,143 @@ reason (0: no route, 1: administratively prohibited, 3: address
 unreachable, 4: port unreachable), not just the port-unreachable case
 that triggers when the CORECONF UDP endpoint itself is down.
 
+# Private SID Translation {#annex-private-sid}
 
+{{I-D.toutain-core-private-sid-translation}} defines a mechanism for
+translating official YANG SIDs into small negative integers ("private
+SIDs"), each of which SHOULD end up encoding in a single CBOR byte
+(range -1 to -24). Two modules are in use in this document: coreconf-m2m
+(`entry_point` = 62000, official range of 400 SIDs) and atmos
+(`entry_point` = 10000000, official range of 100 SIDs). Each module is
+assigned a translation `offset`: the first module uses `offset` = 0,
+and the second uses `offset` equal to the negative of the first
+module's official range size, so that the two private ranges never
+overlap.
 
+Which module goes first matters: the first module gets the deepest,
+single-byte-encoding range, so it should be the one whose SIDs appear
+most often on the wire. This annex compares the two possible orderings
+on the resource discovery exchange of {{fig-resource-discovery}}, which
+mixes both modules: a coreconf-m2m absolute SID (62002, the
+"/bootstrap" node) and its structural delta keys, against fourteen
+atmos absolute SIDs — one per discovered transducer, since each
+identityref value naming a transducer type is an absolute SID, not a
+delta.
+
+## Comparing the Two Orderings
+
+**coreconf-m2m first** (`offset` = 0 for coreconf-m2m, `offset` = -400
+for atmos): 62002 translates to the private SID -3, one byte instead
+of three. Each atmos identityref value falls in the -402 to -417
+range, which still requires 3 bytes (down from 5, since the original
+absolute atmos SIDs exceed 65535). The request shrinks from 3 to 1
+byte, and the response from 118 to 88 bytes — a 26% reduction overall.
+
+**atmos first** (`offset` = 0 for atmos, `offset` = -100 for
+coreconf-m2m): the fourteen atmos identityref values now fall in the
+-2 to -17 range, encoding in a single byte each (down from 5 bytes),
+while 62002 becomes -103, which still needs 2 bytes (worse than the
+first ordering's 1 byte, but this single occurrence is negligible next
+to fourteen 4-byte-per-value savings). The request grows slightly to 2
+bytes, but the response shrinks from 118 to 61 bytes — a 48% reduction
+overall, nearly twice as good as putting coreconf-m2m first.
+
+The reason is straightforward application of the allocation strategy
+in {{I-D.toutain-core-private-sid-translation}}: this exchange
+references fourteen distinct atmos identityref values but only one
+coreconf-m2m absolute SID (62002, appearing twice — once in the
+request, once as the response's outer key), so the module with the
+higher count of on-wire absolute-SID occurrences — atmos, not
+coreconf-m2m — should receive `offset` = 0. This is a property of the
+traffic pattern, not of the modules themselves: a session dominated by
+coreconf-m2m structural exchanges (e.g. repeated FETCH/iPATCH on
+notification-parameters) would favor the opposite ordering.
+
+## Worked Example (atmos first)
+
+{{fig-private-sid-example}} shows {{fig-resource-discovery}} translated
+with atmos `offset` = 0 and coreconf-m2m `offset` = -100. Delta keys
+(the structural fields 7, 8, 6, 1, and 3 relative to their parent) keep
+their magnitude but flip sign, per
+`p(child) - p(parent) = -(child - parent)`; the coreconf-m2m absolute
+SID 62002 becomes -103; and every atmos identityref value becomes its
+private SID in the -2 to -17 range.
+
+~~~~
+  Request payload, original (3 bytes):
+    19 F2 32                       # unsigned(62002)
+
+  Request payload, translated (2 bytes):
+    38 66                          # negative(-103)
+
+  Response payload, original (118 bytes):
+    {62002:
+      {7: 1788334280, 8: 30172, 6: 120,
+       1: [{3: 10000010}, {3: 10000008}, {3: 10000011}, {3: 10000002},
+           {3: 10000014}, {3: 10000016}, {3: 10000015}, {3: 10000012},
+           {3: 10000001}, {3: 10000013}, {3: 10000003}, {3: 10000009},
+           {3: 10000006}, {3: 10000004}]}}
+
+  Response payload, translated (61 bytes):
+    {-103:
+      {-7: 1788334280, -8: 30172, -6: 120,
+       -1: [{-3: -11}, {-3: -9}, {-3: -12}, {-3: -3},
+            {-3: -15}, {-3: -17}, {-3: -16}, {-3: -13},
+            {-3: -2}, {-3: -14}, {-3: -4}, {-3: -10},
+            {-3: -7}, {-3: -5}]}}
+~~~~
+{: #fig-private-sid-example title="Resource discovery of fig-resource-discovery, translated with atmos offset=0 and coreconf-m2m offset=-100" artwork-align="left"}
+
+reference-epoch (1788334280), uptime (30172), and minimal-step (120)
+are plain integers, not SIDs, and are therefore left untranslated.
+Overall, this exchange shrinks from 121 bytes (3 + 118) to 63 bytes
+(2 + 61), a reduction of 48%, entirely attributable to the fourteen
+atmos identityref values collapsing from 5 bytes to 1 byte each.
+
+## Second Example: Time-Series Subscription and Notification
+
+{{fig-notification-observe}} exercises the opposite balance: it
+references coreconf-m2m absolute SID 62048
+("/history/time-series/values") twice (once in the FETCH+Observe
+request, once as the notification's outer key) against a single atmos
+identityref value (10000001, air-temperature) in the request. The
+maximum delta any coreconf-m2m SID currently reaches from its
+`entry_point` is 88 ({{annex-sid}}), so shifting coreconf-m2m from
+`offset` = 0 to `offset` = -100 changes its encoded deltas from
+0-88 to 100-188 — both comfortably inside CBOR's single 2-byte bracket
+(24-255). Putting coreconf-m2m second therefore costs nothing here,
+while atmos still gains its full 5-to-1-byte improvement:
+
+~~~~
+  Request payload, original (9 bytes):
+    82 19 F2 60 1A 00 98 96 81
+    # [62048, 10000001]
+
+  Request payload, translated (4 bytes, atmos offset=0,
+                                coreconf-m2m offset=-100):
+    82 38 94 21
+    # [-149, -2]
+
+  Subscription ack, original and translated (1 byte, unchanged):
+    A0                              # {}
+
+  Notification payload, original (16 bytes):
+    {62048: [189, 14, -3, 1, 5, 7, 3, 2, 1, 2]}
+
+  Notification payload, translated (15 bytes):
+    {-149: [189, 14, -3, 1, 5, 7, 3, 2, 1, 2]}
+~~~~
+{: #fig-private-sid-example-2 title="Time-series subscription and notification, translated with atmos offset=0 and coreconf-m2m offset=-100" artwork-align="left"}
+
+The history values themselves (189, 14, -3, 1, 5, 7, ...) are a
+delta-encoded time series, not SIDs, and are left untranslated. This
+exchange shrinks from 26 bytes (9 + 1 + 16) to 20 bytes (4 + 1 + 15),
+a 23% reduction — smaller than the first example's 48%, since only one
+atmos SID is involved here, but still a clear net gain, and with
+coreconf-m2m paying no penalty for going second. Across both examples,
+putting atmos first is never worse and sometimes substantially better,
+confirming it as the right default ordering for this document's
+traffic mix.
 
 
 
