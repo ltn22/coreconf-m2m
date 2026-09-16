@@ -100,7 +100,10 @@ defines a YANG data model enabling remote management and configuration of
 constrained devices using CoAP, CBOR, and YANG SID identifiers. The
 serialization in CBOR of this data model limits the payload size. It documents
 also how the YANG data model can interact with common IoT ontologies such as
-SOSA or SAREF.
+SOSA or SAREF. The same CORECONF/SID serialization also enables full
+interoperability between constrained devices and AI agents, by exposing
+device actions and data through an MCP (Model Context Protocol) server
+without requiring an intermediate, device-specific translation layer.
 
 
 --- middle
@@ -152,15 +155,29 @@ Some YANG Data Models have been defined for telemetry. {{RFC9232}} introduces
 Network Telemetry used to collect vast amounts of data to supervise a network.
 {{RFC8639}} allows subscribing to a datastore filtered through XPath and
 receiving notifications. {{I-D.birkholz-yang-core-telemetry}} proposes to extend
-telemetry to CORECONF, but using a traditional approach.
+telemetry to CORECONF, but using a traditional approach. None of these
+attempt to limit the size of the exchanged data, which is essential on
+the constrained links this document targets.
 
 This document adopts a different approach. The goal is to define a YANG Data
 Model that will benefit from CBOR serialization to optimize the bandwidth to
-extend CORECONF for M2M use cases over low-power links. This document focuses on
-transducer management: resource discovery, value polling, statistical
-computation, threshold alerts, and time-series history notifications. This is an
+extend CORECONF for M2M use cases over low-power links. The data model turns
+around transducers held by a device. A transducer is the abstract
+representation of a sensor and/or an actuator, transforming an analog value
+into a digital value, or a digital value into a physical action. This
+document focuses on transducer management: resource discovery, value
+polling, statistical computation, threshold alerts, and time-series history
+notifications. This is an
 early-stage work; future revisions will explore other categories of measurements
 and interaction patterns.
+
+Beyond its use as a wire format, the structure defined by the YANG Data
+Model can be mapped into a Semantic Web ontology, giving each container,
+list, and leaf a counterpart class or property that common IoT ontologies
+such as SOSA or SensorThings already understand. {{extending-ontology-to-coreconf-m2m}}
+details this mapping and how it lets a device modeled with coreconf-m2m
+be integrated into an existing ontology-based deployment without a
+device-specific adaptation layer.
 
 ## Use Cases
 
@@ -195,7 +212,7 @@ numerical value depends on its value; for instance, numbers between -24 and 23
 are coded on a single byte, values between -255 and 255 on two bytes,...
 
 Nevertheless, some representations may be less efficient numerically or less
-precise. CBOR defines 3 IEEE 754 encodings on 3, 5, or 9 bytes. The smallest
+precise. CBOR defines three IEEE 754 encodings on 3, 5, or 9 bytes. The smallest
 representation introduces a close to 1% error. CBOR also provides a decimal
 fraction type (tag 4) encoding a value as a `[exponent, mantissa]` pair, which
 avoids floating-point rounding. However, this representation requires the
@@ -310,21 +327,22 @@ coreconf-m2m module.
 {: #fig-identity-template title="Example of an identity definition using the coreconf-m2m extensions" artwork-align="left"}
 
 Identity names and descriptions SHOULD be explicit, since this information
-may be used by AI agents to formulate requests.
+may be used by a human, e.g. through an interface, or by an AI agent, to
+formulate requests.
 
 
 ## Overview of the coreconf-m2m Module
 
 The coreconf-m2m module is organized into three sub-modules:
 
-* "characteristics" contains stable information describing the host. This
-  information may be necessary for some ontologies such as {{SOSA}} and
-  {{SAREF}}. These values may be modified during runtime,
 * "bootstrap" contains the context needed by the client to interact with the
   server and its transducers. It mainly contains the time reference and the
   transducer list. These values cannot be changed by the client (config
   false); only a reboot, which also resets the communications, allows
-  their modification, and
+  their modification
+  * "characteristics" contains stable information describing the host. This
+  information may be necessary for some ontologies such as {{SOSA}} and
+  {{SAREF}}. These values may be modified during runtime, and
 * "transducers" contains the runtime values of all the sensors and
   actuators maintained by the host. It also contains parameters to control
   notifications issued by the device.
@@ -520,7 +538,10 @@ Notification Parameters supports two kinds of notifications:
       quantity is higher than 105 and another alert will be sent when the
       quantity becomes lower than 95%. The value is sent in the notification
       message, so the client is able to know the state of the alert.
-    * "dampening" limits the number of messages sent.
+    * "dampening" limits the number of messages sent. When a crossing is
+      suppressed because of dampening, the notification eventually sent
+      MUST carry a `None` value, so the client can distinguish a dampened
+      event from an actual measured value. 
 
 * "history" builds time series:
     * "step" parameter defines at which interval samples are taken.
@@ -3624,11 +3645,12 @@ Device            SCHC                SCHC                App
 ~~~~
 {: #fig-schc-rule-2-example title="Rule 2 applied to an Observe subscription with two NON and one CON notification" artwork-align="left"}
 
-The notification stream ends when the client sends a new FETCH on the
-same resource without the Observe option, when the client sends a
-RST, when a Confirmable notification receives no ACK after a number
-of retransmission attempts, or when an ICMPv6 destination unreachable
-message is received for the client — all of which the device
+The notification stream ends when the client explicitly deregisters
+with a FETCH carrying the same token and an Observe option set to 1,
+when the client sends a RST, when a Confirmable notification receives
+no ACK after a number of retransmission attempts, or when an ICMPv6
+destination unreachable message is received for the client — all of
+which the device
 interprets as a lost subscriber.
 
 ## Rule 3: Empty messages (e.g., ACK with empty code, or RST)
