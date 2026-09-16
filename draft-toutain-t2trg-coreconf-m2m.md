@@ -593,6 +593,7 @@ The notification ends when either:
 * the client explicitly sends a termination message (a GET/FETCH with the
   Observe option set to 1, i.e. deregister, using the same token as the
   original observation), or
+* the client sends a RST in response to a notification, or
 * the server sends Confirmable notifications and does not receive an
   acknowledgment, or
 * an ICMPv6 unreachable message is received by the

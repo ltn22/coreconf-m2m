@@ -83,7 +83,7 @@ Table of Contents
        3.2.2.  Characteristics Sub-Tree  . . . . . . . . . . . . . .   9
        3.2.3.  Transducer Sub-Tree . . . . . . . . . . . . . . . . .  11
      3.3.  Notifications . . . . . . . . . . . . . . . . . . . . . .  14
-   4.  CORECONF Overview in the M2M Context  . . . . . . . . . . . .  14
+   4.  CORECONF Overview in the M2M Context  . . . . . . . . . . . .  15
      4.1.  CoAP Methods Mapping  . . . . . . . . . . . . . . . . . .  15
      4.2.  SID Allocations . . . . . . . . . . . . . . . . . . . . .  16
    5.  CORECONF Traffic  . . . . . . . . . . . . . . . . . . . . . .  16
@@ -769,14 +769,14 @@ Internet-Draft                coreconf-m2m                September 2026
       with the Observe option set to 1, i.e. deregister, using the same
       token as the original observation), or
 
+   *  the client sends a RST in response to a notification, or
+
    *  the server sends Confirmable notifications and does not receive an
       acknowledgment, or
 
    *  an ICMPv6 unreachable message is received by the server in
       response to the IPv6/UDP/CoAP packet carrying the notification's
       token.
-
-4.  CORECONF Overview in the M2M Context
 
 
 
@@ -785,6 +785,8 @@ Toutain                   Expires 20 March 2027                [Page 14]
 
 Internet-Draft                coreconf-m2m                September 2026
 
+
+4.  CORECONF Overview in the M2M Context
 
 4.1.  CoAP Methods Mapping
 
@@ -829,8 +831,6 @@ Internet-Draft                coreconf-m2m                September 2026
    cancel the Observe subscription accordingly.  A RST response from the
    client is also a valid way to signal that the subscription should be
    terminated.
-
-
 
 
 
