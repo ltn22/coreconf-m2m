@@ -705,7 +705,7 @@ transducer known to the device; no override is present here, meaning every
 transducer uses the default-unit, default-precision and default-category
 declared on its identity.
 
-The client MUST have access to the corresponding YANG file to discover the
+The client MUST have access to the corresponding YANG files to discover the
 transducers' default parameters, indicating the unit, the precision and
 the nature of the transducer.
 
@@ -1003,9 +1003,7 @@ ontology, it may also be important to enrich the ontology with
 coreconf-m2m information concerning the device's CORECONF capabilities;
 this may be helpful for future interactions with the device.
 
-No existing ontology natively carries the coordinates needed to actually
-query a coreconf-m2m device, nor the encoding parameters (SID, precision,
-unit) needed to interpret its data. This document therefore assumes a
+This document therefore assumes a
 small `ccm2m:` extension vocabulary, applicable regardless of which
 ontology (SOSA, SAREF, SensorThings, ...) a device or transducer is
 otherwise mapped to. {{annex-ccm2m-ontology}} gives its full definition,
@@ -1126,7 +1124,7 @@ For example, with `platform-name = "station.example.com"`, `category =
 "sensor"`, and `transducer-name = "air-temperature"`, the resulting
 object-iri is `station.example.com/sensor/air-temperature`, matching the
 example already given above. {{fig-sosa-instance}} shows this
-instantiation in Turtle, adapted from `sosa/sosa_graph.ttl`.
+instantiation in Turtle.
 
 ~~~~
 @prefix sosa:  <http://www.w3.org/ns/sosa/> .
